@@ -13,7 +13,6 @@ runReport <- function(reportFile,
                       selfContained = TRUE,
                       quiet = FALSE) {
   
-#   outFile <- paste0(output_dir,"/",sample_name,"kraken_report.html")
   
   # htmlwidgets::setWidgetIdSeed(1234)
   rmarkdown::render(
@@ -33,14 +32,9 @@ runReport <- function(reportFile,
     output_options = list(self_contained = selfContained),
     params = list(kraken_output = kraken_output,
                   sample_name = sample_name
-                  ),
+    ),
     quiet = quiet
   )
-  
-#   if(dir.exists(file.path(sample_dir, sample_name))) {
-#     unlink(file.path(sample_dir, sample_name), recursive = TRUE)
-#   }
-  
 }
 
 #1. Collect arguments

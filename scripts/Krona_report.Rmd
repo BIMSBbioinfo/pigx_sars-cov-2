@@ -1,0 +1,27 @@
+---
+title: "Krona_report"
+author: "maxel"
+date: "5/4/2021"
+output: html_document
+#params:
+#  sample_dir: '../../../../local/Projects/AAkalin_pathogenomics/Kraken2_results/' 
+#  sample_name: 'tmp_unaligned_report'
+  
+---
+
+
+```{r, echo=FALSE}
+#path to Krona html 
+# krona output is already a html 
+kronaFile <- paste0(params$sample_dir,params$sample_name,".html")
+
+```
+
+  
+
+```{r,echo=F, eval=T}
+#TODO this crashes the presetting of the html file in the header
+library(htmltools)
+
+htmltools::includeHTML(kronaFile)
+```
