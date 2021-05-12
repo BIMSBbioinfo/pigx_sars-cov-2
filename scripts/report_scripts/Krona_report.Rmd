@@ -1,0 +1,27 @@
+---
+title: "Krona_report"
+author: "maxel"
+date: "5/4/2021"
+output: html_document
+params:
+  @PARAMS_SAMPLE_NAME@
+---
+
+Read config.yml for the locations of sample sheet, pipeline output etc  
+```{r, child="_settings.Rmd"}
+```
+
+```{r}
+sampleName <- params$sample_name
+krakenDir <- config$kraken_dir
+
+kronaFile <- paste0("../",krakenDir,"/",sampleName,'_krona_report.html')
+```
+
+
+```{r,echo=F, eval=T}
+#this crashes the html file
+library(htmltools)
+
+htmltools::includeHTML(kronaFile)
+```

@@ -1,0 +1,21 @@
+---
+title: "Timecourse"
+output: html_document
+---
+
+Read config.yml for the locations of sample sheet, pipeline output and krakenDir. 
+
+```{r}
+config <- yaml::read_yaml('./config.yml')
+```
+
+
+#read in sample names from sample sheet 
+
+#where are the data stored, for now use dummy data
+
+
+
+ this is the home page of the website
+
+there should be a timecourse visualized here !!

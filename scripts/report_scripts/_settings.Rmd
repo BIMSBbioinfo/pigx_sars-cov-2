@@ -1,0 +1,22 @@
+
+Reading Config File: 
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+suppressMessages(suppressWarnings(library(knitr)))
+#suppressMessages(suppressWarnings(library(ggplot2)))
+#suppressMessages(suppressWarnings(library(ggrepel)))
+suppressMessages(suppressWarnings(library(data.table)))
+#suppressMessages(suppressWarnings(library(rtracklayer)))
+suppressMessages(suppressWarnings(library(plotly)))
+#suppressMessages(suppressWarnings(library(GenomicRanges)))
+#suppressMessages(suppressWarnings(library(parallel)))
+#suppressMessages(suppressWarnings(library(pbapply)))
+suppressMessages(suppressWarnings(library(DT)))
+
+sampleName <- params$sample_name
+config <- yaml::read_yaml('./config.yml')
+#sampleSheet <- data.table::fread(config$sample_sheet)
+pipeline_output_dir <- config$pipeline_output_dir
+krakenDir <- config$krakenDir
+```
