@@ -79,11 +79,11 @@ site_yml <- list("name" = "Results",
 #depending on the available samples in the pipeline's output
 navbar_yml <- list('title' = 'Reports',
                    'left' = list(
-                     list("text" = "timecourse", "href" = "index.html")))
+                     list("text" = "timecourse", "href" = "timecourse.html")))
 
-#for all rmd files except index.Rmd and child Rmd files (beginning with "_"), 
-# create a navbar item (for each target_name in sample sheet)
-tabs <- grep("(^index.Rmd$)|(^_.+.Rmd$)", basename(rmd_files), invert = T, value = T)
+#for all rmd files except index.Rmd(timecourse) and child Rmd files (beginning with "_"), 
+# create a navbar item (for each sample in sample sheet)
+tabs <- grep("(^timecourse.Rmd$)|(^_.+.Rmd$)", basename(rmd_files), invert = T, value = T)
 
 navbar_yml$left <- c(navbar_yml$left, lapply(tabs,
                                              function(f) {
