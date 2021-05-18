@@ -20,11 +20,18 @@ library(stringr)
 library(magrittr)
 library(openssl)
 ```
+
 # Input Settings
 ```{r InputSettings, echo = FALSE, include = FALSE}
 coverage_file <- params$coverage_file
 sample_name <- params$sample_name
 outFile <- params$outFile
+fastqc_dir <- params$fastqc_dir # TODO @Jan @Miri add that argument to the snakemake rule and the rendersite function?
+# TODO: @Jan snakemake needs to be run twice before and after the preprocessing
+# TODO: @Jan @Ricardo 
+fastqc_unprocessed <- "FASTQ_DIR/{sample}_unprocessed_fastqc.html"
+fastqc_processed <- "FASTQ_DIR/{sample}_unprocessed_fastqc.html"
+
 ``` 
 ```{r printInputSettings, echo = FALSE, include = FALSE}
 # coverage_file <- 'tests/coverage/Test_merged_covs.csv'
@@ -66,8 +73,8 @@ DT::datatable(t(Coverage), options = list(searching = FALSE, paging = FALSE))
 ```
 ## FastQC and Trimming
 
-Download: [fastqc report of unprocessed data](/path/to/fastqc.html)  
-Download: [fastqc report of pre-processes data](/path/to/fastqc.html) 
+Download: [fastqc report of unprocessed data](fastqc_unprocessed)  
+Download: [fastqc report of pre-processes data](fastqc_processed) 
 
 
 
