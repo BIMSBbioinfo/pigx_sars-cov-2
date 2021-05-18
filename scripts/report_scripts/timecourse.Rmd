@@ -3,19 +3,50 @@ title: "Timecourse"
 output: html_document
 ---
 
-Read config.yml for the locations of sample sheet, pipeline output and krakenDir. 
-
-```{r}
-config <- yaml::read_yaml('./config.yml')
-```
-
-
+```{r input}
+suppressMessages(library(DT))
 #read in sample names from sample sheet 
-
-#where are the data stored, for now use dummy data
-
-
+df <- read.table("../tests/sample_data/test_var_timecourse.csv",sep = "\t",header = T)
+print(df)
+```
 
  this is the home page of the website
 
 there should be a timecourse visualized here !!
+
+```{r,echo=F, eval=F}
+
+for (i in unique(df$location_name)){
+  name <- paste0("df_",i)
+  assign(name,df[df$location_name==i,])
+}
+
+
+forplot<- reshape2::melt(df,id.vars=c("dates","samplename","time","location_name","coordinates_lat","coordinates_long"))
+
+all_locs<-ggplot(forplot, aes(x = dates, y = 0:1, color = value)) +
+ggtitle(" plot")+
+geom_point(size = 0.2)+
+scale_colour_gradient(low = "yellow", high = "dark blue")+
+facet_wrap(~variable,ncol = 5)+
+theme(strip.text = element_text(size = 8), strip.background = element_rect(size
+= 0.3) )
+
+all_locs
+```
+
+
+
+
+```{r,eval=F,echo=F}
+plot_ly (
+  type = 'scattergeo' ,
+  lon =c (df$coordinates_long) ,
+  lat =df$coordinates_lat,
+  marker = list (
+  color =c( 'red','red','red','red','red','red','red','red','red','red' ) ,
+  size = df$WT*100 ,
+  mode = 'markers' )
+  )
+```
+

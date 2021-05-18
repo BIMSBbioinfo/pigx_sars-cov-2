@@ -23,7 +23,8 @@ reportsScriptDir <- "scripts/report_scripts" #folder that contains the Rmd repor
 sampleSheetFile <-  "tests/sample_sheet.csv" #path to sample_sheet.csv file
 krakenDir <- "tests/sample_data" #path to kraken output files
 coverage_dir <- "tests/coverage"
-pipelineOutputDir <- "../" #root folder where the pipeline is written to
+#vep_text
+#pipelineOutputDir <- "../" #root folder where the pipeline is written to
 siteDir <- "test_render" #path to folder where the site will be generated
 
 #read sample sheet

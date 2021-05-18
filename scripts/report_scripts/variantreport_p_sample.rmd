@@ -1,7 +1,6 @@
 ---
-title: "SARS-CoV-2 variant report"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+title: "SARS-CoV-2 variant report"                                                                                                  
 date: '`r format(as.POSIXct(if ("" != Sys.getenv("SOURCE_DATE_EPOCH")) { as.numeric(Sys.getenv("SOURCE_DATE_EPOCH")) } else { Sys.time() }, origin="1970-01-01"), "%Y-%m-%d %H:%M:%S")`'
-theme: darkly
 params:  
   vep_txt_file: ''
   snv_csv_file: ''
@@ -10,6 +9,7 @@ params:
   sample_name: ''
   outFile: ''
 ---
+<<<<<<< Updated upstream
 ```{r setup, include=FALSE, message = FALSE, warning = FALSE}
 # knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 # knitr::opts_knit$set(root.dir = params$workdir)
@@ -21,6 +21,11 @@ library(qpcR)
 library(stringr)
 library(magrittr)
 library(openssl)
+=======
+```{r setup, include=FALSE, messages = FALSE, warnings = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+knitr::opts_knit$set(root.dir = params$workdir)
+>>>>>>> Stashed changes
 ```
 # Input Settings
 ```{r printInputSettings, echo = FALSE}
