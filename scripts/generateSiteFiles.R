@@ -22,7 +22,7 @@ setwd("/home/mfaxel/pigx_sarscov2_ww/")
 reportsScriptDir <- "scripts/report_scripts" #folder that contains the Rmd reports that will be rendered into a site
 sampleSheetFile <-  "tests/sample_sheet.csv" #path to sample_sheet.csv file
 krakenDir <- "tests/sample_data" #path to kraken output files
-coverage_file <- "tests/coverage"
+coverage_dir <- "tests/coverage"
 pipelineOutputDir <- "../" #root folder where the pipeline is written to
 siteDir <- "test_render" #path to folder where the site will be generated
 
@@ -54,7 +54,7 @@ for(f in rmd_files) {
 # re-used by separate Rmd files in the target site
 config_yml <- list('sample_sheet' = sampleSheetFile,
                    'kraken_dir' = krakenDir,
-                   'coverage_file'=coverage_file,
+                   'coverage_dir'=coverage_dir,
                    'pipeline_output_dir' = pipelineOutputDir)
 yaml::write_yaml(config_yml, file = file.path(siteDir, "config.yml"))
 

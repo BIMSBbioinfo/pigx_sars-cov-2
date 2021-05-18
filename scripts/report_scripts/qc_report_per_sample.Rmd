@@ -17,11 +17,10 @@ knitr::opts_knit$set(root.dir = params$workdir)
 
 # Input Settings
 ```{r InputSettings, echo = FALSE, include = FALSE}
-
-#coverage_file <- params$coverage_file
 sample_name <- sampleName
 
-```
+coverage_file <- paste0(coverage_dir,"/",sample_name,"_merged_covs.csv")
+``` 
 
 ```{r printInputSettings, echo = FALSE, include = FALSE}
 # coverage_file <- 'tests/coverage/Test_merged_covs.csv'

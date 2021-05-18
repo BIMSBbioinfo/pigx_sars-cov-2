@@ -351,17 +351,6 @@ rule qc_report:
         """
 
 
-# TODO: fix Error: unexpected end of input
-# rule qc_report:
-#     input: os.path.join(COVERAGE_DIR, '{sample}_merged_covs.csv')
-#     output: os.path.join(REPORT_DIR, '{sample}_qc_report.html')
-#     params:
-#         run_report = os.path.join(SCRIPTS_DIR, 'run_QC_report.R'),
-#         report_rmd = os.path.join(SCRIPTS_DIR, 'qc_report_per_sample.rmd')
-#     log: os.path.join(LOG_DIR, 'qc_report_{sample}.log')
-#     shell: "Rscript {params.run_report} --reportFile={params.report_rmd} --coverage_file={input} --sample_name={wildcards.sample} --outFile={output} >> {log} 2>&1"
-
-
 #added by mfaxel based on Boras snakemake.py from crispr_DART
 
 #TODO change input - what is it needed for?
@@ -377,12 +366,13 @@ rule qc_report:
     #     os.path.join(REPORT_DIR, "config.yml"),
     #     expand(os.path.join(REPORT_DIR, "{sample}.Kraken2_report.Rmd"), sample = SAMPLE_NAMES),
     #     expand(os.path.join(REPORT_DIR, "{sample}.Krona_report.Rmd"), sample = SAMPLE_NAMES),
+    #     expand(os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.Rmd"), sample = SAMPLE_NAMES),
     # params:
-    #     report_scripts_dir = os.path.join(SCRIPTS_DIR, "report_scripts"),
+    #     report_scripts_dir = os.path.join(SCRIPTS_DIR, "report_scripts")
 #         script = os.path.join(SCRIPTS_DIR, "generateSiteFiles.R")
 #     log: os.path.join(LOG_DIR, "generateSiteFiles.log")
 #     shell:
-#         "{RSCRIPT} {params.script} {params.report_scripts_dir} {SAMPLE_SHEET_CSV} {KRAKEN_DIR} {REPORT_DIR} {Site_dir} {RSCRIPT} > {log} 2>&1"
+#         "{RSCRIPT} {params.script} {params.report_scripts_dir} {SAMPLE_SHEET_CSV} {KRAKEN_DIR} {COVERAGE_DIR} {REPORT_DIR} {Site_dir} {RSCRIPT} > {log} 2>&1"
 # 
 
 #rule renderTimecourse/index.Rrmd
@@ -411,6 +401,15 @@ rule qc_report:
 #     output:
 #         os.path.join(REPORT_DIR, "{sample}.Krona_report.html")
 #     log: os.path.join(LOG_DIR, "renderReports", "{sample}.Krona_report.log")
+#     shell:
+#         "{RSCRIPT} -e \"library(rmarkdown); rmarkdown::render_site(\'{input[0]}\')\" > {log} 2>&1"#
+
+#rule renderReport_qc:
+#    input:
+#         os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.Rmd")
+#     output:
+#         os.path.join(REPORT_DIR, "{sample}.qc_report.html")
+#     log: os.path.join(LOG_DIR, "renderReports", "{sample}.qc_report.log")
 #     shell:
 #         "{RSCRIPT} -e \"library(rmarkdown); rmarkdown::render_site(\'{input[0]}\')\" > {log} 2>&1"#
 

@@ -25,5 +25,5 @@ config <- yaml::read_yaml('./config.yml')
 #sampleSheet <- data.table::fread(config$sample_sheet)
 pipeline_output_dir <- config$pipeline_output_dir
 krakenDir <- config$krakenDir
-coverage_file <- config$coverage_file
+coverage_dir <- config$coverage_dir
 ```
