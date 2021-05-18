@@ -26,4 +26,7 @@ config <- yaml::read_yaml('./config.yml')
 pipeline_output_dir <- config$pipeline_output_dir
 krakenDir <- config$krakenDir
 coverage_dir <- config$coverage_dir
+variants_dir <- config$variants_dir
+sigmut_db <- config$sigmut_db
+
 ```

@@ -13,7 +13,9 @@ args = commandArgs(trailingOnly=TRUE)
 #reportsScriptDir <- args[1] #folder that contains the Rmd reports that will be rendered into a site
 #sampleSheetFile <- args[2] #path to sample_sheet.csv file
 #krakenDir <-args[3]
-#coverage_file <-args[]
+#coverage_dir <-args[4]
+#variants_dir<-args[]
+#sigmuts_dir <- args[] 
 #pipelineOutputDir <- args[4] #root folder where the pipeline is written to # not sure what needed for
 #siteDir <- args[5] #path to folder where the site will be generated
 
@@ -23,7 +25,8 @@ reportsScriptDir <- "scripts/report_scripts" #folder that contains the Rmd repor
 sampleSheetFile <-  "tests/sample_sheet.csv" #path to sample_sheet.csv file
 krakenDir <- "tests/sample_data" #path to kraken output files
 coverage_dir <- "tests/coverage"
-#vep_text
+variants_dir <- "tests/sample_data"
+sigmut_db <-"../tests/databases/sigmut_db"
 #pipelineOutputDir <- "../" #root folder where the pipeline is written to
 siteDir <- "test_render" #path to folder where the site will be generated
 
@@ -56,6 +59,8 @@ for(f in rmd_files) {
 config_yml <- list('sample_sheet' = sampleSheetFile,
                    'kraken_dir' = krakenDir,
                    'coverage_dir'=coverage_dir,
+                   'variants_dir'=variants_dir,
+                   'sigmut_db'=sigmut_db,
                    'pipeline_output_dir' = pipelineOutputDir)
 yaml::write_yaml(config_yml, file = file.path(siteDir, "config.yml"))
 
