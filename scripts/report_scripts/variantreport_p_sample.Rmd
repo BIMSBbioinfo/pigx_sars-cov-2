@@ -11,8 +11,8 @@ Read config.yml for the locations of sample sheet, pipeline output and sigmut lo
 
 
 ```{r setup, include=FALSE, messages = FALSE, warnings = FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
-knitr::opts_knit$set(root.dir = params$workdir)
+#knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+#knitr::opts_knit$set(root.dir = params$workdir)
 ```
 
 # Input Settings
@@ -20,8 +20,8 @@ knitr::opts_knit$set(root.dir = params$workdir)
 sample_name <- sampleName
 location_sigmuts <- sigmut_db
 
-vepfile <- paste0("../",variants_dir,"/",sample_name,"_vep_sarscov2_parsed.txt")
-snvfile <- paste0("../",variants_dir,"/",sample_name,"__snv.csv")
+vepfile <- paste0(variants_dir,"/",sample_name,"_vep_sarscov2_parsed.txt")
+snvfile <- paste0(variants_dir,"/",sample_name,"_snv.csv")
 sampledir <- variants_dir
   
 #vepfile <- params$vep_txt_file

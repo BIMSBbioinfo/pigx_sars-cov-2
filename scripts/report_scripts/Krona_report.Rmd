@@ -15,7 +15,7 @@ Read config.yml for the locations of sample sheet, pipeline output etc
 sampleName <- params$sample_name
 krakenDir <- config$kraken_dir
 
-kronaFile <- paste0("../",krakenDir,"/",sampleName,'_krona_report.html')
+kronaFile <- paste0(krakenDir,"/",sampleName,'_krona_report.html')
 ```
 
 

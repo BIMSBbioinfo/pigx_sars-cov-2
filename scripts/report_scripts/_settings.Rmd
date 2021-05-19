@@ -5,13 +5,8 @@ Reading Config File:
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 suppressMessages(suppressWarnings(library(knitr)))
 suppressMessages(suppressWarnings(library(ggplot2)))
-#suppressMessages(suppressWarnings(library(ggrepel)))
 suppressMessages(suppressWarnings(library(data.table)))
-#suppressMessages(suppressWarnings(library(rtracklayer)))
 suppressMessages(suppressWarnings(library(plotly)))
-#suppressMessages(suppressWarnings(library(GenomicRanges)))
-#suppressMessages(suppressWarnings(library(parallel)))
-#suppressMessages(suppressWarnings(library(pbapply)))
 suppressMessages(suppressWarnings(library(DT)))
 suppressMessages(suppressWarnings(library(dplyr)))
 suppressMessages(suppressWarnings(library(tidyr)))
@@ -20,9 +15,10 @@ suppressMessages(suppressWarnings(library(stringr)))
 suppressMessages(suppressWarnings(library(magrittr)))
 suppressMessages(suppressWarnings(library(openssl)))
 
-sampleName <- params$sample_name
+if (exists("params")){
+  sampleName <- params$sample_name
+}
 config <- yaml::read_yaml('./config.yml')
-#sampleSheet <- data.table::fread(config$sample_sheet)
 pipeline_output_dir <- config$pipeline_output_dir
 krakenDir <- config$krakenDir
 coverage_dir <- config$coverage_dir
