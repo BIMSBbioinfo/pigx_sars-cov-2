@@ -83,34 +83,16 @@ targets = {
     'final_reports': {
         'description': "Produce a comprehensive report. This is the default target.",
         'files': (
-            expand(os.path.join(REPORT_DIR, '{sample}_qc_report.html'), sample=SAMPLES) + 
-            expand(os.path.join(REPORT_DIR, '{sample}_variant_report.html'), sample=SAMPLES) + 
-            expand(os.path.join(REPORT_DIR, '{sample}_kraken_report.html'), sample=SAMPLES)
+            expand(os.path.join(REPORT_DIR, '{sample}.qc_report_per_sample.html'), sample=SAMPLES) + 
+            expand(os.path.join(REPORT_DIR, '{sample}.variantreport_p_sample.html'), sample=SAMPLES) + 
+            expand(os.path.join(REPORT_DIR, '{sample}.Kraken2_report.html'), sample=SAMPLES) + 
+            expand(os.path.join(REPORT_DIR, '{sample}.Krona_report.html'), sample=SAMPLES)
         )
     },
     'lofreq': {
         'description': "Call variants and produce .vcf file and overview .csv file.",
         'files': (
             expand(os.path.join(VARIANTS_DIR, '{sample}_snv.csv'), sample=SAMPLES)
-        )
-    },
-    'variant_reports': {
-        'description': "Make variants reports.",
-        'files': (
-            expand(os.path.join(REPORT_DIR, '{sample}_variant_report.html'), sample=SAMPLES)
-        )
-    },
-    'qc_reports': {
-        'description': "Make QC reports.",
-        'files': (
-            expand(os.path.join(REPORT_DIR, '{sample}_qc_report.html'), sample=SAMPLES)
-        )
-    },
-    'kraken_reports': {
-        'description': "Make Kraken reports.",
-        'files': (
-            expand(os.path.join(REPORT_DIR, '{sample}_kraken_report.html'), sample=SAMPLES) +
-            expand(os.path.join(REPORT_DIR, '{sample}_krona_report.html'), sample=SAMPLES)
         )
     }
 }
@@ -256,18 +238,6 @@ rule parse_vep:
     log: os.path.join(LOG_DIR, 'parse_vep_{sample}.log')
     shell: "{PYTHON_EXEC} {params.script} {VARIANTS_DIR} {input} {output} >> {log} 2>&1"
 
-#done by rendercite
-# rule variant_report:
-#     input:
-#         vep_txt = os.path.join(VARIANTS_DIR, '{sample}_vep_sarscov2_parsed.txt'),
-#         snv_csv = os.path.join(VARIANTS_DIR, '{sample}_snv.csv')
-#     output: os.path.join(REPORT_DIR, '{sample}_variant_report.html')
-#     params:
-#         run_report = os.path.join(SCRIPTS_DIR, 'run_variant_report.R'),
-#         report_rmd = os.path.join(SCRIPTS_DIR, 'variantreport_p_sample.rmd')
-#     log: os.path.join(LOG_DIR, 'variant_report_{sample}.log')
-#     shell: "{RSCRIPT_EXEC} {params.run_report} --reportFile={params.report_rmd} --vep_txt_file={input.vep_txt} --snv_csv_file={input.snv_csv} --location_sigmuts={SIGMUT_DB} --sample_dir={VARIANTS_DIR} --sample_name={wildcards.sample} --outFile={output} >> {log} 2>&1"
-
 
 rule bam2fastq:
     input: os.path.join(MAPPED_READS_DIR, '{sample}_unaligned.bam')
@@ -284,22 +254,12 @@ rule kraken:
     log: os.path.join(LOG_DIR, 'kraken_{sample}.log')
     shell: "{KRAKEN2_EXEC} --report {output} --db {input.database} {input.unaligned_fastq} >> {log} 2>&1"
 
-#done by rendersite
-# rule kraken_report:
-#     input: os.path.join(KRAKEN_DIR, '{sample}_classified_unaligned_reads.txt')
-#     output: os.path.join(REPORT_DIR, '{sample}_kraken_report.html')
-#     params:
-#         run_report = os.path.join(SCRIPTS_DIR, 'run_Kraken2-report.R'),
-#         report_rmd = os.path.join(SCRIPTS_DIR, 'Kraken2-report.Rmd')
-#     log: os.path.join(LOG_DIR, 'kraken_report_{sample}.log')
-#     shell: "{RSCRIPT_EXEC} {params.run_report} --reportFile={params.report_rmd} --kraken_output={input} --sample_name={wildcards.sample} --output_file={output} >> {log} 2>&1"
 
-#output into krakendir please or else but rule generateFilesSite has to find it 
 rule krona_report:
-    input: 
+    input:
         kraken_output = os.path.join(KRAKEN_DIR, '{sample}_classified_unaligned_reads.txt'),
         database = KRONA_DB
-    output: os.path.join(REPORT_DIR, '{sample}_krona_report.html')
+    output: os.path.join(REPORT_DIR, '{sample}.Krona_report.html')
     log: os.path.join(LOG_DIR, 'krona_report_{sample}.log')
     shell: "{IMPORT_TAXONOMY_EXEC} -m 3 -t 5 {input.kraken_output} -tax {input.database} -o {output} >> {log} 2>&1"
 
@@ -332,112 +292,79 @@ rule get_qc_table:
         script = os.path.join(SCRIPTS_DIR, 'get_qc_table.py')
     log: os.path.join(LOG_DIR, 'get_qc_table_{sample}.log')
     shell: "{PYTHON_EXEC} {params.script} {input.coverage_csv} {input.amplicon_csv} {output} >> {log} 2>&1"
-        
-
-#done by rendercite
-# rule qc_report:
-#     input:
-#         coverage_csv = os.path.join(COVERAGE_DIR, '{sample}_merged_covs.csv'),
-#         report_file = os.path.join(SCRIPTS_DIR, "qc_report_per_sample.rmd")
-#     output: os.path.join(REPORT_DIR, '{sample}_qc_report.html')
-#     params:
-#         sample_dir = VARIANTS_DIR,
-#         loc_sigmuts = SIGMUT_DB
-#     log: os.path.join(LOG_DIR, 'variant_report_{sample}.log')
-#     shell:
-#         """
-#         {RSCRIPT_EXEC} {SCRIPTS_DIR}/run_QC_report.R --reportFile={input.report_file} \
-#         --coverage_file={input.coverage_csv} --sample_name={wildcards.sample} \ 
-#         --outFile={output} >> {log} 2>&1
-#         """
 
 
-#added by mfaxel based on Boras snakemake.py from crispr_DART
-
-#TODO change input - what is it needed for?
+#TODO index.Rmd !
 #TODO site_DiR - folder which contains the generated site as an extra folder/settings file?
 #TODO check whether Site_dir should be REPORT dir
-rule generateSiteFiles:
-   input:
-       
-  output:
-      os.path.join(REPORT_DIR, "_site.yml"),
-      os.path.join(REPORT_DIR, "index.Rmd"),
-      os.path.join(REPORT_DIR, "config.yml"),
-      expand(os.path.join(REPORT_DIR, "{sample}.Kraken2_report.Rmd"), sample = SAMPLE_NAMES),
-      expand(os.path.join(REPORT_DIR, "{sample}.Krona_report.Rmd"), sample = SAMPLE_NAMES),
-      expand(os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.Rmd"), sample = SAMPLE_NAMES),
-      expand(os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.Rmd"), sample = SAMPLE_NAMES),
-  params:
-        report_scripts_dir = os.path.join(SCRIPTS_DIR, "report_scripts")
+rule generate_site_files:
+    input:
+        expand(os.path.join(COVERAGE_DIR, '{sample}_merged_covs.csv'), sample = SAMPLES),
+        expand(os.path.join(REPORT_DIR, '{sample}.Krona_report.html'), sample = SAMPLES),
+        expand(os.path.join(KRAKEN_DIR, '{sample}_classified_unaligned_reads.txt'), sample = SAMPLES),
+        expand(os.path.join(VARIANTS_DIR, '{sample}_vep_sarscov2_parsed.txt'), sample = SAMPLES),
+        expand(os.path.join(VARIANTS_DIR, '{sample}_snv.csv'), sample = SAMPLES)
+    output:
+        os.path.join(REPORT_DIR, "_site.yml"),
+        # os.path.join(REPORT_DIR, "index.Rmd"),
+        os.path.join(REPORT_DIR, "config.yml"),
+        expand(os.path.join(REPORT_DIR, "{sample}.Kraken2_report.Rmd"), sample = SAMPLES),
+        expand(os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.Rmd"), sample = SAMPLES),
+        expand(os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.Rmd"), sample = SAMPLES)
+    params:
+        report_scripts_dir = os.path.join(SCRIPTS_DIR, "report_scripts"),
         script = os.path.join(SCRIPTS_DIR, "generateSiteFiles.R")
-    log: os.path.join(LOG_DIR, "generateSiteFiles.log")
-    shell:
-        "{RSCRIPT} {params.script} {params.report_scripts_dir} {SAMPLE_SHEET_CSV} {KRAKEN_DIR} {COVERAGE_DIR} {VARIANTS_DIR} {SIGMUT_DB} {REPORT_DIR} {RSCRIPT} > {log} 2>&1"
+    log: os.path.join(LOG_DIR, "generate_site_files.log")
+    shell: "{RSCRIPT_EXEC} {params.script} {params.report_scripts_dir} {SAMPLE_SHEET_CSV} {KRAKEN_DIR} {COVERAGE_DIR} {VARIANTS_DIR} {SIGMUT_DB} {REPORT_DIR} {RSCRIPT_EXEC} > {log} 2>&1"
 
 
-rule renderReport_kraken2:
-    input:
-        os.path.join(REPORT_DIR, "{sample}.Kraken2_report.Rmd")
-    output:
-        os.path.join(REPORT_DIR, "{sample}.Kraken2_report.html")
-    log: os.path.join(LOG_DIR, "renderReports", "{sample}.Kraken2-report.log")
-    shell:
-        "{RSCRIPT} -e \"library(rmarkdown); rmarkdown::render_site(\'{input[0]}\')\" > {log} 2>&1"#
+rule render_kraken2_report:
+    input: os.path.join(REPORT_DIR, "{sample}.Kraken2_report.Rmd")
+    output: os.path.join(REPORT_DIR, "{sample}.Kraken2_report.html")
+    log: os.path.join(LOG_DIR, "reports", "{sample}_Kraken2_report.log")
+    shell: "{RSCRIPT_EXEC} -e \"library(rmarkdown); rmarkdown::render_site(\'{input[0]}\')\" > {log} 2>&1"#
 
-#todo really necessary? only if html can not be introduced directly into renderSite rule
-rule renderReport_krona:
-    input:
-        os.path.join(REPORT_DIR, "{sample}.Krona_report.Rmd")
-    output:
-        os.path.join(REPORT_DIR, "{sample}.Krona_report.html")
-    log: os.path.join(LOG_DIR, "renderReports", "{sample}.Krona_report.log")
-    shell:
-        "{RSCRIPT} -e \"library(rmarkdown); rmarkdown::render_site(\'{input[0]}\')\" > {log} 2>&1"#
 
-rule renderReport_variant:
-   input:
-        os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.Rmd")
-    output:
-        os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.html")
-    log: os.path.join(LOG_DIR, "renderReports", "{sample}.variant_report.log")
-    shell:
-        "{RSCRIPT} -e \"library(rmarkdown); rmarkdown::render_site(\'{input[0]}\')\" > {log} 2>&1"#
+rule render_variant_report:
+    input: os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.Rmd")
+    output: os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.html")
+    log: os.path.join(LOG_DIR, "reports", "{sample}_variant_report.log")
+    shell: "{RSCRIPT_EXEC} -e \"library(rmarkdown); rmarkdown::render_site(\'{input[0]}\')\" > {log} 2>&1"#
         
-rule renderReport_qc:
-   input:
-        os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.Rmd")
-    output:
-        os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.html")
-    log: os.path.join(LOG_DIR, "renderReports", "{sample}.qc_report.log")
-    shell:
-        "{RSCRIPT} -e \"library(rmarkdown); rmarkdown::render_site(\'{input[0]}\')\" > {log} 2>&1"#
 
-#renders the timecourse rmd once all other are done rendering (!!)
-rule renderTimecourse
+rule render_qc_report:
+    input: os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.Rmd")
+    output: os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.html")
+    log: os.path.join(LOG_DIR, "reports", "{sample}_qc_report.log")
+    shell: "{RSCRIPT_EXEC} -e \"library(rmarkdown); rmarkdown::render_site(\'{input[0]}\')\" > {log} 2>&1"#
+
+
+# renders the timecourse rmd once all other are done rendering (!!)
+# not yet tested
+rule render_timecourse:
     input:
-        os.path.join(REPORT_DIR, "timecourse.Rmd")
-    output:
-        os.path.join(REPORT_DIR, "timecourse.html")
-    log: os.path.join(LOG_DIR, "renderReports", "timecourse.log")
-    shell:
-        "{RSCRIPT} -e \"library(rmarkdown); rmarkdown::render_site(\'{input[0]}\')\" > {log} 2>&1"#
+        os.path.join(REPORT_DIR, "timecourse.Rmd"),
+        os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.html"),
+        os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.html"),
+        os.path.join(REPORT_DIR, "{sample}.Krona_report.html"),
+        os.path.join(REPORT_DIR, "{sample}.Kraken2_report.html")
+    output: os.path.join(REPORT_DIR, "timecourse.html")
+    log: os.path.join(LOG_DIR, "reports", "timecourse.log")
+    shell: "{RSCRIPT_EXEC} -e \"library(rmarkdown); rmarkdown::render_site(\'{input[0]}\')\" > {log} 2>&1"#
 
 
-rule renderSite:
+# not yet tested
+rule render_site:
     input:
         os.path.join(REPORT_DIR, "_site.yml"),
         os.path.join(REPORT_DIR, "index.Rmd"),
         os.path.join(REPORT_DIR, "config.yml"),
-        expand(os.path.join(REPORT_DIR, "{sample}.Kraken2_report.html"), sample = SAMPLE_NAMES),
-        expand(os.path.join(REPORT_DIR, "{sample}.Krona_report.html"), sample = SAMPLE_NAMES),
-        expand(os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.html"), sample = SAMPLE_NAMES),
-    output:
-        os.path.join(REPORT_DIR, "index.html")
-    params:
-        #report_scripts_dir = os.path.join(SCRIPTS_DIR, "report_scripts")
-        log: os.path.join(LOG_DIR, "renderSite.log")
-    shell:
-        "{RSCRIPT} -e \"library(rmarkdown); rmarkdown::render_site(\'{input[1]}\')\" > {log} 2>&1"
-
-
+        expand(os.path.join(REPORT_DIR, "{sample}.Kraken2_report.html"), sample = SAMPLES),
+        expand(os.path.join(REPORT_DIR, "{sample}.Krona_report.html"), sample = SAMPLES),
+        expand(os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.html"), sample = SAMPLES),
+        expand(os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.html"), sample = SAMPLES),
+    output: os.path.join(REPORT_DIR, "index.html")
+    # params:
+    #     report_scripts_dir = os.path.join(SCRIPTS_DIR, "report_scripts")
+    log: os.path.join(LOG_DIR, "render_site.log")
+    shell: "{RSCRIPT_EXEC} -e \"library(rmarkdown); rmarkdown::render_site(\'{input[1]}\')\" > {log} 2>&1"

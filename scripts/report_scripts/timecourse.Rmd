@@ -3,28 +3,21 @@ title: "Timecourse"
 output: html_document
 ---
 
-#read in config file
 Read config.yml for the locations of sample sheet, pipeline output and sigmut loc and variants_dir
-```{r, child="_settings.Rmd"}
-```
+#```{r, child="_settings.Rmd"}
+#```
 
 # dummy data
-```{r libraries}
+```{r libraries and input}
 library(plotly)
 
-#read in sample names from sample sheet 
-df <- read.table("../../tests/sample_data/test_var_timecourse.csv",sep = "\t",header = T)
-df <- read.table(paste0(variant_dir,"/",test_var_timecourse.csv))
+#for testing
+#df <- read.table("../../tests/sample_data/test_var_timecourse.csv",sep = "\t",header = T)
+df <- read.table(paste0(variants_dir,"test_var_timecourse.csv"),sep = "\t",header = T)
 print(df)
 ```
 
-
-
-```{r input and plot, echo=F}
-#from rafael
-#read in sample names from sample sheet 
-#df <- read.table("../tests/sample_data/test_var_timecourse.csv",sep = "\t",header = T)
-#print(df)
+```{r rafael and plot, echo=F}
 forplot<- reshape2::melt(df,id.vars=c("dates","samplename","time","location_name","coordinates_lat","coordinates_long"))
 forplot$dates <- as.Date(forplot$dates)
 
@@ -36,46 +29,23 @@ plots_locations <- lapply(locations, function(location) {
   layout(title = location)
   fig <- fig %>% add_markers(marker = list(line = list(color = "black", width = 1)))
 })
+
 ```
 
 # plotting the figures
 ```{r plot, echo=F}
-plots_locations[[1]]
-plots_locations[[2]]
-plots_locations[[3]]
-plots_locations[[4]]
-plots_locations[[5]]
-plots_locations[[6]]
+for (i in plots_locations){
+  print(i)
+}
 ```
 
 # fancy plots to come: maps
 
-# snippets
-```{r,echo=F, eval=F}
-
-for (i in unique(df$location_name)){
-  name <- paste0("df_",i)
-  assign(name,df[df$location_name==i,])
-}
 
 
-forplot<- reshape2::melt(df,id.vars=c("dates","samplename","time","location_name","coordinates_lat","coordinates_long"))
+## plot bubble plot
 
-all_locs<-ggplot(forplot, aes(x = dates, y = 0:1, color = value)) +
-ggtitle(" plot")+
-geom_point(size = 0.2)+
-scale_colour_gradient(low = "yellow", high = "dark blue")+
-facet_wrap(~variable,ncol = 5)+
-theme(strip.text = element_text(size = 8), strip.background = element_rect(size
-= 0.3) )
-
-all_locs
-```
-
-
-
-
-```{r,eval=F,echo=F}
+```{r,echo=F}
 
 
 forplot<- reshape2::melt(df,id.vars=c("dates","samplename","time","location_name","coordinates_lat","coordinates_long","WT","b1351","b117"))
@@ -127,4 +97,6 @@ bubble <- bubble %>% layout(
 
 bubble
 ```
+
+
 
