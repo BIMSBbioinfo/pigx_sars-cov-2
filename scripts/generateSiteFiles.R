@@ -26,10 +26,10 @@ pipelineOutputDir <- "../"
 # setwd("/home/mfaxel/pigx_sarscov2_ww/")
 # reportsScriptDir <- "scripts/report_scripts" #folder that contains the Rmd reports that will be rendered into a site
 # #sampleSheetFile <-  "tests/sample_sheet.csv" #path to sample_sheet.csv file
-# krakenDir <- "../tests/sample_data" #path to kraken output files
-# coverage_dir <- "../tests/coverage"
-# variants_dir <- "../tests/sample_data"
-# sigmut_db <-"../tests/databases/sigmut_db"
+# krakenDir <- "../tests/sample_data/" #path to kraken output files
+# coverage_dir <- "../tests/coverage/"
+# variants_dir <- "../tests/sample_data/"
+# sigmut_db <-"../tests/databases/sigmut_db/"
 # #pipelineOutputDir <- "../" #root folder where the pipeline is written to
 # siteDir <- "test_render" #path to folder where the site will be generated
 
@@ -42,6 +42,8 @@ rmd_files <- dir(reportsScriptDir, pattern = '.Rmd$', full.names = T)
 
 for(f in rmd_files) {
   if(basename(f) == 'timecourse.Rmd') {
+    file.copy(from = f, to = siteDir)
+  } else if (basename(f) == 'index.Rmd'){
     file.copy(from = f, to = siteDir)
   } else if (grepl('^_.+.Rmd$', basename(f))){ #copy child Rmd files don't duplicate 
     file.copy(from = f, to = siteDir)
@@ -64,7 +66,8 @@ config_yml <- list('sample_sheet' = sampleSheetFile,
                    'coverage_dir'=coverage_dir,
                    'variants_dir'=variants_dir,
                    'sigmut_db'=sigmut_db,
-                   'pipeline_output_dir' = pipelineOutputDir)
+                   'pipeline_output_dir' = pipelineOutputDir,
+                   'site_dir' = siteDir)
 yaml::write_yaml(config_yml, file = file.path(siteDir, "config.yml"))
 
 # 3. Create a _site.yml file that determines the layout of the rendered html
@@ -96,6 +99,7 @@ navbar_yml <- list('title' = 'Reports',
 #for all rmd files except index.Rmd(timecourse) and child Rmd files (beginning with "_"), 
 # create a navbar item (for each sample in sample sheet)
 tabs <- grep("(^timecourse.Rmd$)|(^_.+.Rmd$)", basename(rmd_files), invert = T, value = T)
+tabs <- grep("(^index.Rmd$)|(^_.+.Rmd$)", basename(tabs), invert = T, value = T)
 
 navbar_yml$left <- c(navbar_yml$left, lapply(tabs,
                                              function(f) {

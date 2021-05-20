@@ -17,12 +17,12 @@ Read config.yml for the locations of sample sheet, pipeline output and krakenDir
 sampleName <- params$sample_name
 krakenDir <- config$kraken_dir
 
-krakenReportFile <- paste0(krakenDir,"/",sampleName,'_classified_unaligned_reads.txt')  # the ".." should not be there ..
-
+krakenReportFile <- paste0(krakenDir,sampleName,'_classified_unaligned_reads.txt')  # the ".." should not be there ..
+kronaFile <- paste0(site_dir,sampleName,'_krona_report.html')
 ```
 
 
-## Kraken2 report on unaligned reads from the Sars-Cov2 enriched samples
+# Kraken2 report on unaligned reads from the Sars-Cov2 enriched samples
 
 ```{r print sample name,echo=F}
 print(paste( "Sample: ",sampleName))
@@ -47,3 +47,15 @@ header_table <- c("percent","num_fragments","num_fragments_taxon","rank","NCBI_I
 colnames(table)<-header_table
 datatable(table)
 ```
+
+# visualization of all unaligned reads are available with Krona:
+
+The data can be explored with a multi-layered pie chart, which was created with [KronaTools](https://github.com/marbl/Krona/wiki). It is an interactive chart of all the classificated species found with Kraken2.  
+
+```{r paste krona link,echo=F}
+#TODO: should display a link to the krona html, which should be in the same folder with this file and per sample 
+#krona_html_link <- paste0(sampleName,"krona_report.html")
+
+#[Krona graph of this sample](`r krona_html_link`)
+```
+
