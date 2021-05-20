@@ -29,8 +29,8 @@ outFile <- params$outFile
 fastqc_dir <- params$fastqc_dir # TODO @Jan @Miri add that argument to the snakemake rule and the rendersite function?
 # TODO: @Jan snakemake needs to be run twice before and after the preprocessing
 # TODO: @Jan @Ricardo 
-fastqc_unprocessed <- "FASTQ_DIR/{sample}_unprocessed_fastqc.html"
-fastqc_processed <- "FASTQ_DIR/{sample}_unprocessed_fastqc.html"
+fastqc_unprocessed <- paste0(FASTQ_DIR,"/{sample}_unprocessed_fastqc.html")
+fastqc_processed <- paste0(FASTQ_DIR,"/{sample}_unprocessed_fastqc.html")
 
 ``` 
 ```{r printInputSettings, echo = FALSE, include = FALSE}
