@@ -1,3 +1,4 @@
+---
 title: "SARS-CoV-2 variant report"                                                                                                  
 date: '`r format(as.POSIXct(if ("" != Sys.getenv("SOURCE_DATE_EPOCH")) { as.numeric(Sys.getenv("SOURCE_DATE_EPOCH")) } else { Sys.time() }, origin="1970-01-01"), "%Y-%m-%d %H:%M:%S")`'
 params:  
@@ -7,18 +8,8 @@ params:
 Read config.yml for the locations of sample sheet, pipeline output and sigmut loc and variants_dir
 ```{r, child="_settings.Rmd"}
 ```
-```{r setup, include=FALSE, message = FALSE, warning = FALSE}
-# # knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
-# # knitr::opts_knit$set(root.dir = params$workdir)
-# library(DT)
-# library(ggplot2)
-# library(dplyr)
-# library(tidyr)
-# library(qpcR)
-# library(stringr)
-# library(magrittr)
-# library(openssl)
-```
+
+
 # Input Settings
 ```{r printInputSettings, echo = FALSE}
 sample_name <- sampleName
@@ -28,26 +19,11 @@ vepfile <- file.path(variants_dir,"/",sample_name,"_vep_sarscov2_parsed.txt")
 snvfile <- file.path(variants_dir,"/",sample_name,"_snv.csv")
 sampledir <- variants_dir
 
-# TODO: @Jan @Miri pls add those input values
-# all variables should be strings 
-# if nothing is given, the default should be NA
-# I filled in testing placeholder for now
-date <- "21/03/25"
-time <- "22:00:00 - 21:00:00"
-location_name <- "BER" 
-coordinates_lat <- "52.3646054650197"
-coordinates_long <- "13.5098643274129"
-csv_output_dir <- "path/to/csv_dir"
 ``` 
+
 ### Sample: `r sample_name` 
 
-```{r test_files, include = FALSE}
-# location_sigmuts <- 'tests/databases/sigmut_db'
-# sampledir <- 'tests'
-# # vepfile <- '/mnt/beast/pathogenomics/pigx_sarscov2_ww/output/vep/Test_vep_sarscov2_reportinput.txt' 
-# vepfile <- 'tests/sample_data/Test_vep_sarscov2_parsed.txt' 
-# snvfile <- 'tests/sample_data/Test_snv.csv'
-```
+
 This report shows the variant analysis of SARS-CoV-2 RNA-seq samples from wastewater samples. Variants are 
 identified by SNV calling. Translated protein mutations were matched against lists of signature mutations for known
 variants of concern (VOC) as found on [outbreak.info](https://outbreak.info/situation-reports) and [CoVariant.org](https://covariants.org/variants/S.501Y.V1).
@@ -158,30 +134,36 @@ deconv <- function (bulk,sig){
   as.vector(rlm_coefficients)
 }
 
-dedupe <- function (df) {
-    transposed <- t (df)
-    dupes <- duplicated (transposed, fromLast=TRUE)
-    allDupes <- dupes | duplicated (transposed, fromLast=FALSE)
-    if (any (allDupes)) {
-        grouped <- colnames (df)[allDupes]
-        groupName <- paste(grouped, collapse = ",")
-        deduped <- df[!dupes]
-        names (deduped)[names (deduped) %in% grouped] <- groupName
-        return (deduped)
-    } else {
-        return (df)
+getIdentCols <- function (dataframe) {
+    '* This function is for collapsing the column names of identical columns and saving them as a new column names.
+       I had the difficulty that with all the existing functions I would always would have missed the "parent" of the 
+       following duplicates. This workaround here should be definitly improved with a more R-like version, if possible. *'
+  
+    cols_new <- c()
+    all_dups <- c()
+    for (i in 1:ncol(msig)){
+      dups <- c()
+      dups <- c()
+      parent <- c()
+      for (j in 1:ncol(msig)){
+        if (i!=j && all(msig[,i] == msig[,j])){
+                parent <- colnames(msig[i])
+                if (!(colnames(msig[j]) %in% dups)) {
+                    dups <- c(dups,colnames(msig[j]))
+                }
+        }else{
+          if (!(colnames(msig[i]) %in% cols_new) && (colnames(msig[i]) %in% all_dups)==FALSE) {
+            cols_new <- c(cols_new, colnames(msig[i]))
+          }
+        }
+      }
+      if (is.null(parent)==FALSE && (colnames(msig[i]) %in% dups)==FALSE && (parent %in% all_dups)==FALSE) {
+        cols_new[i] <- paste(parent,paste(dups,collapse =','), sep = ',')
+      }
+      all_dups <- c(all_dups,dups)
     }
+    return(cols_new)
 }
-
-dedupeMuts <- function (mut, sigmut.df, dedup.df) {
-        # get variant group per mutation
-        duped_muts <- grep (mut, sigmut.df$value)
-        grouped <- sigmut.df$name[duped_muts]
-        groupName <- paste(grouped, collapse = ",")
-      
-        dedup.df$name[dedup.df$value == mut] <- groupName
-        return (dedup.df)
-}  
 ```
 
 ```{r development_parsing_deletions_properly, warning = F, include = FALSE}
@@ -243,7 +225,7 @@ dedupeMuts <- function (mut, sigmut.df, dedup.df) {
 ```
 
 
-```{r process_signature_mutations, message=F, warning=F, include = FALSE}
+```{r processa_and_match_snvs_to_signature_mutations, message=F, warning=F, include = FALSE}
 # reading in signature data
 # it's probably not really necessary to add the pase0 column but I like to have a full overview
 # but maybe this part could be done a bt nicer more compact with e.g. looping through the file directories?
@@ -290,31 +272,14 @@ sig_mutations.df <- as.data.frame(qpcR:::cbind.na(b117=b117$AA_mut, b1351=b1351$
 sig_mutations.df <- sig_mutations.df %>%
                           tidyr::pivot_longer(everything()) %>%
                             tidyr::drop_na(.,value)
-
-# deduplicate dataframe
-# fixme: I was not sure, how I can include this in my function but should be possible, will come back to it later
-dupes <- duplicated (sig_mutations.df$value, fromLast=TRUE)
-allDupes <- dupes | duplicated (sig_mutations.df$value, fromLast=FALSE)
-
-if (any (allDupes)) {
-    sigmuts_deduped <- sig_mutations.df[!dupes,]
-}
-
-# fixme: I think this should be done with some apply() function? 
-for (mut in sig_mutations.df$value) {
-  sigmuts_deduped <- dedupeMuts(mut, sig_mutations.df, sigmuts_deduped)
-}
-
-```
-
-```{r match_snvs_to_signature_mutations, message=F, warning=F, include = FALSE}
 variant_protein_mut <- get_protein_mut(vepfile)
-variant_protein_mut <- dplyr::left_join(variant_protein_mut, sigmuts_deduped, by = c('AA_mut'='value'))
+variant_protein_mut <- dplyr::left_join(variant_protein_mut, sig_mutations.df, by = c('AA_mut'='value'))
 match.df <- variant_protein_mut %>%
                     filter(!is.na(name))
 nomatch.df <- variant_protein_mut %>%
                         filter(is.na(name))
 ```
+
 
 ```{r, message=F, warning=F, include = FALSE}
 # Data frame to use for the tables
@@ -377,10 +342,13 @@ DT::datatable(NoSignatureTable,
 
 ```{r getting_unique_muts_bulk, message=F, warning=F, include = FALSE}
 
+# filter match table for unique mutations
+match_unique.df <- unique(dplyr::distinct(match.df[,-13]))
+
 # get prot.mutations only 
-muts <- c(match.df$AA_mut)
+muts <- c(match_unique.df$AA_mut)
 # get bulk frequency values
-bulk <- as.numeric(match.df$freq)
+bulk <- as.numeric(match_unique.df$freq)
 
 ```
 
@@ -435,8 +403,16 @@ msig_stable_complete <- bind_cols(muts_all.df,msig_all,bulk_all.df)
 # between those columns. The workaround for now is to identify those equal columns and merge them into one, returning also
 # a vector with the information about which of the columns were merged. 
 
-msig_stable_unique <- dedupe(msig_stable)
+# 1. collapsing identical columns
 
+# transposing in order to be able to use the distinct functions
+msig_transposed <- as.data.frame(t(msig_stable[,-1]))
+# collaps identical columns and transpose back
+msig_stable_unique <- data.frame(muts = msig_stable[,1],t(msig_transposed %>% distinct(.keep_all = TRUE)))
+
+# 2. collaps the column names and rename the columns
+colnames_collapsed <- getIdentCols(msig_stable_complete)
+colnames(msig_stable_unique) <- colnames_collapsed
 ```
 ```{r deconvolution, message=F, warning=F, include = FALSE}
 
