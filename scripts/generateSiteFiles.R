@@ -10,28 +10,29 @@ library(yaml)
 
 args = commandArgs(trailingOnly=TRUE)
 
-# reportsScriptDir <- args[1] #folder that contains the Rmd reports that will be rendered into a site
-# sampleSheetFile <- args[2] #path to sample_sheet.csv file
-# krakenDir <- args[3]
-# coverage_dir <- args[4]
-# variants_dir <- args[5]
-# # remove line, as soon as we can create variant csv-files!!
-# # variants_dir <- "../tests/sample_data"
-# sigmut_db <- args[6] 
-# siteDir <- args[7] #path to folder where the site will be generated aka report_dir ?
-# # necessary? - also see below l67
-# pipelineOutputDir <- "../"
+reportsScriptDir <- args[1] #folder that contains the Rmd reports that will be rendered into a site
+sampleSheetFile <- args[2] #path to sample_sheet.csv file
+krakenDir <- args[3]
+coverage_dir <- args[4]
+variants_dir <- args[5]
+# remove line, as soon as we can create variant csv-files!!
+# variants_dir <- "../tests/sample_data"
+sigmut_db <- args[6] 
+siteDir <- args[7] #path to folder where the site will be generated aka report_dir ?
+var_timecourse_csv <- args[8]
+# necessary? - also see below l67
+pipelineOutputDir <- "../"
 
-# #for testing
-# setwd("/home/mfaxel/pigx_sarscov2_ww/")
- reportsScriptDir <- "scripts/report_scripts" #folder that contains the Rmd reports that will be rendered into a site
- sampleSheetFile <-  "tests/sample_sheet.csv" #path to sample_sheet.csv file
- krakenDir <- "../tests/sample_data/" #path to kraken output files
- coverage_dir <- "../tests/coverage/"
- variants_dir <- "../tests/sample_data/"
- sigmut_db <-"../tests/databases/sigmut_db/"
-# #pipelineOutputDir <- "../" #root folder where the pipeline is written to
- siteDir <- "test_render" #path to folder where the site will be generated
+# # #for testing
+# # setwd("/home/mfaxel/pigx_sarscov2_ww/")
+#  reportsScriptDir <- "scripts/report_scripts" #folder that contains the Rmd reports that will be rendered into a site
+#  sampleSheetFile <-  "tests/sample_sheet.csv" #path to sample_sheet.csv file
+#  krakenDir <- "../tests/sample_data/" #path to kraken output files
+#  coverage_dir <- "../tests/coverage/"
+#  variants_dir <- "../tests/sample_data/"
+#  sigmut_db <-"../tests/databases/sigmut_db/"
+# # #pipelineOutputDir <- "../" #root folder where the pipeline is written to
+#  siteDir <- "test_render" #path to folder where the site will be generated
 
 #read sample sheet
 sampleSheet <- data.table::fread(sampleSheetFile)
@@ -67,7 +68,8 @@ config_yml <- list('sample_sheet' = sampleSheetFile,
                    'variants_dir'=variants_dir,
                    'sigmut_db'=sigmut_db,
                    'pipeline_output_dir' = pipelineOutputDir,
-                   'site_dir' = siteDir)
+                   'site_dir' = siteDir,
+                   'var_timecourse_csv' = var_timecourse_csv)
 yaml::write_yaml(config_yml, file = file.path(siteDir, "config.yml"))
 
 # 3. Create a _site.yml file that determines the layout of the rendered html
