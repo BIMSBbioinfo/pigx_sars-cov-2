@@ -1,15 +1,13 @@
-----
-title: "SARS-CoV-2 variant report"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
-date: '`r format(as.POSIXct(if ("" != Sys.getenv("SOURCE_DATE_EPOCH")) { as.numeric(Sys.getenv("SOURCE_DATE_EPOCH")) } else { Sys.time() }, origin="1970-01-01"), "%Y-%m-%d %H:%M:%S")`'
-theme: darkly
-params:  
-  vep_txt_file: ''
-  snv_csv_file: ''
-  location_sigmuts: ''
-  sample_dir: ''
-  sample_name: ''
-  outFile: ''
 ---
+title: "SARS-CoV-2 variant report"                                                                                                  
+date: '`r format(as.POSIXct(if ("" != Sys.getenv("SOURCE_DATE_EPOCH")) { as.numeric(Sys.getenv("SOURCE_DATE_EPOCH")) } else { Sys.time() }, origin="1970-01-01"), "%Y-%m-%d %H:%M:%S")`'
+params:  
+  @PARAMS_SAMPLE_NAME@
+---
+
+Read config.yml for the locations of sample sheet, pipeline output and sigmut loc and variants_dir
+```{r, child="_settings.Rmd"}
+```
 ```{r setup, include=FALSE, message = FALSE, warning = FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 knitr::opts_knit$set(root.dir = params$workdir)
@@ -22,14 +20,17 @@ library(stringr)
 library(magrittr)
 library(openssl)
 ```
+
+
 # Input Settings
 ```{r printInputSettings, echo = FALSE}
-vepfile <- params$vep_txt_file
-snvfile <- params$snv_csv_file
-sampledir <- params$sample_dir
-location_sigmuts <- params$location_sigmuts
-sample_name <- params$sample_name
-outFile <- params$outFile
+sample_name <- sampleName
+location_sigmuts <- sigmut_db
+
+vepfile <- file.path(variants_dir,"/",sample_name,"_vep_sarscov2_parsed.txt")
+snvfile <- file.path(variants_dir,"/",sample_name,"_snv.csv")
+sampledir <- variants_dir
+
 ``` 
 ### Sample: `r sample_name` 
 
