@@ -25,7 +25,7 @@ args = commandArgs(trailingOnly=TRUE)
 # #for testing
 # setwd("/home/mfaxel/pigx_sarscov2_ww/")
  reportsScriptDir <- "scripts/report_scripts" #folder that contains the Rmd reports that will be rendered into a site
- #sampleSheetFile <-  "tests/sample_sheet.csv" #path to sample_sheet.csv file
+ sampleSheetFile <-  "tests/sample_sheet.csv" #path to sample_sheet.csv file
  krakenDir <- "../tests/sample_data/" #path to kraken output files
  coverage_dir <- "../tests/coverage/"
  variants_dir <- "../tests/sample_data/"
