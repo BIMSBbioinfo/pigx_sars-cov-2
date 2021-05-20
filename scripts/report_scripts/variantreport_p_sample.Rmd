@@ -15,8 +15,8 @@ Read config.yml for the locations of sample sheet, pipeline output and sigmut lo
 sample_name <- sampleName
 location_sigmuts <- sigmut_db
 
-vepfile <- paste0(variants_dir,"/",sample_name,"_vep_sarscov2_parsed.txt")
-snvfile <- paste0(variants_dir,"/",sample_name,"_snv.csv")
+vepfile <- file.path(variants_dir,"/",sample_name,"_vep_sarscov2_parsed.txt")
+snvfile <- file.path(variants_dir,"/",sample_name,"_snv.csv")
 sampledir <- variants_dir
 
 ``` 

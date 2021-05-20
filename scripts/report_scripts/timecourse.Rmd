@@ -13,7 +13,7 @@ library(plotly)
 
 #for testing
 #df <- read.table("../../tests/sample_data/test_var_timecourse.csv",sep = "\t",header = T)
-df <- read.table(paste0(variants_dir,"test_var_timecourse.csv"),sep = "\t",header = T)
+df <- read.table(file.path(variants_dir,"test_var_timecourse.csv"),sep = "\t",header = T)
 print(df)
 ```
 
