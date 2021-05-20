@@ -1,6 +1,5 @@
 ---
-title: "Kraken2-report"
-#author: "mfaxel"
+title: "taxonomic classification"
 date: '`r format(as.POSIXct(if ("" != Sys.getenv("SOURCE_DATE_EPOCH")) { as.numeric(Sys.getenv("SOURCE_DATE_EPOCH")) } else { Sys.time() }, origin="1970-01-01"), "%Y-%m-%d %H:%M:%S")`'
 #output: html_document
 params:
@@ -17,7 +16,7 @@ Read config.yml for the locations of sample sheet, pipeline output and krakenDir
 sampleName <- params$sample_name
 krakenDir <- config$kraken_dir
 
-krakenReportFile <- paste0(krakenDir,sampleName,'_classified_unaligned_reads.txt')  # the ".." should not be there ..
+krakenReportFile <- paste0(krakenDir,sampleName,'_classified_unaligned_reads.txt')  
 kronaFile <- paste0(site_dir,sampleName,'_krona_report.html')
 ```
 

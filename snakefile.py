@@ -308,7 +308,7 @@ rule generate_site_files:
         os.path.join(REPORT_DIR, "_site.yml"),
         # os.path.join(REPORT_DIR, "index.Rmd"),
         os.path.join(REPORT_DIR, "config.yml"),
-        expand(os.path.join(REPORT_DIR, "{sample}.Kraken2_report.Rmd"), sample = SAMPLES),
+        expand(os.path.join(REPORT_DIR, "{sample}.taxonomic_classification.Rmd"), sample = SAMPLES),
         expand(os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.Rmd"), sample = SAMPLES),
         expand(os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.Rmd"), sample = SAMPLES)
     params:
@@ -319,9 +319,9 @@ rule generate_site_files:
 
 
 rule render_kraken2_report:
-    input: os.path.join(REPORT_DIR, "{sample}.Kraken2_report.Rmd")
-    output: os.path.join(REPORT_DIR, "{sample}.Kraken2_report.html")
-    log: os.path.join(LOG_DIR, "reports", "{sample}_Kraken2_report.log")
+    input: os.path.join(REPORT_DIR, "{sample}.taxonomic_classification.Rmd")
+    output: os.path.join(REPORT_DIR, "{sample}.taxonomic_classification.html")
+    log: os.path.join(LOG_DIR, "reports", "{sample}_taxonomic_classification.log")
     shell: "{RSCRIPT_EXEC} -e \"library(rmarkdown); rmarkdown::render_site(\'{input[0]}\')\" > {log} 2>&1"#
 
 
@@ -347,7 +347,7 @@ rule render_timecourse:
         os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.html"),
         os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.html"),
         os.path.join(REPORT_DIR, "{sample}.Krona_report.html"),
-        os.path.join(REPORT_DIR, "{sample}.Kraken2_report.html")
+        os.path.join(REPORT_DIR, "{sample}.taxonomic_classification.html")
     output: os.path.join(REPORT_DIR, "timecourse.html")
     log: os.path.join(LOG_DIR, "reports", "timecourse.log")
     shell: "{RSCRIPT_EXEC} -e \"library(rmarkdown); rmarkdown::render_site(\'{input[0]}\')\" > {log} 2>&1"#
@@ -359,7 +359,7 @@ rule render_site:
         os.path.join(REPORT_DIR, "_site.yml"),
         os.path.join(REPORT_DIR, "index.Rmd"),
         os.path.join(REPORT_DIR, "config.yml"),
-        expand(os.path.join(REPORT_DIR, "{sample}.Kraken2_report.html"), sample = SAMPLES),
+        expand(os.path.join(REPORT_DIR, "{sample}.taxonomic_classification.html"), sample = SAMPLES),
         expand(os.path.join(REPORT_DIR, "{sample}.Krona_report.html"), sample = SAMPLES),
         expand(os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.html"), sample = SAMPLES),
         expand(os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.html"), sample = SAMPLES),
