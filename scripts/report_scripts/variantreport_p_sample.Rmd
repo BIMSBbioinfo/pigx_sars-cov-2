@@ -2,18 +2,36 @@
 title: "SARS-CoV-2 Mutations and Variant report"
 nav: "Variant report"
 date: '`r format(as.POSIXct(if ("" != Sys.getenv("SOURCE_DATE_EPOCH")) { as.numeric(Sys.getenv("SOURCE_DATE_EPOCH")) } else { Sys.time() }, origin="1970-01-01"), "%Y-%m-%d %H:%M:%S")`'
+output:
+  html_document:
+    theme: lumen
+    highlight: monochrome
+    code_folding: hide
+    depth: '3'
+    toc: yes
+    toc_float: yes
+    number_sections: yes
 params:
-    @PARAMS_SAMPLE_NAME@
+  sample_name: ''
+  sigmut_db: ''
+  variants_dir: ''
+  vep_file: ''
+  snv_file: ''
+  sample_sheet: ''
 
 ---
 
-```{r, child="_settings.Rmd"}
-# Read config.yml for the locations of sample sheet, pipeline output and sigmut loc and variants_dir
-```
-
-```{r, libs}
-library(base64url)
+```{r libs, include=FALSE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(knitr)
+library(dplyr)
+library(ggplot2)
+library(DT)
+library(tidyr)
+library(qpcR)
+library(stringr)
 library(magrittr)
+library(base64url)
 ```
 ### Sample: `r sample_name` 
 
@@ -35,14 +53,18 @@ coordinates_lat <- as.character(sample_sheet[name==sample_name]$coordinates_lat)
 coordinates_long <- as.character(sample_sheet[name==sample_name]$coordinates_long)
 
 ``` 
+### Sample: `r sample_name` 
 
-
-This report shows the variant analysis of SARS-CoV-2 from wastewater samples. Mutations are 
-identified by single-nucleotide-variant (SNV) calling performed by [LoFreq](https://csb5.github.io/lofreq/). 
-Translated to amino acid mutations by using [Ensemble VEP - COVID-19](https://covid-19.ensembl.org/info/docs/tools/vep/index.html).
-The list of found mutations (including synonymous and non-synonymous mutations) were matched against lists of 
-signature mutations characterising variants of concern (VOC) of SARS-CoV-19 provided by [outbreak.info](https://outbreak.info/situation-reports) 
-and [CoVariant.org](https://covariants.org/variants/S.501Y.V1).
+```{r test_files, include = FALSE}
+# location_sigmuts <- 'tests/databases/sigmut_db'
+# sampledir <- 'tests'
+# # vepfile <- '/mnt/beast/pathogenomics/pigx_sarscov2_ww/output/vep/Test_vep_sarscov2_reportinput.txt' 
+# vepfile <- 'tests/sample_data/Test_vep_sarscov2_parsed.txt' 
+# snvfile <- 'tests/sample_data/Test_snv.csv'
+```
+This report shows the variant analysis of SARS-CoV-2 RNA-seq samples from wastewater samples. Variants are 
+identified by SNV calling. Translated protein mutations were matched against lists of signature mutations for known
+variants of concern (VOC) as found on [outbreak.info](https://outbreak.info/situation-reports) and [CoVariant.org](https://covariants.org/variants/S.501Y.V1).
 
 ```{r function_parse_snv_csv, include = FALSE, warning = F, message = F}
 parse_snv_csv <- function (snvfile,...){ # allele frequency from v-pipe vcf
@@ -176,6 +198,64 @@ dedupeMuts <- function (mut, sigmut.df, dedup.df) {
 }  
 ```
 
+```{r development_parsing_deletions_properly, warning = F, include = FALSE}
+# library(stringr)
+# library(dplyr)
+# library(tidyr)
+# library(qpcR)
+# 
+# #vepfile <- '/mnt/beast/pathogenomics/vpipe/akalinlab_pathogenomics/vep_mutation_matching/210417_VEP_results/vep_sarscov2_WW_S26.txt'
+# 
+# vepfile.df <- read.table(vepfile, sep = '\t', header = T) # you should include in the vep script to parse out the # 
+#   #in the beginning of the line or include that step here. 
+# 
+# # parsing snv and protmut location
+# locations <- data.frame(gene_mut_loc = str_split_fixed(vepfile.df$Location,"[:-]+", n=3),
+#                         prot_mut_loc = vepfile.df$Protein_position, 
+#                         AAs = str_split_fixed(vepfile.df$Amino_acids, "/",2), 
+#                         Conseq = vepfile.df$Consequence)
+# locations <- dplyr::na_if(locations,'')
+# 
+# # delete all rows with no protein position value
+# locations <- locations %>% filter(!grepl("^-", prot_mut_loc))
+# # specific B117 mutations: 21990-21993, 21764-21770, maybe also 3675-3677, 69-70 - all there
+# 
+# detectable_deletions <- function (x, colnames) { 
+#   
+#   if (x['gene_mut_loc.2'] != x['gene_mut_loc.3'] & str_detect(x['prot_mut_loc'],"-")){
+#   
+#     constant_before <- as.data.frame((cbind(x['gene_mut_loc.1'], x['gene_mut_loc.2'], x['gene_mut_loc.3'])))
+#     constant_after <- as.data.frame((x['Conseq']))
+#   
+#     split_prot_pos <- str_split(x['prot_mut_loc'],"-")
+#     list_prot_pos <- list()
+#     for (i in 1:length(split_prot_pos)){
+#       list_prot_pos[[i]] <- seq(as.numeric(split_prot_pos[[i]][1]),as.numeric(split_prot_pos[[i]][2]))
+#     }
+#     
+#     extendet <- as.data.frame(qpcR:::cbind.na(as.character(unlist(list_prot_pos)), as.character(unlist(str_split(x['AAs.1'],''))), as.character(str_split(x['AAs.2'],''))))
+#     extendet[is.na(extendet)] <- '-' 
+#     
+#     full <- as.data.frame(cbind(constant_before,extendet, constant_after))
+#     colnames(full) <- colnames
+#     full$prot_mut_loc <- vapply(full$prot_mut_loc, paste, collapse = " ", character(1L))
+#     full$AAs.1 <- vapply(full$AAs.1, paste, collapse = " ", character(1L))
+#     full$AAs.2 <- vapply(full$AAs.2, paste, collapse = " ", character(1L))
+#     
+#     return(full)
+#   }
+#   
+# }
+# deletions.df <- locations
+# deletions.df <- locations %>%
+#                     filter(gene_mut_loc.2 != gene_mut_loc.3 &
+#                             Conseq == "inframe_deletion" &
+#                             str_detect(deletions.df$prot_mut_loc,"-"))
+# colnames <- colnames(deletions.df)
+# deletions <- dplyr::bind_rows(apply(deletions.df,1, detectable_deletions, colnames = colnames))
+# locations <- dplyr::bind_rows(locations,deletions)
+```
+
 
 ```{r process_signature_mutations, message=F, warning=F, include = FALSE}
 # reading in signature data
@@ -265,16 +345,10 @@ nomatch.df <- complete.df %>%
 ```
 ## Mutations matching variants of concern
 
-The following tables list the called SNVs. Table 1 shows the mutations matching signature mutations for given SARS-CoV-2 
-variants. Table 2 shows all other mutations without any match. The columns are described as follows:  
-1. **SNV** - nucleotide mutation in the pattern of: reference base- position nucleotide sequence - mutation base 
-2. annotated gene  
-3. translated amino acid (AA) mutation in the pattern of: reference AA - position AA sequence - mutation AA  
-    * a asterix "*" denotes a stop codon  
-    * a dash "-" denotes a deletion  
-4. variant of concern which is described by this mutation  
-5. reported allele frequency   
-6. read coverage of that particular mutation  
+The following tables list the called SNVs found by [*LoFreq*](https://csb5.github.io/lofreq/) and translated 
+to protein mutations by [*Ensemble VEP*](https://covid-19.ensembl.org/info/docs/tools/vep/index.html). Table 1 shows 
+the mutations matching signature mutations for given SARS-CoV-2 variants. 
+Table 2 shows all other mutations without any match. 
 
 ```{r, message=F, warning=F, echo = FALSE, results = 'asis'}
 cat("\n Table 1: SNVs from sample matching signature mutations")
@@ -412,8 +486,8 @@ df <- df %>%
 
 ```
 
-# Methods
-## LoFreq filter
+## Methods
+### LoFreq filter
 |LoFreq is used with default filter settings: |  |  
 |:--------------------------------------------|:-|
 |minimum coverage| 10|    
@@ -421,7 +495,7 @@ df <- df %>%
 |Minimum SNV Quality (Phred)|63|  
 |Minimum Indel Quality (Phred)|47|
 
-## VEP settings  
+### VEP settings  
 * Species: SARS-CoV-2  
 * Assembly: ASM985889v3  
 
@@ -435,7 +509,7 @@ df <- df %>%
 Deconvolution is done by using robust regression. The resulting coefficients are normalized to get the percentage of
 each present variant.
 
-# Raw data 
+## Raw data 
 
 ```{r, include = F}
 snvs <- readLines(snvfile) %>% paste0(collapse="\n") %>% base64_urlencode()
