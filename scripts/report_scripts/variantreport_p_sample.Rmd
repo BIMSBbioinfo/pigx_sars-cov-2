@@ -38,13 +38,10 @@ Sample: `r params$sample_name`
 # Input Settings
 ```{r printInputSettings, echo = FALSE}
 sample_name <- params$sample_name
-location_sigmuts <- sigmut_db
+sample_sheet <- data.table::fread(params$sample_sheet)
+location_sigmuts <- params$sigmut_db
 
-vepfile <- file.path(variants_dir, paste0(sample_name, "_vep_sarscov2_parsed.txt"))
-snvfile <- file.path(variants_dir, paste0(sample_name, "_snv.csv"))
-sampledir <- variants_dir
-
-csv_output_dir <- variants_dir
+csv_output_dir <- params$variants_dir
 sample_sheet <- data.table::fread(sample_sheet) #read in sample file and then get the rest:
 date <- as.character(sample_sheet[name==sample_name]$date)
 time <- as.character(sample_sheet[name==sample_name]$time)
