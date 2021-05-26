@@ -18,17 +18,17 @@ library(reshape2)
 df_var <- read.table(var_timecourse_csv, sep = "\t", header=T)
 df_mut <- read.table(mut_timecourse_csv, sep = "\t", header=T)
 ```
-PiGx ww sars-cov-2 performs mutation analysis of SARS-CoV-2 and reports and quantifies the occurrence of 
+This pipeline performs mutation analysis of SARS-CoV-2 and reports and quantifies the occurrence of 
 variants of concern (VOC) and signature mutations by which they are characterised. For each sample three reports are 
 generated:  
-* a qc-report reporting general statistics and amplicon coverage
+* a QC-report reporting general statistics and amplicon coverage
 * a variant-report which including tables summarizing the mutation calling and the deconvolution results for the abundance of VOCs
-* a *Kraken2* report including a krona plot showing the analysis of the unaligned reads
+* a taxonomic classification report including a pie chart showing the analysis of the unaligned reads
 
 The visualizations below provide an overview of the evolution of VOCs found
-in the analysed samples across given time points and locations. The abundance values for the variants are derived 
-by deconvolution (for details please see the variantreport_p_sample) The frequencies of the mutations 
-are the output of [LoFreq](https://csb5.github.io/lofreq/) (for details please see the documentation).
+in the analyzed samples across given time points and locations. The abundance values for the variants are derived 
+by deconvolution (for details please see the [variant report](https://bimsbstatic.mdc-berlin.de/akalin/PiGx/sars-cov2-ww/example_report/WW_210304_KW1.variantreport_p_sample.html#22_Deconvolution)) 
+The frequencies of the mutations are the output of [LoFreq](https://csb5.github.io/lofreq/).
 
 
 # VARIANTS
@@ -112,11 +112,12 @@ plots_line_locations[[3]]
 
 ## Virus strains per date and location
 
-On this map you can see the relative frequencies of identified variants of concern (VOC) of SARS-CoV-2 and at specific 
-wastewater sampling locations over time. The diameter of the circles displays the variant frequency. Colors of overlapping variants 
-are adding up. This plot visualizes the development of local outbreaks and variant abundance.  
+On this map you can see the relative frequencies of identified variants of concern (VOC) of SARS-CoV-2 at specific 
+wastewater sampling locations over time. This plot 
+visualizes the development of local outbreaks and the proportions of identified VOCs in that area.  
 
-Use the slider to select a specific date or hit the Play button to display all snapshots successively.
+Use the slider to select a specific date or hit the Play button to display all snapshots successively. By 
+double-clicking on the variants displayed on the legend the chosen variants can be disabled.
 
 ```{r maps for variants, echo=F}
 
@@ -173,9 +174,8 @@ plots_line_locations[[3]]
 
 ## mutations on the map for each data/location
 
-This map shows the frequency values of signature mutations which are characterising variants of concern (VOC) of SARS-CoV-2 for
-samples at specific wastewater sampling locations over time. The diameter of the circles displays the mutation frequency. 
-Colors of overlapping variants are adding up. This plot visualizes the development of local outbreaks on the level of 
+This map shows the frequencies of signature mutations which are characterizing variants of concern (VOC) of SARS-CoV-2 for
+samples at specific wastewater sampling locations over time. This plot visualizes the development of local outbreaks on the level of 
 single mutations. So far the map can only display signature mutations which where reported for VOCs.
 
 Use the slider to select a specific date or hit the Play button to display all snapshots successively.
