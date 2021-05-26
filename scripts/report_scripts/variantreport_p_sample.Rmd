@@ -12,17 +12,26 @@ output:
     toc_float: yes
     number_sections: yes
 params:
-    @PARAMS_SAMPLE_NAME@
+  sample_name: ''
+  sigmut_db: ''
+  variants_dir: ''
+  vep_file: ''
+  snv_file: ''
+  sample_sheet: ''
 
 ---
 
-Read config.yml for the locations of sample sheet, pipeline output and sigmut loc and variants_dir
-```{r, child="_settings.Rmd"}
-```
-
-```{r, libs}
-library(base64url)
+```{r libs, include=FALSE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(knitr)
+library(dplyr)
+library(ggplot2)
+library(DT)
+library(tidyr)
+library(qpcR)
+library(stringr)
 library(magrittr)
+library(base64url)
 ```
 Sample: `r params$sample_name` 
 
