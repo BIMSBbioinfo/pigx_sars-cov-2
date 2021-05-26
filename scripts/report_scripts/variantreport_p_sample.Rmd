@@ -15,6 +15,7 @@ params:
 library(base64url)
 library(magrittr)
 ```
+### Sample: `r sample_name` 
 
 # Input Settings
 ```{r printInputSettings, echo = FALSE}
@@ -34,7 +35,7 @@ coordinates_lat <- as.character(sample_sheet[name==sample_name]$coordinates_lat)
 coordinates_long <- as.character(sample_sheet[name==sample_name]$coordinates_long)
 
 ``` 
-### Sample: `r sample_name` 
+
 
 ```{r test_files, include = FALSE}
 # location_sigmuts <- 'tests/databases/sigmut_db'
