@@ -37,13 +37,6 @@ coordinates_long <- as.character(sample_sheet[name==sample_name]$coordinates_lon
 ``` 
 
 
-```{r test_files, include = FALSE}
-# location_sigmuts <- 'tests/databases/sigmut_db'
-# sampledir <- 'tests'
-# # vepfile <- '/mnt/beast/pathogenomics/pigx_sarscov2_ww/output/vep/Test_vep_sarscov2_reportinput.txt' 
-# vepfile <- 'tests/sample_data/Test_vep_sarscov2_parsed.txt' 
-# snvfile <- 'tests/sample_data/Test_snv.csv'
-```
 This report shows the variant analysis of SARS-CoV-2 from wastewater samples. Mutations are 
 identified by single-nucleotide-variant (SNV) calling performed by [LoFreq](https://csb5.github.io/lofreq/). 
 Translated to amino acid mutations by using [Ensemble VEP - COVID-19](https://covid-19.ensembl.org/info/docs/tools/vep/index.html).
