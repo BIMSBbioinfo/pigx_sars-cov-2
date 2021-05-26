@@ -3,36 +3,32 @@ title: "SARS-CoV-2 variant report"
 nav: "Variant report"
 date: '`r format(as.POSIXct(if ("" != Sys.getenv("SOURCE_DATE_EPOCH")) { as.numeric(Sys.getenv("SOURCE_DATE_EPOCH")) } else { Sys.time() }, origin="1970-01-01"), "%Y-%m-%d %H:%M:%S")`'
 params:
-  sample_name: ''
-  sigmut_db: ''
-  variants_dir: ''
-  vep_file: ''
-  snv_file: ''
-  sample_sheet: ''
+    @PARAMS_SAMPLE_NAME@
 
 ---
 
-```{r libs, include=FALSE, message = FALSE, warning = FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
-library(knitr)
-library(dplyr)
-library(ggplot2)
-library(DT)
-library(tidyr)
-library(qpcR)
-library(stringr)
-library(magrittr)
+Read config.yml for the locations of sample sheet, pipeline output and sigmut loc and variants_dir
+```{r, child="_settings.Rmd"}
+```
+
+```{r, libs}
 library(base64url)
+library(magrittr)
 ```
 
 # Input Settings
 ```{r printInputSettings, echo = FALSE}
 sample_name <- params$sample_name
-sample_sheet <- data.table::fread(params$sample_sheet)
-location_sigmuts <- params$sigmut_db
+location_sigmuts <- sigmut_db
 
-csv_output_dir <- params$variants_dir
+vepfile <- file.path(variants_dir, paste0(sample_name, "_vep_sarscov2_parsed.txt"))
+snvfile <- file.path(variants_dir, paste0(sample_name, "_snv.csv"))
+sampledir <- variants_dir
+
+csv_output_dir <- variants_dir
+sample_sheet <- data.table::fread(sample_sheet) #read in sample file and then get the rest:
 date <- as.character(sample_sheet[name==sample_name]$date)
+time <- as.character(sample_sheet[name==sample_name]$time)
 location_name <- as.character(sample_sheet[name==sample_name]$location_name)
 coordinates_lat <- as.character(sample_sheet[name==sample_name]$coordinates_lat)
 coordinates_long <- as.character(sample_sheet[name==sample_name]$coordinates_long)
@@ -40,6 +36,13 @@ coordinates_long <- as.character(sample_sheet[name==sample_name]$coordinates_lon
 ``` 
 ### Sample: `r sample_name` 
 
+```{r test_files, include = FALSE}
+# location_sigmuts <- 'tests/databases/sigmut_db'
+# sampledir <- 'tests'
+# # vepfile <- '/mnt/beast/pathogenomics/pigx_sarscov2_ww/output/vep/Test_vep_sarscov2_reportinput.txt' 
+# vepfile <- 'tests/sample_data/Test_vep_sarscov2_parsed.txt' 
+# snvfile <- 'tests/sample_data/Test_snv.csv'
+```
 This report shows the variant analysis of SARS-CoV-2 RNA-seq samples from wastewater samples. Variants are 
 identified by SNV calling. Translated protein mutations were matched against lists of signature mutations for known
 variants of concern (VOC) as found on [outbreak.info](https://outbreak.info/situation-reports) and [CoVariant.org](https://covariants.org/variants/S.501Y.V1).
@@ -176,6 +179,65 @@ dedupeMuts <- function (mut, sigmut.df, dedup.df) {
 }  
 ```
 
+```{r development_parsing_deletions_properly, warning = F, include = FALSE}
+# library(stringr)
+# library(dplyr)
+# library(tidyr)
+# library(qpcR)
+# 
+# #vepfile <- '/mnt/beast/pathogenomics/vpipe/akalinlab_pathogenomics/vep_mutation_matching/210417_VEP_results/vep_sarscov2_WW_S26.txt'
+# 
+# vepfile.df <- read.table(vepfile, sep = '\t', header = T) # you should include in the vep script to parse out the # 
+#   #in the beginning of the line or include that step here. 
+# 
+# # parsing snv and protmut location
+# locations <- data.frame(gene_mut_loc = str_split_fixed(vepfile.df$Location,"[:-]+", n=3),
+#                         prot_mut_loc = vepfile.df$Protein_position, 
+#                         AAs = str_split_fixed(vepfile.df$Amino_acids, "/",2), 
+#                         Conseq = vepfile.df$Consequence)
+# locations <- dplyr::na_if(locations,'')
+# 
+# # delete all rows with no protein position value
+# locations <- locations %>% filter(!grepl("^-", prot_mut_loc))
+# # specific B117 mutations: 21990-21993, 21764-21770, maybe also 3675-3677, 69-70 - all there
+# 
+# detectable_deletions <- function (x, colnames) { 
+#   
+#   if (x['gene_mut_loc.2'] != x['gene_mut_loc.3'] & str_detect(x['prot_mut_loc'],"-")){
+#   
+#     constant_before <- as.data.frame((cbind(x['gene_mut_loc.1'], x['gene_mut_loc.2'], x['gene_mut_loc.3'])))
+#     constant_after <- as.data.frame((x['Conseq']))
+#   
+#     split_prot_pos <- str_split(x['prot_mut_loc'],"-")
+#     list_prot_pos <- list()
+#     for (i in 1:length(split_prot_pos)){
+#       list_prot_pos[[i]] <- seq(as.numeric(split_prot_pos[[i]][1]),as.numeric(split_prot_pos[[i]][2]))
+#     }
+#     
+#     extendet <- as.data.frame(qpcR:::cbind.na(as.character(unlist(list_prot_pos)), as.character(unlist(str_split(x['AAs.1'],''))), as.character(str_split(x['AAs.2'],''))))
+#     extendet[is.na(extendet)] <- '-' 
+#     
+#     full <- as.data.frame(cbind(constant_before,extendet, constant_after))
+#     colnames(full) <- colnames
+#     full$prot_mut_loc <- vapply(full$prot_mut_loc, paste, collapse = " ", character(1L))
+#     full$AAs.1 <- vapply(full$AAs.1, paste, collapse = " ", character(1L))
+#     full$AAs.2 <- vapply(full$AAs.2, paste, collapse = " ", character(1L))
+#     
+#     return(full)
+#   }
+#   
+# }
+# deletions.df <- locations
+# deletions.df <- locations %>%
+#                     filter(gene_mut_loc.2 != gene_mut_loc.3 &
+#                             Conseq == "inframe_deletion" &
+#                             str_detect(deletions.df$prot_mut_loc,"-"))
+# colnames <- colnames(deletions.df)
+# deletions <- dplyr::bind_rows(apply(deletions.df,1, detectable_deletions, colnames = colnames))
+# locations <- dplyr::bind_rows(locations,deletions)
+```
+
+
 ```{r process_signature_mutations, message=F, warning=F, include = FALSE}
 # reading in signature data
 # it's probably not really necessary to add the pase0 column but I like to have a full overview
@@ -215,7 +277,7 @@ p1$alt_aa <- na_if(p1$alt_aa, '')
 p1$alt_aa[is.na(p1$alt_aa)] <- "-"
 p1$AA_mut <- paste0(p1$ref_aa, p1$codon_num, p1$alt_aa)
 ################
-vepfile.df <- read.table(params$vep_file, sep = ",", header = T) #TODO - in na's umwandeln
+vepfile.df <- read.table(vepfile,sep = ",", header = T) #TODO - in na's umwandeln
 vepfile.df <- na_if(vepfile.df, "-")
 sig_mutations.df <- as.data.frame(qpcR:::cbind.na(b117=b117$AA_mut, b1351=b1351$AA_mut,
                                                   b1427=b1427$AA_mut, b1429=b1429$AA_mut,
@@ -241,7 +303,7 @@ for (mut in sig_mutations.df$value) {
 ```
 
 ```{r match_snvs_to_signature_mutations, message=F, warning=F, include = FALSE}
-variant_protein_mut <- get_protein_mut(params$vep_file)
+variant_protein_mut <- get_protein_mut(vepfile)
 variant_protein_mut <- dplyr::left_join(variant_protein_mut, sigmuts_deduped, by = c('AA_mut'='value'))
 match.df <- variant_protein_mut %>%
                     filter(!is.na(name))
@@ -251,7 +313,7 @@ nomatch.df <- variant_protein_mut %>%
 
 ```{r, message=F, warning=F, include = FALSE}
 # Data frame to use for the tables
-lofreq.info <- as_data_frame(parse_snv_csv(params$snv_file))
+lofreq.info <- as_data_frame(parse_snv_csv(snvfile))
 # vep.info <- write the part that returns the variant_protein_mut into a function 
 vep.info <- variant_protein_mut
 # add freqency and coverage information to protein mutations
@@ -401,8 +463,7 @@ df <- df %>%
         geom_text(aes(label=sprintf("%0.3f", round(value, digits = 3))), 
                       position=position_dodge(width=0.9), 
                       vjust=-0.25) + 
-        scale_fill_discrete(name = "Variants") +
-        theme_set(theme_get() + theme(text = element_text(family = 'Open Sans'))) 
+        scale_fill_discrete(name = "Variants")
 
 ```
 
@@ -432,14 +493,14 @@ each present variant.
 ## Raw data 
 
 ```{r, include = F}
-snvs <- readLines(params$snv_file) %>% paste0(collapse="\n") %>% base64_urlencode()
+snvs <- readLines(snvfile) %>% paste0(collapse="\n") %>% base64_urlencode()
 ```
 Called SNVs:  
 [Download SNVs.csv](`r sprintf('data:text/csv;base64,%s', snvs)`)
 ```{r, include = F}
 # can possible be fused together with above. But rigth now it's safer like this. 
 # write.csv2(vepfile.df, "./file.csv") # not sure about the funct of the dataframe here, but it works so I leave it for now
-vep <- readLines(params$vep_file) %>% paste0(collapse="\n") %>% base64_urlencode()
+vep <- readLines(vepfile) %>% paste0(collapse="\n") %>% base64_urlencode()
 ```
 Variant effect prediction (*Ensemble VEP output*):  
 [Download VEP_out.csv](`r sprintf('data:text/csv;base64,%s', vep)`)
@@ -455,6 +516,7 @@ if (file.exists (output_variants)) {
 } else {
     output_variant_plot <- data.frame (samplename = character(), # brauche ich als input von sample sheet 
                                        dates = character(),
+                                       time = character(),
                                        location_name = character(),
                                        coordinates_lat = character(),
                                        coordinates_long = character())
@@ -471,6 +533,7 @@ if (file.exists (output_variants)) {
 # adding new row
 meta_data <- c (samplename = sample_name,
                 dates = date,
+                time = time,
                 location_name = location_name,
                 coordinates_lat = coordinates_lat,
                 coordinates_long = coordinates_long
@@ -506,6 +569,7 @@ if (file.exists (output_mutations)) {
 } else {
     output_mutation_plot <- data.frame (samplename = character(), # brauche ich als input von sample sheet 
                                        dates = character(),
+                                       time = character(),
                                        location_name = character(),
                                        coordinates_lat = character(),
                                        coordinates_long = character())
@@ -522,6 +586,7 @@ if (file.exists (output_mutations)) {
 # adding new row
 meta_data <- c (samplename = sample_name,
                 dates = date,
+                time = time,
                 location_name = location_name,
                 coordinates_lat = coordinates_lat,
                 coordinates_long = coordinates_long
