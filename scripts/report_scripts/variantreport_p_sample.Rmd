@@ -7,8 +7,8 @@ params:
 
 ---
 
-Read config.yml for the locations of sample sheet, pipeline output and sigmut loc and variants_dir
 ```{r, child="_settings.Rmd"}
+# Read config.yml for the locations of sample sheet, pipeline output and sigmut loc and variants_dir
 ```
 
 ```{r, libs}
