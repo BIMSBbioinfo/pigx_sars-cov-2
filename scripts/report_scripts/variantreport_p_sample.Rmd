@@ -274,7 +274,7 @@ nomatch.df <- variant_protein_mut %>%
 
 ```{r, message=F, warning=F, include = FALSE}
 # Data frame to use for the tables
-lofreq.info <- as_data_frame(parse_snv_csv(snvfile))
+lofreq.info <- as_data_frame(parse_snv_csv(params$snv_file)
 # vep.info <- write the part that returns the variant_protein_mut into a function 
 vep.info <- variant_protein_mut
 # add freqency and coverage information to protein mutations
