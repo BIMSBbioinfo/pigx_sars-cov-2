@@ -19,16 +19,11 @@ params:
 ---
 
 ```{r libs, echo=FALSE}
-suppressMessages(suppressWarnings(library(DT)))
+suppressMessages(suppressWarnings(library(DT))) # why is this here? Do we still need it?
 ```
+Sample: `r params$sample_name`
 
-
-# Kraken2 report on unaligned reads from the SARS-CoV-2 enriched samples
-
-```{r print sample name,echo=F}
-print(paste( "Sample: ", params$sample_name))
-```
-
+# Classification of unaligned reads
 
 The SARS-CoV-2 enriched wastewater samples are aligned to the virus
 genome. Those reads that are left unaligned are aligned with the
