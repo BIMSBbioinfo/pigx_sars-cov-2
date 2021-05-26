@@ -463,7 +463,7 @@ df <- df %>%
 # Raw data 
 
 ```{r, include = F}
-snvs <- readLines(snvfile) %>% paste0(collapse="\n") %>% base64_urlencode()
+snvs <- readLines(params$snv_file) %>% paste0(collapse="\n") %>% base64_urlencode()
 ```
 Called SNVs:  
 [Download SNVs.csv](`r sprintf('data:text/csv;base64,%s', snvs)`)
