@@ -23,7 +23,7 @@ generated:
 * a *Kraken2* report including a krona plot showing the analysis of the unaligned reads
 
 The visualizations below provide an overview of the evolution of VOCs found
-in the analysed samples across given time points and locations.  The abundance values for the variants are derived 
+in the analysed samples across given time points and locations. The abundance values for the variants are derived 
 by deconvolution (for details please see the variantreport_p_sample) The frequencies of the mutations 
 are the output of [LoFreq](https://csb5.github.io/lofreq/) (for details please see the documentation).
 
