@@ -412,8 +412,8 @@ df <- df %>%
 
 ```
 
-## Methods
-### LoFreq filter
+# Methods
+## LoFreq filter
 |LoFreq is used with default filter settings: |  |  
 |:--------------------------------------------|:-|
 |minimum coverage| 10|    
@@ -421,7 +421,7 @@ df <- df %>%
 |Minimum SNV Quality (Phred)|63|  
 |Minimum Indel Quality (Phred)|47|
 
-### VEP settings  
+## VEP settings  
 * Species: SARS-CoV-2  
 * Assembly: ASM985889v3  
 
@@ -435,7 +435,7 @@ df <- df %>%
 Deconvolution is done by using robust regression. The resulting coefficients are normalized to get the percentage of
 each present variant.
 
-## Raw data 
+# Raw data 
 
 ```{r, include = F}
 snvs <- readLines(snvfile) %>% paste0(collapse="\n") %>% base64_urlencode()
