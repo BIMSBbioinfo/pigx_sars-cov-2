@@ -321,7 +321,10 @@ DT::datatable(NoSignatureTable,
                          dom = 'Bfrtip'),
               filter = "bottom")
 ```
-# Deconvolution
+# Deconvolution 
+Deconvolution is done by using robust regression. It relies on signature mutations of each virus strain/variants. It aims 
+to predict the individual contributions of the variants of concern to the observed mutation frequencies in the bulk 
+wastewater sample.
 
 ```{r getting_unique_muts_bulk, message=F, warning=F, include = FALSE}
 
@@ -439,11 +442,6 @@ df <- df %>%
 |Restrict results by severity of consequence | no |  
 |upstream/downstream distance | 5000bp|  
 
-## Deconvolution 
-Deconvolution is done by using robust regression. The resulting coefficients are normalized to get the percentage of
-each present variant. Deconvolution relies on signature mutations of each virus strain/variants. It aims to predict the 
-individual contributions of the variants/strains to the observed mutation frequencies in the bulk wastewater sample.
-TODO: Limitation, be careful with the results when....
 
 # Raw data 
 
