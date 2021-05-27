@@ -33,7 +33,7 @@ library(stringr)
 library(magrittr)
 library(base64url)
 ```
-### Sample: `r sample_name` 
+Sample: `r params$sample_name` 
 
 # Input Settings
 ```{r printInputSettings, echo = FALSE}
