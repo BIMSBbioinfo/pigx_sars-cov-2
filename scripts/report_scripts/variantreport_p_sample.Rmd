@@ -403,19 +403,62 @@ msig_stable_complete <- bind_cols(muts_all.df,msig_all,bulk_all.df)
 ```
 
 
+
 ```{r collapse_identicals, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
 # When multiple columns look like the same, the deconvolution will not work, because the function can't distinguish 
 # between those columns. The workaround for now is to identify those equal columns and merge them into one, returning also
 # a vector with the information about which of the columns were merged. 
 
-msig_stable_unique <- dedupe(msig_stable)
+# deduplicate dataframe
+# fixme: This can be simplified and it also does reduntant repetition of loops
 
+msig_stable_transposed <- t (msig_stable)
+msig_stable_transposed <- as.data.frame(cbind(variants = colnames(msig_stable), msig_stable_transposed))
+
+dupes_variants <- duplicated (msig_stable_transposed[,-1], fromLast=TRUE)
+allDupes_variants <- dupes_variants | duplicated (msig_stable_transposed[,-1], fromLast=FALSE)
+
+# fixme isn't that a case for "distinct" ?
+if (any (allDupes_variants)) {
+   var_deduped_transposed <- msig_stable_transposed[!dupes_variants,]
+}
+var_dedup <- as.data.frame(t(var_deduped_transposed))
+
+dedupeVariants <- function (variant, variants.df, dedup_variants.df) {
+        # get variant group per mutation pattern
+        # duped_variants <- grep (variant, variants.df$variants)
+        duped_variants <- c()
+        row_number_variant <- which(grepl(variant, variants.df$variants))
+        for (row in 1:nrow(variants.df)) { 
+            if (all (variants.df[row_number_variant,-1] == variants.df[row,-1])) {
+              duped_variants <- c(duped_variants, variants.df[row,"variants"])
+            }
+        }
+       # grouped_variants <- variants.df$variants[duped_variants]
+        groupName_variants <- paste(duped_variants, collapse = ",")
+        for (row in dedup_variants.df$variants){
+          if (grepl(row,groupName_variants)) {
+            rownames(dedup_variants.df)[rownames(dedup_variants.df) == row] <- groupName_variants
+          }
+        }
+        return (dedup_variants.df)
+}  
+
+# fixme: I think this should be done with some apply() function? 
+for (variant in rownames(msig_stable_transposed)[-1]) {
+  
+  var_deduped_transposed <- dedupeVariants(variant, msig_stable_transposed, var_deduped_transposed)
+}
+
+msig_stable_unique <- as.data.frame(t(var_deduped_transposed[,-1])) # fixme: proper variable handling
 ```
 ```{r deconvolution, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
+sig <- apply(msig_stable_unique[,-1], 2 , function(x) {
+    as.numeric(as.character(x))
+})
 
-sig <- msig_stable_unique[,-1]
+#sig <- as.numeric(msig_stable_unique[,-1])
 variant_abundance <- deconv(as.numeric(bulk_all),sig)
-
 ```
 `r if (executeDeconvolution){"The following bar plot shows the percentage of each VOCs in the sample as predicted by the
 deconvolution model. If it is not possible to identify a unique VOC from the reported mutation, 
