@@ -40,7 +40,7 @@ tests/
 
 ## Settings file and sample sheet
 
-A draft for these two files are given in the `tests/` directory. The pre-filled rows should work but feel free to modify either locations in the settings file or given samples in the sample sheet.
+A draft for these two files are given in the `tests/` directory. The pre-filled rows should work but feel free to modify either locations or parameters in the settings file or given samples in the sample sheet.
 
 ## Dummy sample fastq file
 
@@ -111,5 +111,5 @@ Nothing to be done here. Necessary files are provided in `tests/databases/sigmut
 ## Run the pipeline
 
 ```
-PIGX_UNINSTALLED=t ./pigx-sars-cov2-ww -s settings.yaml sample_sheet.csv
+PIGX_UNINSTALLED=t ./pigx-sars-cov2-ww -s tests/settings.yaml tests/sample_sheet.csv
 ```
