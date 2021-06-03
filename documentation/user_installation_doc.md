@@ -217,31 +217,6 @@ In the settings file, parameters are saved, in YAML format, to configure the exe
 - _sigmut-db-dir_, the location of the signature mutations database (must be prepared by the user)
 - _vep-db-dir_, the location of `sars_cov_2` database for VEP (must be prepared by the user)
 
-## Structure overview
-
-This guide will lead to the following structure of directories and files.
-
-```
-tests/
-|
-|__sample_sheet.csv
-|
-|__settings.yaml
-|
-|__sample_data/__reads/
-|
-|__databases/
-   │
-   │__kraken_db/
-   │
-   │__krona_db/
-   │
-   │__vep_db/
-   |
-   |__sigmut_db/
-``` 
-
-
 ## Prepare databases
 
 Before the pipeline can work 3 databases must be downloaded and their location will need to be provided in the settings file. Depending on the size of the databases this can take some time.
@@ -267,11 +242,12 @@ wget -qO- https://genome-idx.s3.amazonaws.com/kraken/k2_pluspfp_20210127.tar.gz 
 # wget -qO- https://genome-idx.s3.amazonaws.com/kraken/k2_pluspfp_8gb_20210127.tar.gz | tar -C $DIR -xzv
 ```
 
-Next go to the DIR directory and build the Kraken database. This might take a while (depends on the size of the downloaded database):
+Next go to the database/ directory and build the Kraken database. This might take a while (depends on the size of the downloaded database):
 
 ```
-cd DIR
-DBNAME=kraken_db/
+#current location: pigx_sarscov2_ww/
+cd database/
+DBNAME=kraken_db
 kraken2-build --use-ftp --download-taxonomy --db $DBNAME # if this fails, you might want to try it without the --use-ftp flag
 kraken2-build --build --db $DBNAME
 ```
@@ -284,7 +260,8 @@ This folder should now contain at least these files: hash.k2d, opts.k2d and taxo
 Krona Tools needs two files, which have to be installed in the `databases/krona_db/`. Also this might take a while:
 
 ```
-DBNAME=databases/krona_db/
+#current location: pigx_sarscov2_ww/databases/
+DBNAME=krona_db/
 mkdir -p $DBNAME
 KRONA=$(dirname $(which ktImportTaxonomy))/../share/krona-tools/ # this is just a workaround until tool paths are declared
 $KRONA/updateTaxonomy.sh $DBNAME # the scripts are stored a priori in that folder
@@ -296,7 +273,8 @@ $KRONA/updateAccessions.sh $DBNAME
 Just download the `SARS_CoV_2` database for VEP (variant effect predictor) and unpack it in the `databases/vep_db/` directory.
 
 ```
-DBNAME=databases/vep_db/
+#current location: pigx_sarscov2_ww/databases/
+DBNAME=vep_db/
 mkdir -p $DBNAME
 wget -qO- ftp://ftp.ensemblgenomes.org/pub/viruses/variation/indexed_vep_cache/sars_cov_2_vep_101_ASM985889v3.tar.gz | tar -C $DBNAME -xzv
 ```
@@ -304,3 +282,51 @@ wget -qO- ftp://ftp.ensemblgenomes.org/pub/viruses/variation/indexed_vep_cache/s
 ### sigmut database
 
 Nothing to be done here. Necessary files are provided in `databases/sigmut_db/`.
+
+
+# Quick Start
+
+To check wether the pipeline together with the databases was properly installed, run PiGx SARS-CoV-2 Wastewater Sequencing Pipeline on a minimal test dataset.
+For this there are samples provided in `tests/sample_data/`. The folder structure should be provided like this, assuming all databases are set up like described [here](#prepare-databases):
+
+
+```
+pigx_sarscov2_ww
+|
+|__databases/
+   │
+   │__kraken_db/
+   │
+   │__krona_db/
+   │
+   │__vep_db/
+   |
+   |__sigmut_db/
+|      
+|__tests/
+   |__sample_sheet.csv
+   |
+   |__settings.yaml
+   |
+   |__sample_data/
+      |
+      |__reads/
+      |
+      |__NC_045512.2.fasta
+      |
+      |__nCoV-2019_NCref.bed
+|
+|__[...]
+
+``` 
+
+Now the the test set can be run with the command: 
+
+```
+#current location: pigx_sarscov2_ww/
+PIGX_UNINSTALLED=t ./pigx-sars-cov2-ww -s tests/settings.yaml tests/sample_sheet.csv
+```
+
+Inside `tests/` a new directory `output` is created, which includes specific directories containing output data for the respective step of the pipeline.    The `tests/output/reports/index.html` gives the overview over all merged reports for the test data. 
+
+# Troubleshooting
