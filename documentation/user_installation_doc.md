@@ -214,7 +214,7 @@ In the settings file, parameters are saved, in YAML format, to configure the exe
 - _amplicons-bed_, the amplicons `bed` file for coronavirus (must be prepared by the user)
 - _kraken-db-dir_, the location of the kraken database (must be prepared by the user)
 - _krona-db-dir_, the location of the krona database (must be prepared by the user)
-- _sigmut-db-dir_, the location of the signature mutations database (must be prepared by the user)
+- _sigmut-db-dir_, the location of the signature mutations database (provided at databases/sigmut_db/)
 - _vep-db-dir_, the location of `sars_cov_2` database for VEP (must be prepared by the user)
 
 ## Prepare databases
@@ -279,9 +279,9 @@ mkdir -p $DBNAME
 wget -qO- ftp://ftp.ensemblgenomes.org/pub/viruses/variation/indexed_vep_cache/sars_cov_2_vep_101_ASM985889v3.tar.gz | tar -C $DBNAME -xzv
 ```
 
-### sigmut database
+### Sigmut database
 
-Nothing to be done here. Necessary files are provided in `databases/sigmut_db/`.
+Necessary files are provided in `databases/sigmut_db/` for the current main Variants of Concern. Users can add files with new variants if/when necessary.
 
 
 # Quick Start
