@@ -242,10 +242,6 @@ tests/
 ``` 
 
 
-## Dummy sample fastq file
-
-For testing purposes we created small dummy reads `Test_R1.fastq` and `Test_R2.fastq` which can be found in `tests/sample_data/reads/`.
-
 ## Prepare databases
 
 Before the pipeline can work 3 databases must be downloaded and their location will need to be provided in the settings file. Depending on the size of the databases this can take some time.
