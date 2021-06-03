@@ -102,10 +102,10 @@ make check
 
 # Getting started
 
-At this point you are able to run the pipeline from within the current directory `pigx_sarscov2_ww`. Use `--help` to see the available options.
+At this point you are able to run the pipeline from within the current directory `pigx_sarscov2_ww`. Use `--help` to see the available options. Note that currently it is needed to set the shell variable `PIGX_UNINSTALLED` to any value.
 
 ```sh
-./pigx-sars-cov2-ww --help
+PIGX_UNINSTALLED=t ./pigx-sars-cov2-ww --help
 ```
 <details>
 <summary>toggle output</summary>
@@ -155,8 +155,7 @@ This pipeline was developed by the Akalin group at MDC in Berlin in 2017-2021.
 </details>
 </br>
 
-Though, to actually use it on your experimental data still more setup is required. Please follow [the steps to prepare the required databases](##Prepare-databases) first. Then afterwards, you can run the pipeline from the source directory. </br>
-Note that currently it is needed to set the shell variable `PIGX_UNINSTALLED` to any value.
+Though, to actually use it on your experimental data still more setup is required. Please follow [the steps to prepare the required databases](#prepare-databases) first and [prepare the input](#preparing-the-input). Then afterwards, you can run the pipeline from the source directory.
 
 ```sh
 PIGX_UNINSTALLED=t ./pigx-sars-cov2-ww [options] sample_sheet.csv
@@ -168,7 +167,55 @@ For example, with this command the pipeline is used for the included test data:
 PIGX_UNINSTALLED=t ./pigx-sars-cov2-ww -s tests/settings.yaml tests/sample_sheet.csv
 ```
 
-These links guide you to more information on the [settings file](##settings-file) and the [sample sheet](##sample-sheet).
+## Preparing the input
+
+In order to run the pipeline, the user must supply
+
+- a sample sheet
+- a settings file
+
+both files are described below.
+
+In order to generate template settings and sample sheet files, type
+
+```sh
+PIGX_UNINSTALLED=t ./pigx-sars-cov2-ww --init
+```
+
+in the shell, and a boilerplate `sample_sheet.csv` and `settings.yaml` will be written to your current directory. An example for both files is provided in the `tests/` directory.
+
+### Sample sheet
+
+The sample sheet is a tabular file (`csv` format) describing the experiment. The table has the following columns:
+
+| SampleName | Read               | Read2              | date               | location_name      | coordinates_lat    | coordinates_long   |
+| ------     | -------            | --------           | --------           | --------           |  --------          |  --------          |
+| Test0      | Test0_R1.fastq     | Test0_R2.fastq     | 2021-01-01T08:00:00| Berlin             | 52.3646054650197   | 13.5098643274129   |
+| Test2      | Test2_R1.fastq     | Test2_R2.fastq     | 2021-01-03T08:00:00| Munich             | 48.2084486780314   | 11.6282300407931   |
+
+- _SampleName_ is the name for the sample
+- _Read_ & _Read2_ are the fastq file names of paired end reads
+  - the location of these files is specified in the settings file
+  - single-end data is not yet supported
+  - compressed (`.gz`) reads are not yet supported
+- _date_ must be given in the format yyyy-mm-ddThh:mm:ss
+- _location_name_ is the name of the location and should be unique per coordinates
+- _coordinates_lat_ & _coordinates_long_ correspond the latitude and longitude of the location name
+
+### Settings file
+
+In the settings file, parameters are saved, in YAML format, to configure the execution of PiGx-sarscov2. It specifies:
+
+#### Locations
+
+- _output-dir_, the location of the outputs for the pipeline
+- _reads-dir_, the location of the reads (directory where `fastq` files are)
+- _reference-fasta_, the `fasta` file with the reference genome (must be prepared by the user)
+- _amplicons-bed_, the amplicons `bed` file for coronavirus (must be prepared by the user)
+- _kraken-db-dir_, the location of the kraken database (must be prepared by the user)
+- _krona-db-dir_, the location of the krona database (must be prepared by the user)
+- _sigmut-db-dir_, the location of the signature mutations database (must be prepared by the user)
+- _vep-db-dir_, the location of `sars_cov_2` database for VEP (must be prepared by the user)
 
 ## Structure overview
 
@@ -194,10 +241,6 @@ tests/
    |__sigmut_db/
 ``` 
 
-
-## Settings file and sample sheet
-
-A draft for these two files are given in the `tests/` directory. The pre-filled rows should work but feel free to modify either locations in the settings file or given samples in the sample sheet.
 
 ## Dummy sample fastq file
 
