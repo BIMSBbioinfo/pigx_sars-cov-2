@@ -105,7 +105,7 @@ make check
 At this point you are able to run the pipeline from within the current directory `pigx_sarscov2_ww`. Use `--help` to see the available options.
 
 ```sh
-$ ./pigx-sars-cov2-ww --help
+./pigx-sars-cov2-ww --help
 ```
 <details>
 <summary>toggle output</summary>
@@ -155,7 +155,8 @@ This pipeline was developed by the Akalin group at MDC in Berlin in 2017-2021.
 </details>
 </br>
 
-Though, to actually use it on your experimental data still more setup is required. Please follow [the steps to prepare the required databases](##Prepare-databases) first. Then afterwards, you can run the pipeline from the source directory.
+Though, to actually use it on your experimental data still more setup is required. Please follow [the steps to prepare the required databases](##Prepare-databases) first. Then afterwards, you can run the pipeline from the source directory. </br>
+Note that currently it is needed to set the shell variable `PIGX_UNINSTALLED` to any value.
 
 ```sh
 PIGX_UNINSTALLED=t ./pigx-sars-cov2-ww [options] sample_sheet.csv
