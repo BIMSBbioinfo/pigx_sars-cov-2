@@ -17,11 +17,9 @@ To check the wastewater samples also for the abundance of other species the **un
 
 # Installation
 
-This step by step installation and how-to-use guide should only allow test users to run the pipeline in this very preliminary state. The usage will change as soon the pipeline is more _PiGx-ifyied_.
-
 ## Install via guix
 
-This pipeline is going to be packaged in the [GNU Guix](https://gnu.org/s/guix) package manager soon. Though, right now in this preliminary state it has to be installed from source manually.
+This pipeline is going to be packaged in the [GNU Guix](https://gnu.org/s/guix) package manager soon. Right now in this preliminary state it has to be installed from source manually.
 
 ## Install from source
 
@@ -265,9 +263,3 @@ wget -qO- ftp://ftp.ensemblgenomes.org/pub/viruses/variation/indexed_vep_cache/s
 ### sigmut database
 
 Nothing to be done here. Necessary files are provided in `tests/databases/sigmut_db/`.
-
-## Run the pipeline
-
-```
-PIGX_UNINSTALLED=t ./pigx-sars-cov2-ww -s settings.yaml sample_sheet.csv
-```
