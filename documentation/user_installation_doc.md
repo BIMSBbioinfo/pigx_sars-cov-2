@@ -3,15 +3,15 @@ PiGx SARS-CoV-2 is a pipeline for analysing data from sequenced wastewater sampl
 
 ## Workflow
 
-First the raw reads are trimmed by using [Prinseq](http://prinseq.sourceforge.net/) to improve alignment rates and mutation calling. Next the trimmed reads are aligned to the reference genome of SARS-CoV-2 using [BWA](https://github.com/lh3/bwa), the results are *SAM*/*BAM* files of **aligned** and **unaligned** reads. Following the alignment a quality check on raw and processed reads is performed by using [MultiQC](https://multiqc.info/). The next step is calling the variants and inferring SNVs (single nucleotide polymorphisms) on all **aligned** reads with [LoFreg](https://csb5.github.io/lofreq/). [ ... mutation step ?]
-To check the wastewater samples also for the abundance of other species the **unaligned** reads will be taxonomicly classified with [Kraken2](https://github.com/DerrickWood/kraken2). The Kraken2 requires a database of all genomes the reads are getting aligned against, therefore keep in mind that you can only find those species which are included in the chosen database, for documentation how to set this up, see: [Prepare databases](#Prepare databases). For a better and interactive visualization of all species present in the wastewater [Krona](https://github.com/marbl/Krona/wiki) is used. Also here a small step of setting up a database is needed before running the pipeline. 
+First the raw reads are trimmed by using [Prinseq](http://prinseq.sourceforge.net/) to improve alignment rates and mutation calling. Next the trimmed reads are aligned to the reference genome of SARS-CoV-2 using [BWA](https://github.com/lh3/bwa), the results are *SAM*/*BAM* files of **aligned** and **unaligned reads**. Following the alignment a quality check on raw and processed reads is performed by using [MultiQC](https://multiqc.info/). Calling the variants and inferring SNVs (single nucleotide polymorphisms) on the **aligned reads** is done with [LoFreg](https://csb5.github.io/lofreq/). [ ... mutation step ?]  
+To investigate the abundance of other existing species in the wastewater samples the **unaligned reads** will be taxonomicly classified with [Kraken2](https://github.com/DerrickWood/kraken2). The Kraken2 requires a database of the genomes against the reads are getting aligned, therefore keep in mind that you can only find those species which are included in the chosen database. For documentation how to set this up, see: [Prepare databases](#prepare-databases). For a better and interactive visualization of all species present in the wastewater [Krona](https://github.com/marbl/Krona/wiki) is used. Also here a small step of setting up a database is needed before running the pipeline, see: [Prepare databases](#prepare-databases). 
 
 ## Output
 * Merged Report including:
-* Overview of development of variant and mutation abundance over time and locations
-* Quality Control report of raw and processed (trimmed) reads
-* Variant report
-* Taxonomic classification
+   * Overview of development of variant and mutation abundance over time and locations
+   * Quality Control report of raw and processed (trimmed) reads
+   * Variant report
+   * Taxonomic classification
 * SAM/ BAM files of the aligned and unaligned reads against SARS-CoV-2
 
 
@@ -204,13 +204,13 @@ For testing purposes we created small dummy reads `Test_R1.fastq` and `Test_R2.f
 
 ## Prepare databases
 
-Before the pipeline can be run, 3 databases must be downloaded and their location will need to be provided in the settings file. Depending on the size of the databses this can take some time.
-Be sure that the pigx-sarscov2-ww pipeline is downloaded and the tools are installed or used via the provided and suggested guix environment, bevore preparing the databases. One database (signature mutations, `sigmut_db`) is already provided via the repository. The folder structure is suggested like the following and pre-filled accordingly in the settings file.
+Before the pipeline can work 3 databases must be downloaded and their location will need to be provided in the settings file. Depending on the size of the databases this can take some time.
+Be sure that the pigx-sarscov2-ww pipeline is downloaded and the tools are installed or used via the provided and suggested guix environment. One database (signature mutations, `sigmut_db`) is already provided via the repository. The folder structure is suggested like [this](#structure-overview) and pre-filled accordingly in the settings file.
 
 ### Kraken2 database
 
-There are several libraries of genomes that can be used to classify the (unaligned) reads. It is up to you which one to use, but be sure that they fulfill the necessities stated by Kraken2 [Kraken2 manual](https://github.com/DerrickWood/kraken2/wiki/Manual#kraken-2-databases). We recommend to use the Plus-PFP library provided [here](https://benlangmead.github.io/aws-indexes/k2).
-It is also possible to have multiple Kraken2 databases, just be sure to provide the wanted one to the settings file.
+There are several libraries of genomes that can be used to classify the (unaligned) reads. It is up to you which one to use, but be sure that they fulfill the necessities stated by Kraken2 [Kraken2 manual](https://github.com/DerrickWood/kraken2/wiki/Manual#kraken-2-databases). For an overall overview we recommend to use the Plus-PFP library provided [here](https://benlangmead.github.io/aws-indexes/k2). If the classification is not of concern or only the viruses are of interest, we recommend to use a smaller one.  
+It is also possible to have multiple Kraken2 databases installed, just be sure to provide the correct one to the settings file.
 
 First download and unpack the database in the `tests/databases/kraken_db/`:
 
