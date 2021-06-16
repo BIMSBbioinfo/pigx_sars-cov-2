@@ -124,7 +124,8 @@ detectable_deletions <- function (x, colnames) {
 
 get_protein_mut <- function (vepfile){ # parse together from vep output "Protein_position" and "Amino_acid"
   #' input: []_sarscov2_parsed.txt, parsed vcf from VEP CLI, comma seperated
-  #' 
+  #' this function is for parsing the information about mutation position in the amino acid sequence, the reference aa and
+  #' the alternative mutation into the aa-mutation-notation which is later on comparable to the lists of signature mutations
   
   # reading in whole vep txt output
     vepfile.df <- read.table(vepfile, sep = ',', header = T) # you should include in the vep script to parse out the # 
