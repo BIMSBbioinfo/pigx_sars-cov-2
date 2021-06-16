@@ -186,6 +186,7 @@ deconv <- function (bulk,sig){
   as.vector(rlm_coefficients)
 }
 
+# TODO this does not lead to 100% correct results and has to be updated with "dedupeVariants" from PR 48
 dedupe <- function (df) {
     transposed <- t (df)
     dupes <- duplicated (transposed, fromLast=TRUE)
@@ -202,6 +203,12 @@ dedupe <- function (df) {
 }
 
 dedupeMuts <- function (mut, sigmut.df, dedup.df) {
+        #' this function is a different version of "dedupe" 
+        #' if a signature mutation is shared by multiple variants the mutation-tables
+        #' would have seperate rows for the same mutation. This function is for concatenating all the variants 
+        #' that share that mutation. It requires the original df with all mutations, the deduplicated one 
+        #' (only one row per mutation) and the mutation for which this procedure should be applied
+        #' This function is not yet completely refined and should be improved further
         # get variant group per mutation
         duped_muts <- grep (mut, sigmut.df$value)
         grouped <- sigmut.df$name[duped_muts]
