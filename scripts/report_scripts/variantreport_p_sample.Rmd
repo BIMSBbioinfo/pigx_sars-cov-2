@@ -63,17 +63,22 @@ parse_snv_csv <- function (snvfile,...){ # allele frequency from v-pipe vcf
   Ref <- snvtable$Ref
   Pos <- snvtable$Pos
   Var <- snvtable$Var
+  
+  # concat position value and nucleotides to nucleotide-mutation-notation 
   snvinfo.df <- data.frame(Ref = Ref,
                         Pos = Pos, 
                         Var = Var,
                         gene_mut = paste0(Ref, Pos, Var),
                         stringsAsFactors = FALSE)
+  # concat nucleotide-mutation-notation with mutation frequencies and coverage
+  # seperate posistion column will be used for joining data frames
   snv.info <- cbind(gene_pos=snvinfo.df[,"Pos"], gene_mut=snvinfo.df[,"gene_mut"],freq,cov)
   
   return(snv.info)
 }
 
 get_protein_mut <- function (vepfile){ # parse together from vep output "Protein_position" and "Amino_acid"
+  
   
   # reading in whole vep txt output
     vepfile.df <- read.table(vepfile, sep = ',', header = T) # you should include in the vep script to parse out the # 
