@@ -77,6 +77,33 @@ parse_snv_csv <- function (snvfile,...){ # allele frequency from v-pipe vcf
   return(snv.info)
 }
 
+detectable_deletions <- function (x, colnames) { 
+  
+  if (x['gene_mut_loc.2'] != x['gene_mut_loc.3'] & str_detect(x['prot_mut_loc'],"-")){
+  
+    constant_before <- as.data.frame((cbind(x['gene_mut_loc.1'], x['gene_mut_loc.2'], x['gene_mut_loc.3'])))
+    constant_after <- as.data.frame((cbind(x['Conseq'],x['genes'])))
+  
+    split_prot_pos <- str_split(x['prot_mut_loc'],"-")
+    list_prot_pos <- list()
+    for (i in 1:length(split_prot_pos)){
+      list_prot_pos[[i]] <- seq(as.numeric(split_prot_pos[[i]][1]),as.numeric(split_prot_pos[[i]][2]))
+    }
+    
+    extendet <- as.data.frame(qpcR:::cbind.na(as.character(unlist(list_prot_pos)), as.character(unlist(str_split(x['AAs.1'],''))), as.character(str_split(x['AAs.2'],''))))
+    extendet[is.na(extendet)] <- '-' 
+    
+    full <- as.data.frame(cbind(constant_before,extendet, constant_after))
+    colnames(full) <- colnames
+    full$prot_mut_loc <- vapply(full$prot_mut_loc, paste, collapse = " ", character(1L))
+    full$AAs.1 <- vapply(full$AAs.1, paste, collapse = " ", character(1L))
+    full$AAs.2 <- vapply(full$AAs.2, paste, collapse = " ", character(1L))
+    
+    return(full)
+  }
+  
+}
+
 get_protein_mut <- function (vepfile){ # parse together from vep output "Protein_position" and "Amino_acid"
   #' input: []_sarscov2_parsed.txt, parsed vcf from VEP CLI, comma seperated
   #' 
@@ -97,34 +124,7 @@ get_protein_mut <- function (vepfile){ # parse together from vep output "Protein
     # delete all rows with no protein position value
     locations <- locations %>% filter(!grepl("^-", prot_mut_loc))
     # specific B117 mutations: 21990-21993, 21764-21770, maybe also 3675-3677, 69-70 - all there
-    
-    
-    detectable_deletions <- function (x, colnames) { 
-      
-      if (x['gene_mut_loc.2'] != x['gene_mut_loc.3'] & str_detect(x['prot_mut_loc'],"-")){
-      
-        constant_before <- as.data.frame((cbind(x['gene_mut_loc.1'], x['gene_mut_loc.2'], x['gene_mut_loc.3'])))
-        constant_after <- as.data.frame((cbind(x['Conseq'],x['genes'])))
-      
-        split_prot_pos <- str_split(x['prot_mut_loc'],"-")
-        list_prot_pos <- list()
-        for (i in 1:length(split_prot_pos)){
-          list_prot_pos[[i]] <- seq(as.numeric(split_prot_pos[[i]][1]),as.numeric(split_prot_pos[[i]][2]))
-        }
-        
-        extendet <- as.data.frame(qpcR:::cbind.na(as.character(unlist(list_prot_pos)), as.character(unlist(str_split(x['AAs.1'],''))), as.character(str_split(x['AAs.2'],''))))
-        extendet[is.na(extendet)] <- '-' 
-        
-        full <- as.data.frame(cbind(constant_before,extendet, constant_after))
-        colnames(full) <- colnames
-        full$prot_mut_loc <- vapply(full$prot_mut_loc, paste, collapse = " ", character(1L))
-        full$AAs.1 <- vapply(full$AAs.1, paste, collapse = " ", character(1L))
-        full$AAs.2 <- vapply(full$AAs.2, paste, collapse = " ", character(1L))
-        
-        return(full)
-      }
-      
-    }
+  
     deletions.df <- locations
     deletions.df <- locations %>%
                         filter(gene_mut_loc.2 != gene_mut_loc.3 &
