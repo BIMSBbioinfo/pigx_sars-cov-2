@@ -358,6 +358,7 @@ muts <- c(match.df$AA_mut)
 # get bulk frequency values
 bulk <- as.numeric(match.df$freq)
 
+# only execute the deconvolution when at least one mutation was found
 executeDeconvolution <- length(muts) > 0
 ```
 
