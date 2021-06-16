@@ -168,6 +168,9 @@ get_protein_mut <- function (vepfile){ # parse together from vep output "Protein
 }
 
 deconv <- function (bulk,sig){
+  #' This function performs the deconvolution using a signature matrix for the mutations found in the sample 
+  #' and bulk frequency values derived by the SNV caller
+  #' it was build by Altuna
   
   rlm_model = suppressWarnings(MASS::rlm(sig,bulk, maxit = 100))
       
