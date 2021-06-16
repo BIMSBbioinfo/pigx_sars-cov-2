@@ -78,6 +78,8 @@ parse_snv_csv <- function (snvfile,...){ # allele frequency from v-pipe vcf
 }
 
 get_protein_mut <- function (vepfile){ # parse together from vep output "Protein_position" and "Amino_acid"
+  #' input: []_sarscov2_parsed.txt, parsed vcf from VEP CLI, comma seperated
+  #' 
   
   
   # reading in whole vep txt output
