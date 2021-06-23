@@ -453,7 +453,7 @@ msig_stable_unique <- dedupe(msig_stable)
 ```
 ```{r deconvolution, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
 
-sig <- msig_stable_unique[,-1]
+sig <- msig_stable_unique[, -which( names(msig_stable_unique) %in% "muts" )]  
 variant_abundance <- deconv(as.numeric(bulk_all),sig)
 
 ```
