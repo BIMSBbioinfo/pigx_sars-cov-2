@@ -322,12 +322,14 @@ variants. Table 2 shows all other mutations without any match. The columns are d
 cat("\n Table 1: SNVs from sample matching signature mutations")
 ```
 ```{r sig_table, message=F, warning=F, echo = FALSE, results = 'asis'}
+# Display the filtered signature mutations and the variants accordingly in scrollable tables
+
 SignatureTable <-  data.frame("SNV" = match.df$gene_mut, 
                   "gene" = match.df$genes,
                   "protein_mutation" = match.df$AA_mut,
-                  "variant" = match.df$name, # maybe more nice writing of it e.g B1.1.7            
-                  "frequency" = match.df$freq, # maybe more clear name stating which frequency
-                  "coverage" =  match.df$cov) # maybe more clear title stating which coverage 
+                  "variant" = match.df$name, # TODO: more nice writing of it e.g B1.1.7            
+                  "frequency" = match.df$freq, # TODO: more clear name stating which frequency
+                  "coverage" =  match.df$cov) # TODO: more clear title stating which coverage 
 DT::datatable(SignatureTable,
               extensions = c('FixedColumns', 'Scroller'),
               options = list(fixedColumns = TRUE, 
