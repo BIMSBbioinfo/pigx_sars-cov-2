@@ -449,7 +449,7 @@ msig_stable_complete <- bind_cols(muts_all.df,msig_all,bulk_all.df)
 # a vector with the information about which of the columns were merged. 
 
 msig_stable_unique <- dedupe(msig_stable)
-
+# TODO this does not group columns correctly -> see comment at "dedupe" and PR #48
 ```
 ```{r deconvolution, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
 
