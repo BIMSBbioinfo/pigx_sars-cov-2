@@ -290,14 +290,14 @@ nomatch.df <- variant_protein_mut %>%
                         filter(is.na(name))
 ```
 
-```{r, message=F, warning=F, include = FALSE}
-# Data frame to use for the tables
-lofreq.info <- as_data_frame(parse_snv_csv(params$snv_file))
-# vep.info <- write the part that returns the variant_protein_mut into a function 
+```{r merge_vep_with_lofreq_info, message=F, warning=F, include = FALSE}
+# get the SNV frequency values and coverage information for the mutations from the LoFreq output
+lofreq.info <- as_data_frame(parse_snv_csv(params$snv_file)) 
 vep.info <- variant_protein_mut
-# add freqency and coverage information to protein mutations
-#variant_protein_mut <- dplyr::left_join(variant_protein_mut, sig_mutations.df, by = c('AA_mut'='value'))
+
 complete.df <- dplyr::left_join(lofreq.info, vep.info, by = c('gene_pos'='gene_mut_loc.2'), copy = T)
+
+# TODO: redundant step from previous chunk can be removed
 match.df <- complete.df %>%
                     filter(!is.na(name))
 nomatch.df <- complete.df %>%
