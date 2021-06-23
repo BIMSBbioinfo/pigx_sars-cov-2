@@ -412,7 +412,8 @@ msig[1,2] <- 0 # put the WT signature, here it's 0 and not 1 bc it will be inver
 ```
 ```{r adding_wt_to_sigmat, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
 
-# making the WT rows
+# for the deconvolution to work we need the "wild type" frequencies too. The matrix from above got mirrored, 
+# wild type mutations are simulated the following: e.g. T210I (mutation) -> T210T ("wild type")
 
 # 1. make "WT mutations" 
 muts_wt <- lapply(muts,function(x) str_replace(x,regex(".$"), str_sub(x, 1,1)))
