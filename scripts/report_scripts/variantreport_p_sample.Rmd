@@ -342,12 +342,14 @@ DT::datatable(SignatureTable,
 ```{r nonsig_table, message=F, warning=F, echo = FALSE, results = 'asis'}
 cat("\n Table 2: SNVs from sample not matching any signature mutations")
 ```
-```{r, message=F, warning=F, echo = FALSE, results = 'asis'}
+```{r non_sig_table, message=F, warning=F, echo = FALSE, results = 'asis'}
+# Display the filtered signature mutations and the variants accordingly in scrollable tables
+
 NoSignatureTable <-  data.frame("SNV" = nomatch.df$gene_mut, 
                   "gene" = nomatch.df$genes,
                   "protein_mutation" = nomatch.df$AA_mut,
-                  "frequency" = nomatch.df$freq, # maybe more clear name stating which frequency
-                  "coverage" =  nomatch.df$cov) # maybe more clear title stating which coverage
+                  "frequency" = nomatch.df$freq, # TODO more clear name stating which frequency
+                  "coverage" =  nomatch.df$cov) # TODO more clear title stating which coverage
 DT::datatable(NoSignatureTable,
               extensions = c('FixedColumns', 'Scroller'),
               options = list(fixedColumns = TRUE, 
