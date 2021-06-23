@@ -257,11 +257,12 @@ read_sigmuts <- function (sigmut) {
 
 sig_mutations.df <- do.call(rbind, lapply(sigmuts, read_sigmuts))
 
-vepfile.df <- read.table(params$vep_file, sep = ",", header = T) #TODO - in na's umwandeln
+vepfile.df <- read.table(params$vep_file, sep = ",", header = T) 
 
 vepfile.df <- na_if(vepfile.df, "-")
 
 # deduplicate dataframe
+# reasoning see description of "dedupeMuts"
 # fixme: I was not sure, how I can include this in my function but should be possible, will come back to it later
 dupes <- duplicated (sig_mutations.df$value, fromLast=TRUE)
 allDupes <- dupes | duplicated (sig_mutations.df$value, fromLast=FALSE)
