@@ -368,9 +368,9 @@ wastewater sample.
 
 ```{r getting_unique_muts_bulk, message=F, warning=F, include = FALSE}
 
-# get prot.mutations only 
+# get prot.mutations only, input for the signature matrix 
 muts <- c(match.df$AA_mut)
-# get bulk frequency values
+# get bulk frequency values, will be input for the deconvolution function
 bulk <- as.numeric(match.df$freq)
 
 # only execute the deconvolution when at least one mutation was found
@@ -380,9 +380,12 @@ executeDeconvolution <- length(muts) > 0
 
 ```{r creating_signature_matrix_simple, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
 # create an empty data frame add a column for the Wildtype
+# Wildtype in this case means the reference version of SARS-Cov-2
 msig <- data.frame(muts,WT=0,b117=0,b1351=0,b1427=0,b1429=0,b1526=0,p1=0, b16172=0)
 
-# make sigmuts per variant tables new with parsed mutations
+# making a matrix with the signature mutations found in the sample
+# make binary matrix matching the mutations to the mutation-list per variant to see how many characterising mutations
+# where found by variant 
 
 b117 <- filter(sig_mutations.df, name == "b117")$value
 msig[msig$muts %in% b117,"b117"]=1
