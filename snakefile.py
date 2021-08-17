@@ -28,6 +28,7 @@ from itertools import chain
 import re
 
 SAMPLE_SHEET_CSV = config['locations']['sample-sheet']
+MUTATION_SHEET_CSV = config['locations']['mutation-sheet']
 READS_DIR        = config['locations']['reads-dir']
 REFERENCE_FASTA  = config['locations']['reference-fasta']
 AMPLICONS_BED    = config['locations']['amplicons-bed']
