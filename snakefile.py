@@ -382,6 +382,7 @@ rule render_kraken2_report:
 
 rule render_variant_report:
     input:
+      deconvolution_functions=os.path.join(SCRIPTS_DIR, "deconvolution.R"),
       script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
       report=os.path.join(SCRIPTS_DIR,"report_scripts", "variantreport_p_sample.Rmd"),
       header=os.path.join(REPORT_DIR, "_navbar.html"),
@@ -399,6 +400,7 @@ rule render_variant_report:
   "snv_file":     "{input.snv}",         \
   "sample_sheet": "{SAMPLE_SHEET_CSV}",  \
   "mutation_sheet": "{MUTATION_SHEET_CSV}", \
+  "deconvolution_functions": "{input.deconvolution_functions}", \
   "logo": "{LOGO}" \
 }}' > {log} 2>&1"""
 
