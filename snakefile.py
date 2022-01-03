@@ -220,17 +220,17 @@ rule get_primer_seqs:
 
 # fixme: single-end version needed - input should work already, but output not
 # TODO: properly structure fastp output reports
-rule fastp:
+rule fastp_se:
     input: trim_reads_input
     output:
-        r1 = os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R1.fastq.gz"),
-        r2 = os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R2.fastq.gz") 
+        fastq_out = os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed.fastq.gz"),
+        qc_report = os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastp.html')
     log: os.path.join(LOG_DIR, 'fastp_{sample}.log')
     shell: """ 
         {FASTP_EXEC} --adapter_sequence=AGATCGGAAGAGCACACGTCTGAACTCCAGTCA --adapter_sequence_r2=AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\
-         -i {input[0]} -I {input[1]} -o {output.r1}\
-          -O {output.r2} >> {log}t 2>&1
+         -i {input[0]} -o {output.fastq_out} --html {output.qc_report} >> {log}t 2>&1
     """
+# !!! 03/01 Not tested if the report output works like that
 
 rule bwa_index:
     input: REFERENCE_FASTA
