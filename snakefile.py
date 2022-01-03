@@ -204,9 +204,6 @@ def vep_input(args):
         
 # Trimming in three steps: general by qual and cutoff, get remaining adapters out, get remaining primers out
 
-# TODO: do we still need prinseq? --> maybe check with some lowqual samples what difference it makes 
-# TODO: add all the new tools to variable/param lists and to the manifest
-
 rule get_primer_seqs:
     input: 
         ref = REFERENCE_FASTA,
