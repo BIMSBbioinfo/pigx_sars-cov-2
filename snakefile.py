@@ -217,6 +217,9 @@ rule get_primer_seqs:
 # TODO provide the adapter sequence by settings file, maybe also add option for multiple adapter if needed
 # TODO with the use of fastp the use of fastqc becomes partly reduntant, fastqc should be removed or adjusted
 # TODO it should be possible to add customized parameter
+
+# fixme: single-end version needed - input should work already, but output not
+# TODO: properly structure fastp output reports
 rule fastp:
     input: trim_reads_input
     output:
@@ -228,7 +231,7 @@ rule fastp:
          -i {input[0]} -I {input[1]} -o {output.r1}\
           -O {output.r2} >> {log}t 2>&1
     """
-    
+
 rule bwa_index:
     input: REFERENCE_FASTA
     output:
@@ -243,6 +246,7 @@ rule bwa_index:
         """
 
 # TODO: use map_input as input 
+# fixme: single-end version needed
 rule bwa_align:
     input:
         fastq = [os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R1.fastq.gz"), os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R2.fastq.gz")],
@@ -306,6 +310,8 @@ rule samtools_index_postprimertrim:
     log: os.path.join(LOG_DIR, 'samtools_index_{sample}.log')
     shell: "{SAMTOOLS_EXEC} index {input} {output} >> {log} 2>&1"
 
+# fixme: single-end version needed
+# fixme: or discard completely and change multiqc to use fastp --> fastp rule would have to be adjusted to create reasonable outputs
 rule fastqc_raw:
     input: trim_reads_input
     output:
@@ -349,7 +355,8 @@ rule fastqc_primer_trimmed:
     params:
         output_dir = os.path.join(FASTQC_DIR, '{sample}')
     shell: "{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1"
-    
+
+# fixme: adjust to use fastp reports    
 rule multiqc:
   input:
     fastqc_raw_output = expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_R{read_num}_fastqc.html'), sample=SAMPLES, read_num=[1, 2]),
@@ -442,7 +449,7 @@ rule krona_report:
     log: os.path.join(LOG_DIR, 'krona_report_{sample}.log')
     shell: "{IMPORT_TAXONOMY_EXEC} -m 3 -t 5 {input.kraken_output} -tax {input.database} -o {output} >> {log} 2>&1"
 
-
+# TODO: change amplicon naming to mutaiton site bc it's missleading
 rule samtools_bedcov:
     input:
         mutations_bed = MUTATIONS_BED,
@@ -461,7 +468,7 @@ rule samtools_coverage:
     log: os.path.join(LOG_DIR, 'samtools_coverage_{sample}.log')
     shell: "{SAMTOOLS_EXEC} coverage {input.aligned_bam} > {output} 2>> {log} 3>&2"
 
-
+# TODO: change amplicon naming to mutation site bc it's missleading
 rule get_qc_table:
     input:
         coverage_csv = os.path.join(COVERAGE_DIR, '{sample}_coverage.csv'),
@@ -555,6 +562,7 @@ rule render_qc_report:
   "logo": "{LOGO}" \
 }}' > {log} 2>&1"""
 
+
 rule create_mutations_summary:
     input:
         script = os.path.join(SCRIPTS_DIR, "creating_mutation_summary_table.R"),
@@ -564,6 +572,7 @@ rule create_mutations_summary:
     shell: """
         {RSCRIPT_EXEC} {input.script} "{MUTATIONS_DIR}" {output} > {log} 2>&1
         """
+# fixme: script "overview_QC_table.R" should be changed to dynamically determine if there are two read files or not 
 rule create_overviewQC_table: 
     input:
         script = os.path.join(SCRIPTS_DIR, "overview_QC_table.R"),
