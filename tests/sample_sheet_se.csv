@@ -1,0 +1,5 @@
+name,reads,reads2,date,location_name,coordinates_lat,coordinates_long
+Test_se_1,BC01.subsampled.fastq.gz,,2021-01-01 08:00:00,Bratislava,48.106629,17.163976
+Test_se_2,BC02.subsampled.fastq.gz,,2021-01-03 08:00:00,Bratislava,48.106629,17.163976
+Test_se_3,BC03.subsampled.fastq.gz,,2021-03-05 20:00:00,Bratislava,48.106629,17.163976
+Test_se_4,BC04.subsampled.fastq.gz,,2021-03-09 08:00:00,Bratislava,48.106629,17.163976
