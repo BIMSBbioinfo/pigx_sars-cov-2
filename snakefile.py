@@ -243,17 +243,7 @@ rule bowtie2_index:
     log: os.path.join(LOG_DIR, 'bowtie2_align_{sample}.log')
     shell: "{BOWTIE_EXEC}-build -f {input} {params.index_prefix} >> {log} 2>&1"
 
-# TODO: use map_input as input 
-rule bwa_align:
-    input:
-        fastq = [os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R1.fastq.gz"), os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R2.fastq.gz")],
-        ref = os.path.join(INDEX_DIR, "{}".format(os.path.basename(REFERENCE_FASTA))),
-        index = os.path.join(INDEX_DIR, "{}.bwt".format(os.path.basename(REFERENCE_FASTA)))
-    output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_tmp.sam')
-    params:
-        threads = 4
-    log: os.path.join(LOG_DIR, 'bwa_align_{sample}.log')
-    shell: "{BWA_EXEC} mem -t {params.threads} {input.ref} {input.fastq} > {output} 2>> {log} 3>&2"
+# TODO: use map_input as input
 
 rule bowtie2_align:
     input:
