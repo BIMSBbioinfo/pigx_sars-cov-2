@@ -231,19 +231,6 @@ rule fastp:
          -i {input[0]} -I {input[1]} -o {output.r1}\
           -O {output.r2} >> {log} 2>&1
     """
-    
-rule bwa_index:
-    input: REFERENCE_FASTA
-    output:
-      ref=os.path.join(INDEX_DIR, os.path.basename(REFERENCE_FASTA)),
-      index=os.path.join(INDEX_DIR, "{}.bwt".format(os.path.basename(REFERENCE_FASTA)))
-    log: os.path.join(LOG_DIR, 'bwa_index.log')
-    shell: """
-        mkdir -p {INDEX_DIR};
-        ln -sf {input} {INDEX_DIR};
-        cd {INDEX_DIR};
-        {BWA_EXEC} index {output.ref} >> {log} 2>&1 
-        """
 
 rule bowtie2_index:
     input: REFERENCE_FASTA
