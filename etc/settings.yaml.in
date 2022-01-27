@@ -51,9 +51,6 @@ tools:
   samtools:
     executable: @SAMTOOLS@
     args: ""
-  prinseq:
-    executable: @PRINSEQ@
-    args: ""
   kraken2:
     executable: @KRAKEN2@
     args: ""
@@ -80,9 +77,6 @@ tools:
     args: "--keep"
   gzip:
     executable: @GZIP@
-    args: ""
-  bbduk:
-    executable: @BBDUK@
     args: ""
   bedtools:
     executable: @BEDTOOLS@
