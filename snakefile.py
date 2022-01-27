@@ -239,9 +239,9 @@ rule bowtie2_index:
         index1 = expand(os.path.join(INDEX_DIR,'{prefix}.{index}.bt2'), prefix='reference', index=range(1,4)),
         index2 = expand(os.path.join(INDEX_DIR,'{prefix}.rev.{index}.bt2'), prefix='reference', index=range(1,2))
     params:
-        prefix = 'reference' # TODO: make dynamic based on REFERENCE_FASTA input
+        index_prefix = 'reference' # TODO: make dynamic based on REFERENCE_FASTA input
     log: os.path.join(LOG_DIR, 'bowtie2_align_{sample}.log')
-    shell: "{BOWTIE_EXEC}-build -f {input} {params.prefix} >> {log} 2>&1"
+    shell: "{BOWTIE_EXEC}-build -f {input} {params.index_prefix} >> {log} 2>&1"
 
 # TODO: use map_input as input 
 rule bwa_align:
@@ -254,6 +254,19 @@ rule bwa_align:
         threads = 4
     log: os.path.join(LOG_DIR, 'bwa_align_{sample}.log')
     shell: "{BWA_EXEC} mem -t {params.threads} {input.ref} {input.fastq} > {output} 2>> {log} 3>&2"
+
+rule bowtie2_align:
+    input:
+        read1 = os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R1.fastq.gz"),
+        read2 = os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R2.fastq.gz"),
+        index1 = expand(os.path.join(INDEX_DIR,'{prefix}.{index}.bt2'), prefix='reference', index=range(1,4)),
+        index2 = expand(os.path.join(INDEX_DIR,'{prefix}.rev.{index}.bt2'), prefix='reference', index=range(1,2))
+    output:
+        os.path.join(MAPPED_READS_DIR, '{sample}_aligned_tmp.sam')
+    params:
+        index_Id = os.path.join(INDEX_DIR,'{prefix}') # TODO: make dynamic based on REFERENCE_FASTA input
+    log: os.path.join(LOG_DIR, 'bowtie_align_{sample}.log')
+    shell: "{BOWTIE_EXEC} -x {params.index_ID} --very-sensitive -1 {input.read1} -2 {input.read2} -S {output} 2>> {log} 3>&2"
 
 rule samtools_filter_aligned:
     input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_tmp.sam')
