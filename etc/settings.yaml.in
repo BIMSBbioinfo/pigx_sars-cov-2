@@ -35,6 +35,9 @@ tools:
   bwa:
     executable: @BWA@
     args: ""
+  bowtie2:
+    executable: @BOWTIE@
+    args: ""
   fastp:
     executable: @FASTP@
     args: "--adapter_sequence=AGATCGGAAGAGCACACGTCTGAACTCCAGTCA --adapter_sequence_r2=AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
