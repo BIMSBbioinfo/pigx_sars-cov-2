@@ -170,6 +170,7 @@ def trim_reads_input(args):
   sample = args[0]
   return [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
 
+# TODO check if it is still correct to have the fastqc outputs here too. Coul be that you don't need them here
 def map_input(args):
     sample = args[0]
     reads_files = [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
@@ -389,10 +390,11 @@ rule fastqc_raw:
         output_dir = os.path.join(FASTQC_DIR, '{sample}')
     run:
         # renaming the ".fastq.gz" suffix to "_fastqc.html" 
-        tmp_R1_output = os.path.basename(input[0]).replace(fastq_ext(input[0]), '_fastqc.html')
-        tmp_R1_zip = os.path.basename(input[0]).replace(fastq_ext(input[0]),  '_fastqc.zip')
-        tmp_R2_output = os.path.basename(input[1]).replace(fastq_ext(input[0]),'_fastqc.html')
-        tmp_R2_zip = os.path.basename(input[1]).replace(fastq_ext(input[0]),'_fastqc.zip')
+        # TODO remove magic numbers, use split()
+        tmp_R1_output = os.path.basename(input[0])[:-9] + '_fastqc.html'
+        tmp_R1_zip = os.path.basename(input[0])[:-9] + '_fastqc.zip'
+        tmp_R2_output = os.path.basename(input[1])[:-9] + '_fastqc.html'
+        tmp_R2_zip = os.path.basename(input[1])[:-9] + '_fastqc.zip'
         shell("""{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1;
                 if [[ {tmp_R1_output} != *{wildcards.sample}* ]]; then
                     mv {params.output_dir}/{tmp_R1_output} {output.r1_rep} &&\
@@ -402,21 +404,10 @@ rule fastqc_raw:
                 fi """)
  
 # TODO: can probably be done by using map_input, no seperate functions neccessary?        
-rule fastqc_trimmed_se:
-    input: os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed.fastq.gz")
-    output:
-        html = os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.html'),
-        zip = os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.zip')
-    log: os.path.join(LOG_DIR, 'fastqc_{sample}_trimmed.log')
-    params:
-        output_dir = os.path.join(FASTQC_DIR, '{sample}')
-    shell: "{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1"
-
 rule fastqc_trimmed_pe:
     input: os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R{read_num}.fastq.gz")
     output:
-        html = os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.html'),
-        zip = os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.zip')
+        os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.html')
     log: os.path.join(LOG_DIR, 'fastqc_{sample}_trimmed_R{read_num}.log')
     params:
         output_dir = os.path.join(FASTQC_DIR, '{sample}')
@@ -425,21 +416,23 @@ rule fastqc_trimmed_pe:
 rule fastqc_primer_trimmed:
     input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed_sorted.bam')
     output:
-        html = os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'),
-        zip = os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip'),
+        os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html')
     log: os.path.join(LOG_DIR, 'fastqc_{sample}_aligned_primer-trimmed.log')
     params:
         output_dir = os.path.join(FASTQC_DIR, '{sample}')
     shell: "{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1"
-
-# TODO think about adding a global version to include all samples
+    
 rule multiqc:
-  input: multiqc_input
+  input:
+    fastqc_raw_output = expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_R{read_num}_fastqc.html'), sample=SAMPLES, read_num=[1, 2]),
+    fastqc_trimmed_output = expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.html'), sample=SAMPLES, read_num=[1, 2]),
+    fastqc_primer_trimmed_output = expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = SAMPLES)
   output: os.path.join(MULTIQC_DIR, '{sample}', 'multiqc_report.html')
   params:
+    fastqc_dir = os.path.join(FASTQC_DIR, '{sample}'),
     output_dir = os.path.join(MULTIQC_DIR, '{sample}')
   log: os.path.join(LOG_DIR, 'multiqc_{sample}.log')
-  shell: "{MULTIQC_EXEC} -f -o {params.output_dir} {input} >> {log} 2>&1"
+  shell: "{MULTIQC_EXEC} -o {params.output_dir} {params.fastqc_dir} >> {log} 2>&1"
 
 # WIP create a dummy entry if no variant is found - use this as long as the input-function solution doesn't work
 def no_variant_vep(sample, lofreq_output):
@@ -521,7 +514,7 @@ rule krona_report:
     log: os.path.join(LOG_DIR, 'krona_report_{sample}.log')
     shell: "{IMPORT_TAXONOMY_EXEC} -m 3 -t 5 {input.kraken_output} -tax {input.database} -o {output} >> {log} 2>&1"
 
-# TODO: change amplicon naming to mutaiton site bc it's missleading
+
 rule samtools_bedcov:
     input:
         mutations_bed = MUTATIONS_BED,
@@ -540,7 +533,7 @@ rule samtools_coverage:
     log: os.path.join(LOG_DIR, 'samtools_coverage_{sample}.log')
     shell: "{SAMTOOLS_EXEC} coverage {input.aligned_bam} > {output} 2>> {log} 3>&2"
 
-# TODO: change amplicon naming to mutation site bc it's missleading
+
 rule get_qc_table:
     input:
         coverage_csv = os.path.join(COVERAGE_DIR, '{sample}_coverage.csv'),
@@ -594,8 +587,7 @@ rule render_variant_report:
       header = os.path.join( REPORT_DIR, "_navbar.html" )
     output:
       varreport = os.path.join( REPORT_DIR, "{sample}.variantreport_p_sample.html" ),
-      mutations = os.path.join( MUTATIONS_DIR, "{sample}_mutations.csv"),
-      variants = os.path.join( VARIANTS_DIR, "{sample}_variants.csv")
+      mutations = os.path.join( MUTATIONS_DIR, "{sample}_mutations.csv")
     log: os.path.join( LOG_DIR, "reports", "{sample}_variant_report.log" )
     shell: """
             {RSCRIPT_EXEC} {input.script} \
@@ -635,16 +627,6 @@ rule render_qc_report:
   "logo": "{LOGO}" \
 }}' > {log} 2>&1"""
 
-
-rule create_variants_summary:
-    input:
-        script = os.path.join(SCRIPTS_DIR, "creating_variants_summary_table.R"),
-        files = expand(os.path.join(VARIANTS_DIR, "{sample}_variants.csv"), sample = SAMPLES)
-    output: os.path.join(VARIANTS_DIR, 'data_variant_plot.csv')
-    log: os.path.join(LOG_DIR, "create_variants_summary.log")
-    shell: """
-        {RSCRIPT_EXEC} {input.script} "{VARIANTS_DIR}" {output} > {log} 2>&1
-        """
 rule create_mutations_summary:
     input:
         script = os.path.join(SCRIPTS_DIR, "creating_mutation_summary_table.R"),
@@ -654,24 +636,23 @@ rule create_mutations_summary:
     shell: """
         {RSCRIPT_EXEC} {input.script} "{MUTATIONS_DIR}" {output} > {log} 2>&1
         """
-
-# TODO integrate the output of fastp.json to get the number of raw and trimmed reads
 rule create_overviewQC_table: 
     input:
         script = os.path.join(SCRIPTS_DIR, "overview_QC_table.R"),
+        # only run after having read trimming and coverage analysis done for all samples
+        trimmed_reads = expand(os.path.join(TRIMMED_READS_DIR, '{sample}_trimmed_R{read_num}.fastq.gz'), sample=SAMPLES, read_num=[1, 2]),
         cov_summary = expand(os.path.join(COVERAGE_DIR, '{sample}_merged_covs.csv'), sample=SAMPLES)
     output:  os.path.join(OUTPUT_DIR, 'overview_QC.csv')
     log: os.path.join(LOG_DIR, "create_overviewQC_table.log")
     shell: """
         {RSCRIPT_EXEC} {input.script} {OUTPUT_DIR} {SAMPLE_SHEET_CSV} {READS_DIR} {output} > {log} 2>&1
     """
-
+    
 rule render_index:
     input:
       script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
       report=os.path.join(SCRIPTS_DIR, "report_scripts", "index.Rmd"),
       header=os.path.join(REPORT_DIR, "_navbar.html"),
-      variants = os.path.join(VARIANTS_DIR, 'data_variant_plot.csv'),
       mutations = os.path.join(VARIANTS_DIR, 'data_mutation_plot.csv'),
       overviewQC = os.path.join(OUTPUT_DIR, 'overview_QC.csv'),
       # TODO: see comment below
@@ -682,7 +663,12 @@ rule render_index:
       krona=expand(os.path.join(REPORT_DIR, "{sample}.Krona_report.html"), sample = SAMPLES),
       qc=expand(os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.html"), sample = SAMPLES),
       variant=expand(os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.html"), sample = SAMPLES)
+    # TODO: these CSV files should be declared as inputs!  Due to
+    # https://github.com/BIMSBbioinfo/pigx_sarscov2_ww/issues/19 we
+    # cannot do this yet, so we just add the variant reports for all
+    # samples as inputs.
     params:
+      variants = os.path.join(VARIANTS_DIR, 'data_variant_plot.csv'),
       fun_cvrg_scr = os.path.join(SCRIPTS_DIR, 'sample_coverage_score.R'),
       fun_lm = os.path.join(SCRIPTS_DIR, 'pred_mutation_increase.R'),
       fun_tbls = os.path.join(SCRIPTS_DIR, 'table_extraction.R'),
@@ -694,7 +680,7 @@ rule render_index:
     shell: """{RSCRIPT_EXEC} {input.script} \
 {input.report} {output.report} {input.header}   \
 '{{                                      \
-  "variants_csv": "{input.variants}",   \
+  "variants_csv": "{params.variants}",   \
   "mutations_csv": "{input.mutations}", \
   "coverage_dir": "{COVERAGE_DIR}",\
   "sample_sheet": "{SAMPLE_SHEET_CSV}",  \
