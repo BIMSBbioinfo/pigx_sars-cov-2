@@ -241,7 +241,7 @@ rule bowtie2_index:
     params:
         prefix = 'reference' # TODO: make dynamic based on REFERENCE_FASTA input
     log: os.path.join(LOG_DIR, 'bowtie2_align_{sample}.log')
-    shell: "{BOWTIE_EXEC}-build -f {input} {params.prefix}"
+    shell: "{BOWTIE_EXEC}-build -f {input} {params.prefix} >> {log} 2>&1"
 
 # TODO: use map_input as input 
 rule bwa_align:
