@@ -244,6 +244,16 @@ rule bwa_index:
         cd {INDEX_DIR};
         {BWA_EXEC} index {output.ref} >> {log} 2>&1 
         """
+rule bowtie2_index:
+    input: REFERENCE_FASTA
+    output:
+        ref = os.path.join(INDEX_DIR, os.path.basename(REFERENCE_FASTA)),
+        index1 = expand(os.path.join(INDEX_DIR,'{prefix}.{index}.bt2'), prefix='reference', index=range(1,4)),
+        index2 = expand(os.path.join(INDEX_DIR,'{prefix}.rev.{index}.bt2'), prefix='reference', index=range(1,2))
+    params:
+        prefix = 'reference' # TODO: make dynamic based on REFERENCE_FASTA input
+    log: os.path.join(LOG_DIR, 'bowtie2_align_{sample}.log')
+    shell: "{BOWTIE_EXEC} ...."
 
 # TODO: use map_input as input 
 rule bwa_align:
