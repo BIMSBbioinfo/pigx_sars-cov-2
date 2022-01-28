@@ -76,11 +76,11 @@ def tool(name):
     cmd = config['tools'][name]['executable']
     return cmd + " " + toolArgs(name)
 
+GUNZIP_EXEC          = tool("gunzip")
 BOWTIE_EXEC          = tool("bowtie2")
-BOWTIE_INDEX_EXEC    = tool("bowtie2-build")
+#BOWTIE_INDEX_EXEC    = tool("bowtie2-build")
 FASTP_EXEC           = tool("fastp")
 FASTQC_EXEC          = tool("fastqc")
-GUNZIP_EXEC          = tool("gunzip")
 GZIP_EXEC            = tool("gzip")
 MULTIQC_EXEC         = tool("multiqc")
 IMPORT_TAXONOMY_EXEC = tool("import_taxonomy")
@@ -239,10 +239,14 @@ rule bowtie2_index:
         ref = os.path.join(INDEX_DIR, os.path.basename(REFERENCE_FASTA)),
         index1 = expand(os.path.join(INDEX_DIR,'{prefix}.{index}.bt2'), prefix='reference', index=range(1,4)),
         index2 = expand(os.path.join(INDEX_DIR,'{prefix}.rev.{index}.bt2'), prefix='reference', index=range(1,2))
-    params:
-        index_prefix = 'reference' # TODO: make dynamic based on REFERENCE_FASTA input
+     # TODO: add suffix as params and make dynamic based on REFERENCE_FASTA input
     log: os.path.join(LOG_DIR, 'bowtie2_building_index.log')
-    shell: "{BOWTIE_INDEX_EXEC} -f {input} {params.index_prefix} >> {log} 2>&1" # could be that I need an extra EXECT here
+    shell: """
+            mkdir -p {INDEX_DIR};
+            ln -sf {input} {INDEX_DIR};
+            cd {INDEX_DIR};
+            /gnu/store/qd6dsq845d0d8krn5jzncajy95l05wvv-profile/bin/bowtie2-build -f {input} 'reference' >> {log} 2>&1
+         """  # could be that I need an extra EXECT here
 
 # TODO: use map_input as input
 
@@ -255,7 +259,7 @@ rule bowtie2_align:
     output:
         os.path.join(MAPPED_READS_DIR, '{sample}_aligned_tmp.sam')
     params:
-        index_Id = os.path.join(INDEX_DIR,'{prefix}') # TODO: make dynamic based on REFERENCE_FASTA input
+        index_ID = os.path.join(INDEX_DIR,'reference') # TODO: make dynamic based on REFERENCE_FASTA input
     log: os.path.join(LOG_DIR, 'bowtie_align_{sample}.log')
     shell: "{BOWTIE_EXEC} -x {params.index_ID} --very-sensitive -1 {input.read1} -2 {input.read2} -S {output} 2>> {log} 3>&2"
 
