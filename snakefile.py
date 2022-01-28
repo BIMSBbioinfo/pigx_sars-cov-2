@@ -77,6 +77,7 @@ def tool(name):
     return cmd + " " + toolArgs(name)
 
 BOWTIE_EXEC          = tool("bowtie2")
+BOWTIE_INDEX_EXEC    = tool("bowtie2-build")
 FASTP_EXEC           = tool("fastp")
 FASTQC_EXEC          = tool("fastqc")
 GUNZIP_EXEC          = tool("gunzip")
@@ -240,8 +241,8 @@ rule bowtie2_index:
         index2 = expand(os.path.join(INDEX_DIR,'{prefix}.rev.{index}.bt2'), prefix='reference', index=range(1,2))
     params:
         index_prefix = 'reference' # TODO: make dynamic based on REFERENCE_FASTA input
-    log: os.path.join(LOG_DIR, 'bowtie2_align_{sample}.log')
-    shell: "{BOWTIE_EXEC}-build -f {input} {params.index_prefix} >> {log} 2>&1" # could be that I need an extra EXECT here
+    log: os.path.join(LOG_DIR, 'bowtie2_building_index.log')
+    shell: "{BOWTIE_INDEX_EXEC} -f {input} {params.index_prefix} >> {log} 2>&1" # could be that I need an extra EXECT here
 
 # TODO: use map_input as input
 
