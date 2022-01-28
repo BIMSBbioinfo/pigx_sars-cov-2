@@ -36,10 +36,10 @@ tools:
     executable: @BWA@
     args: ""
   bowtie2:
-    executable: @BOWTIE@
+    executable: @BOWTIE2@
     args: ""
   bowtie2-build:
-    executable: @BOWTIE_IDX@
+    executable: @BOWTIE2_BUILD@
     args ""
   fastp:
     executable: @FASTP@
