@@ -38,9 +38,6 @@ tools:
   bowtie2:
     executable: @BOWTIE@
     args: ""
-  bowtie2-build:
-    executable: @BOWTIE_IDX@
-    args ""
   fastp:
     executable: @FASTP@
     args: ""
