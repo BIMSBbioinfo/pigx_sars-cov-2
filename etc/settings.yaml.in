@@ -35,9 +35,6 @@ tools:
   bwa:
     executable: @BWA@
     args: ""
-  bowtie2:
-    executable: @BOWTIE@
-    args: ""
   fastp:
     executable: @FASTP@
     args: ""
