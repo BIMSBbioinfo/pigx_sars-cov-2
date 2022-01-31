@@ -45,7 +45,6 @@
 (define %packages
   (list "bash-minimal"
         "bwa"
-        "bowtie2"
         "bedtools"
         "ensembl-vep"
         "fastp"
