@@ -271,7 +271,8 @@ rule samtools_filter_unaligned:
     input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_tmp.sam')
     output: os.path.join(MAPPED_READS_DIR, '{sample}_unaligned.bam')
     log: os.path.join(LOG_DIR, 'samtools_filter_unaligned_{sample}.log')
-    shell: "{SAMTOOLS_EXEC} view -bh -F 2 {input} > {output} 2>> {log} 3>&2"
+    shell: # only inlcude (f) unmapped reads (4)
+        "{SAMTOOLS_EXEC} view -bh -f 4 {input} > {output} 2>> {log} 3>&2"
 
 
 rule samtools_sort_preprimertrim:
