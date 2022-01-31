@@ -73,7 +73,6 @@ AX_R_PACKAGE([stringr])
 AX_R_PACKAGE([tidyr])
 AX_R_PACKAGE([reshape2])
 AX_R_PACKAGE([R.utils])
-AX_R_PACKAGE([viridis])
   ])
 
 AC_ARG_ENABLE([environment-capture],
@@ -91,7 +90,7 @@ AC_SUBST_FILE(PIPELINE_META)
 PIPELINE_META=$srcdir/META
 AC_CONFIG_FILES([Makefile META etc/settings.yaml])
 AC_CONFIG_FILES([tests/tests/vep.sh], [chmod +x tests/tests/vep.sh])
-AC_CONFIG_FILES([test.sh], [chmod +x test.sh])
+AC_CONFIG_FILES([tests/tests/test_deconvolution.R], [chmod +x tests/tests/test_deconvolution.R])
 AC_CONFIG_FILES([scripts/download_databases.sh], [chmod +x scripts/download_databases.sh])
 AC_CONFIG_FILES([qsub-template.sh:pigx-common/common/qsub-template.sh.in])
 AC_CONFIG_FILES([pigx-sars-cov2-ww:pigx-common/common/pigx-runner.in], [chmod +x pigx-sars-cov2-ww])
