@@ -73,6 +73,8 @@ AX_R_PACKAGE([stringr])
 AX_R_PACKAGE([tidyr])
 AX_R_PACKAGE([reshape2])
 AX_R_PACKAGE([R.utils])
+AX_R_PACKAGE([viridis])
+AX_R_PACKAGE([viridisLite])
   ])
 
 AC_ARG_ENABLE([environment-capture],
