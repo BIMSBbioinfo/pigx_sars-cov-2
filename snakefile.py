@@ -182,6 +182,23 @@ def map_input(args):
     elif len(reads_files) == 1:
         return [os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_fastq.gz".format(sample=sample)),
                 os.path.join(FASTQC_DIR,"{sample}".format(sample=sample), "{sample}_trimmed_fastqc.html".format(sample=sampel))]
+# dynamically define the multiqc input files created by FastQC
+# TODO add qc html and json files from fastp
+def multiqc_input(args):
+    sample = args[0]
+    reads_files = [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
+    if len(reads_files) > 1:
+        files = [expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_R{read_num}_fastqc.html'), sample=sample, read_num=[1, 2]),
+                expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.html'), sample=sample, read_num=[1, 2]),
+                expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample)
+                ]
+    elif len(reads_files) == 1:
+        files = [expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.html'), sample=sample),
+                expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.html'), sample=sample),
+                expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample)
+                ]
+    return (list(chain.from_iterable(files)))
+
 
 # WIP - until then use hack that create a single line in the lofreq output 
 def vep_input(args):
