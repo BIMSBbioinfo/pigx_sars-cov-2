@@ -43,6 +43,7 @@ coverage.df <- gsub('\\]','',coverage.df)
 ```
 # Coverage reports
 Here, the information about read coverage of the reference genome as well as coverage of the mutation locations that were provided are listed. From those values, the overall quality of the sample can be assessed and whether or not its analysis results should and will be used for further trend-analysis and visualization. 
+
 ## Mutation locations
 
 In order to assess variant calling based on mutations of interest it is crucial that its genome locations are covered by read alignment. The table below shows the proportion of covered mutation locations, how many mutations are tracked in total, how many of their locations are covered and which locations have no read coverage at all. 
