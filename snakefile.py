@@ -374,10 +374,7 @@ rule fastqc_primer_trimmed:
 
 # fixme: adjust to use fastp reports    
 rule multiqc:
-  input:
-    fastqc_raw_output = expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_R{read_num}_fastqc.html'), sample=SAMPLES, read_num=[1, 2]),
-    fastqc_trimmed_output = expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.html'), sample=SAMPLES, read_num=[1, 2]),
-    fastqc_primer_trimmed_output = expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = SAMPLES)
+  input: multiqc_input
   output: os.path.join(MULTIQC_DIR, '{sample}', 'multiqc_report.html')
   params:
     fastqc_dir = os.path.join(FASTQC_DIR, '{sample}'),
