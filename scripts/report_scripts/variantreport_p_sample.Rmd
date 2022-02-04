@@ -47,7 +47,7 @@ mutation_sheet <- params$mutation_sheet
 location_sigmuts <- params$sigmut_db
 deconvolution_functions <- params$deconvolution_functions
 
-csv_output_dir <- file.path(params$output_dir,'variants')
+variants_output_dir <- file.path(params$output_dir,'variants')
 mutation_output_dir <- file.path(params$output_dir,'mutations')
 date <- as.character(sample_sheet[name==sample_name]$date)
 location_name <- as.character(sample_sheet[name==sample_name]$location_name)
