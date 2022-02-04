@@ -577,6 +577,15 @@ rule render_qc_report:
 }}' > {log} 2>&1"""
 
 
+rule create_variants_summary:
+    input:
+        script = os.path.join(SCRIPTS_DIR, "creating_variants_summary_table.R"),
+        files = expand(os.path.join(VARIANTS_DIR, "{sample}_variants.csv"), sample = SAMPLES)
+    output: os.path.join(VARIANTS_DIR, 'data_variant_plot.csv')
+    log: os.path.join(LOG_DIR, "create_variants_summary.log")
+    shell: """
+        {RSCRIPT_EXEC} {input.script} "{VARIANTS_DIR}" {output} > {log} 2>&1
+        """
 rule create_mutations_summary:
     input:
         script = os.path.join(SCRIPTS_DIR, "creating_mutation_summary_table.R"),
