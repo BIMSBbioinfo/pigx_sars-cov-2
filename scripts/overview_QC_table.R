@@ -11,17 +11,29 @@ concat_overview_table <- function ( sample_sheet, reads_dir, sample_dir ) {
   # get read number of raw reads
   cat("get num of total raw reads...\n ")
   read_counts$reads_r1 <- read_num_raw(read_counts$raw_reads1, reads_dir)$read_num
-  read_counts$reads_r2 <- read_num_raw(read_counts$raw_reads2, reads_dir)$read_num
+  # NOTE This is a hack to get the script working with se files
+  read_counts$reads_r2 <- ifelse(!is.na(read_counts$raw_reads2),
+    read_num_raw(read_counts$raw_reads2, reads_dir)$read_num, 0
+  )
   read_counts <- read_counts %>% mutate( total_reads = reads_r1 + reads_r2 )
   # get read number after trimming
   cat("get num of reads after trimming...\n")
   # TODO: make it proper! 
-  trimmed_reads_r1 <- unlist(lapply(unique(read_counts$samplename), 
-                          function (x){paste0(x,"_trimmed_R1.fastq.gz")}))
-  trimmed_reads_r2 <- unlist(lapply(unique(read_counts$samplename), 
-                          function (x){paste0(x,"_trimmed_R2.fastq.gz")}))
-  read_counts$read_num_trimmed_r1 <- read_num_raw( trimmed_reads_r1, file.path(sample_dir,"trimmed_reads"))$read_num
-  read_counts$read_num_trimmed_r2 <- read_num_raw( trimmed_reads_r2, file.path(sample_dir,"trimmed_reads"))$read_num
+  # NOTE This is a hack to get the script working with se files
+  if(!is.na(read_counts$raw_reads2)){
+    trimmed_reads_r1 <- unlist(lapply(unique(read_counts$samplename), 
+                            function (x){paste0(x,"_trimmed_R1.fastq.gz")}))
+    trimmed_reads_r2 <- unlist(lapply(unique(read_counts$samplename), 
+                            function (x){paste0(x,"_trimmed_R2.fastq.gz")}))
+    read_counts$read_num_trimmed_r1 <- read_num_raw( trimmed_reads_r1, file.path(sample_dir,"trimmed_reads"))$read_num
+    read_counts$read_num_trimmed_r2 <- read_num_raw(trimmed_reads_r2, file.path(sample_dir, "trimmed_reads"))$read_num
+  } else {
+    trimmed_reads <- unlist(lapply(unique(read_counts$samplename),
+      function(x) {paste0(x, "_trimmed.fastq.gz")}))
+    # TODO: decide whether paired-end column names should be kept
+    read_counts$read_num_trimmed_r1 <- read_num_raw(trimmed_reads, file.path(sample_dir, "trimmed_reads"))$read_num
+    read_counts$read_num_trimmed_r2 <- 0
+     }
   
   # get read number unaligned from files
   unaligned_reads <- unlist(lapply(unique(read_counts$samplename), 
