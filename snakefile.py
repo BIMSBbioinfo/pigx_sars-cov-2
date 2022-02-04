@@ -613,6 +613,7 @@ rule render_index:
       script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
       report=os.path.join(SCRIPTS_DIR, "report_scripts", "index.Rmd"),
       header=os.path.join(REPORT_DIR, "_navbar.html"),
+      variants = os.path.join(VARIANTS_DIR, 'data_variant_plot.csv'),
       mutations = os.path.join(VARIANTS_DIR, 'data_mutation_plot.csv'),
       overviewQC = os.path.join(OUTPUT_DIR, 'overview_QC.csv'),
       # TODO: see comment below
@@ -623,12 +624,7 @@ rule render_index:
       krona=expand(os.path.join(REPORT_DIR, "{sample}.Krona_report.html"), sample = SAMPLES),
       qc=expand(os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.html"), sample = SAMPLES),
       variant=expand(os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.html"), sample = SAMPLES)
-    # TODO: these CSV files should be declared as inputs!  Due to
-    # https://github.com/BIMSBbioinfo/pigx_sars-cov-2/issues/19 we
-    # cannot do this yet, so we just add the variant reports for all
-    # samples as inputs.
     params:
-      variants = os.path.join(VARIANTS_DIR, 'data_variant_plot.csv'),
       fun_cvrg_scr = os.path.join(SCRIPTS_DIR, 'sample_coverage_score.R'),
       fun_lm = os.path.join(SCRIPTS_DIR, 'pred_mutation_increase.R'),
       fun_tbls = os.path.join(SCRIPTS_DIR, 'table_extraction.R'),
@@ -640,7 +636,7 @@ rule render_index:
     shell: """{RSCRIPT_EXEC} {input.script} \
 {input.report} {output.report} {input.header}   \
 '{{                                      \
-  "variants_csv": "{params.variants}",   \
+  "variants_csv": "{input.variants}",   \
   "mutations_csv": "{input.mutations}", \
   "coverage_dir": "{COVERAGE_DIR}",\
   "sample_sheet": "{SAMPLE_SHEET_CSV}",  \
