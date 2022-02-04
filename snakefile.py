@@ -535,7 +535,8 @@ rule render_variant_report:
       header = os.path.join( REPORT_DIR, "_navbar.html" )
     output:
       varreport = os.path.join( REPORT_DIR, "{sample}.variantreport_p_sample.html" ),
-      mutations = os.path.join( MUTATIONS_DIR, "{sample}_mutations.csv")
+      mutations = os.path.join( MUTATIONS_DIR, "{sample}_mutations.csv"),
+      variants = os.path.join( VARIANTS_DIR, "{sample}_variants.csv")
     log: os.path.join( LOG_DIR, "reports", "{sample}_variant_report.log" )
     shell: """
             {RSCRIPT_EXEC} {input.script} \
