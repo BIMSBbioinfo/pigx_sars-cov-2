@@ -525,7 +525,7 @@ Called SNVs:
 Variant effect prediction (*Ensemble VEP output*):  
 [Download VEP_out.csv](`r sprintf('data:text/csv;base64,%s', vep)`)
 
-```{r csv_output_variant_plot, include = F, eval = executeDeconvolution}
+```{r csv_output_variant_plot, include = F}
 # prepare processed variant values to output them as a csv which will be used for the plots in index.rmd
 # those outputs are not offically declared as outputs which can lead to issues - that part should be handled by a seperate 
 # file (and maybe rule)
