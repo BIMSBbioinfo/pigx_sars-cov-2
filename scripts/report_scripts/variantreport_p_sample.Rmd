@@ -531,9 +531,9 @@ Variant effect prediction (*Ensemble VEP output*):
 # file (and maybe rule)
 # get all possible variants
 all_variants <- colnames (msig_simple[, -which( names(msig_simple) %in% "muts" )])
-output_variants <- file.path(csv_output_dir, "data_variant_plot.csv")
 # 1. write dataframe with this information here
 output_variant_plot <- data.frame (samplename = character(),
+output_variants <- file.path(variants_output_dir, paste0(sample_name, "_variants.csv"))
                                    dates = character(),
                                    location_name = character(),
                                    coordinates_lat = character(),
