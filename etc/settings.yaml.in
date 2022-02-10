@@ -37,7 +37,8 @@ tools:
     args: ""
   fastp:
     executable: @FASTP@
-    args: ""
+    args: "--adapter_sequence=AGATCGGAAGAGCACACGTCTGAACTCCAGTCA --adapter_sequence_r2=AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
+    # Please refer to fastp manual about setting adapter sequences: https://github.com/OpenGene/fastp#adapters
   fastqc:
     executable: @FASTQC@
     args: ""
