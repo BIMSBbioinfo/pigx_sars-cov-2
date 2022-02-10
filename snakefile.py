@@ -237,23 +237,22 @@ rule fastp:
     output:
         r1 = os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R1.fastq.gz"),
         r2 = os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R2.fastq.gz"),
-        qc = os.path.join(FASTQC_DIR, '{sample}', '{sample}_pe_fastp.html'),
+        html = os.path.join(FASTQC_DIR, '{sample}', '{sample}_pe_fastp.html'),
+        json = os.path.join(FASTQC_DIR, '{sample}', '{sample}_pe_fastp.json')
     log: os.path.join(LOG_DIR, 'fastp_{sample}.log')
     shell: """
-         {FASTP_EXEC} -i {input[0]} -I {input[1]} -o {output.r1} -O {output.r2} --html {output.qc}>> {log}t 2>&1
+         {FASTP_EXEC} -i {input[0]} -I {input[1]} -o {output.r1} -O {output.r2} --html {output.html} --json {output.json} >> {log}t 2>&1
      """
 
-
-# fixme: single-end version needed - input should work already, but output not
-# TODO: properly structure fastp output reports
 rule fastp_se:
     input: trim_reads_input
     output:
-        fastq_out = os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed.fastq.gz"),
-        qc_report = os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastp.html')
+        r = os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed.fastq.gz"),
+        html = os.path.join(FASTQC_DIR, '{sample}', '{sample}_se_fastp.html'),
+        json = os.path.join(FASTQC_DIR, '{sample}', '{sample}_se_fastp.json')
     log: os.path.join(LOG_DIR, 'fastp_{sample}.log')
     shell: """ 
-        {FASTP_EXEC} -i {input[0]} -o {output.fastq_out} --html {output.qc_report} >> {log}t 2>&1
+        {FASTP_EXEC} -i {input[0]} -o {output.r} --html {output.html} --json {output.json} >> {log}t 2>&1
     """
 # !!! 03/01 Not tested if the report output works like that
 
