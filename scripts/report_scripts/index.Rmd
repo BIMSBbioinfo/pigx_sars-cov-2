@@ -87,7 +87,7 @@ coverages.df$proport_muts_covered <- round((as.numeric(coverages.df$total_muts_c
 
 if ( !(length(coverages.df) == 0)){
     # take only the samples with > 90% mutation coverage
-    good_samples.df <- coverages.df %>% filter( as.numeric(proport_muts_covered) >= 6) # TODO stringecy should be given by user, maybe even through visualization
+    good_samples.df <- coverages.df %>% filter( as.numeric(proport_muts_covered) >= 1) # TODO stringecy should be given by user, maybe even through visualization
     bad_samples.df <- coverages.df %>% filter( !(samplename %in% good_samples.df$samplename))
 } else {
     cat("\n No coverage values found.")
