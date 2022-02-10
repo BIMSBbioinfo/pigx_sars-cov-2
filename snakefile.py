@@ -170,7 +170,6 @@ def trim_reads_input(args):
   sample = args[0]
   return [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
 
-# TODO check if it is still correct to have the fastqc outputs here too. Coul be that you don't need them here
 def map_input(args):
     sample = args[0]
     reads_files = [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
@@ -182,21 +181,27 @@ def map_input(args):
         return [os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed.fastq.gz".format(sample=sample))
                 ]
 
-# dynamically define the multiqc input files created by FastQC
-# TODO add qc html and json files from fastp
+# dynamically define the multiqc input files created by FastQC and fastp
+# TODO add kraken reports per sample
 def multiqc_input(args):
     sample = args[0]
     reads_files = [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
     if len(reads_files) > 1:
-        files = [expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_R{read_num}_fastqc.html'), sample=sample, read_num=[1, 2]),
-                expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.html'), sample=sample, read_num=[1, 2]),
-                expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample)
-                ]
+        files = [
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_pe_fastp.html'), sample = sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_pe_fastp.json'), sample = sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_R{read_num}_fastqc.html'), sample=sample, read_num=[1, 2]),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.html'), sample=sample, read_num=[1, 2]),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample)
+        ]
     elif len(reads_files) == 1:
-        files = [expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.html'), sample=sample),
-                expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.html'), sample=sample),
-                expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample)
-                ]
+        files = [
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_se_fastp.html'), sample = sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_se_fastp.json'), sample = sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.html'), sample=sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.html'), sample=sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample)
+        ]
     return (list(chain.from_iterable(files)))
 
 
