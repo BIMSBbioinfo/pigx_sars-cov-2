@@ -231,7 +231,6 @@ rule get_primer_seqs:
             -bed {input.bed} -name > {output} 2>> {log} 3>&2"
         
 # TODO the output suffix should be dynamic depending on the input
-# TODO provide the adapter sequence by settings file, maybe also add option for multiple adapter if needed
 # TODO with the use of fastp the use of fastqc becomes partly reduntant, fastqc should be removed or adjusted
 # TODO it should be possible to add customized parameter
 rule fastp:
@@ -255,8 +254,7 @@ rule fastp_se:
         qc_report = os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastp.html')
     log: os.path.join(LOG_DIR, 'fastp_{sample}.log')
     shell: """ 
-        {FASTP_EXEC} --adapter_sequence=AGATCGGAAGAGCACACGTCTGAACTCCAGTCA --adapter_sequence_r2=AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\
-         -i {input[0]} -o {output.fastq_out} --html {output.qc_report} >> {log}t 2>&1
+        {FASTP_EXEC} -i {input[0]} -o {output.fastq_out} --html {output.qc_report} >> {log}t 2>&1
     """
 # !!! 03/01 Not tested if the report output works like that
 
