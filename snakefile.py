@@ -234,6 +234,17 @@ rule get_primer_seqs:
 # TODO provide the adapter sequence by settings file, maybe also add option for multiple adapter if needed
 # TODO with the use of fastp the use of fastqc becomes partly reduntant, fastqc should be removed or adjusted
 # TODO it should be possible to add customized parameter
+rule fastp:
+    input: trim_reads_input
+    output:
+        r1 = os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R1.fastq.gz"),
+        r2 = os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R2.fastq.gz"),
+        qc = os.path.join(FASTQC_DIR, '{sample}', '{sample}_pe_fastp.html'),
+    log: os.path.join(LOG_DIR, 'fastp_{sample}.log')
+    shell: """
+         {FASTP_EXEC} -i {input[0]} -I {input[1]} -o {output.r1} -O {output.r2} --html {output.qc}>> {log}t 2>&1
+     """
+
 
 # fixme: single-end version needed - input should work already, but output not
 # TODO: properly structure fastp output reports
