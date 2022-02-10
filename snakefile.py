@@ -229,7 +229,7 @@ rule fastp:
     shell: """ 
         {FASTP_EXEC} --adapter_sequence=AGATCGGAAGAGCACACGTCTGAACTCCAGTCA --adapter_sequence_r2=AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\
          -i {input[0]} -I {input[1]} -o {output.r1}\
-          -O {output.r2} >> {log}t 2>&1
+          -O {output.r2} >> {log} 2>&1
     """
     
 rule bwa_index:
