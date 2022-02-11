@@ -191,16 +191,22 @@ def multiqc_input(args):
             expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_pe_fastp.html'), sample = sample),
             expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_pe_fastp.json'), sample = sample),
             expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_R{read_num}_fastqc.html'), sample=sample, read_num=[1, 2]),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_R{read_num}_fastqc.zip'), sample=sample, read_num=[1, 2]),
             expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.html'), sample=sample, read_num=[1, 2]),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample)
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.zip'), sample=sample, read_num=[1, 2]),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip'), sample = sample)
         ]
     elif len(reads_files) == 1:
         files = [
             expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_se_fastp.html'), sample = sample),
             expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_se_fastp.json'), sample = sample),
             expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.html'), sample=sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.zip'), sample=sample),
             expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.html'), sample=sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample)
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.zip'), sample=sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip'), sample = sample)
         ]
     return (list(chain.from_iterable(files)))
 
