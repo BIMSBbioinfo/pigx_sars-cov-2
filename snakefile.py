@@ -432,15 +432,14 @@ rule fastqc_primer_trimmed:
         output_dir = os.path.join(FASTQC_DIR, '{sample}')
     shell: "{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1"
 
-# fixme: adjust to use fastp reports    
+# TODO think about adding a global version to include all samples
 rule multiqc:
   input: multiqc_input
   output: os.path.join(MULTIQC_DIR, '{sample}', 'multiqc_report.html')
   params:
-    fastqc_dir = os.path.join(FASTQC_DIR, '{sample}'),
     output_dir = os.path.join(MULTIQC_DIR, '{sample}')
   log: os.path.join(LOG_DIR, 'multiqc_{sample}.log')
-  shell: "{MULTIQC_EXEC} -o {params.output_dir} {params.fastqc_dir} >> {log} 2>&1"
+  shell: "{MULTIQC_EXEC} -f -o {params.output_dir} {input} >> {log} 2>&1"
 
 # WIP create a dummy entry if no variant is found - use this as long as the input-function solution doesn't work
 def no_variant_vep(sample, lofreq_output):
