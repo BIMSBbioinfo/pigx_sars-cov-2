@@ -278,7 +278,7 @@ rule bwa_index:
 # fixme: single-end version needed
 rule bwa_align:
     input:
-        fastq = [os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R1.fastq.gz"), os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R2.fastq.gz")],
+        fastq = map_input,
         ref = os.path.join(INDEX_DIR, "{}".format(os.path.basename(REFERENCE_FASTA))),
         index = os.path.join(INDEX_DIR, "{}.bwt".format(os.path.basename(REFERENCE_FASTA)))
     output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_tmp.sam')
