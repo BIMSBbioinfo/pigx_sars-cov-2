@@ -340,6 +340,15 @@ rule samtools_index_postprimertrim:
     log: os.path.join(LOG_DIR, 'samtools_index_{sample}.log')
     shell: "{SAMTOOLS_EXEC} index {input} {output} >> {log} 2>&1"
 
+# function to determine the extension of the input files 
+def fastq_ext(fastq_file):
+    "Function to determine the fastq file extension"
+    root, ext = os.path.splitext(fastq_file)
+    if ext == ".gz":
+        root_root, root_ext = os.path.splitext(root)
+        ext = ''.join([root_ext,ext])
+    return ext
+
 # fixme: single-end version needed
 # fixme: or discard completely and change multiqc to use fastp --> fastp rule would have to be adjusted to create reasonable outputs
 rule fastqc_raw:
