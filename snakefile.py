@@ -363,11 +363,10 @@ rule fastqc_raw:
         output_dir = os.path.join(FASTQC_DIR, '{sample}')
     run:
         # renaming the ".fastq.gz" suffix to "_fastqc.html" 
-        # TODO remove magic numbers, use split()
-        tmp_R1_output = os.path.basename(input[0])[:-9] + '_fastqc.html'
-        tmp_R1_zip = os.path.basename(input[0])[:-9] + '_fastqc.zip'
-        tmp_R2_output = os.path.basename(input[1])[:-9] + '_fastqc.html'
-        tmp_R2_zip = os.path.basename(input[1])[:-9] + '_fastqc.zip'
+        tmp_R1_output = os.path.basename(input[0]).replace(fastq_ext(input[0]), '_fastqc.html')
+        tmp_R1_zip = os.path.basename(input[0]).replace(fastq_ext(input[0]),  '_fastqc.zip')
+        tmp_R2_output = os.path.basename(input[1]).replace(fastq_ext(input[0]),'_fastqc.html')
+        tmp_R2_zip = os.path.basename(input[1]).replace(fastq_ext(input[0]),'_fastqc.zip')
         shell("""{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1;
                 if [[ {tmp_R1_output} != *{wildcards.sample}* ]]; then
                     mv {params.output_dir}/{tmp_R1_output} {output.r1_rep} &&\
