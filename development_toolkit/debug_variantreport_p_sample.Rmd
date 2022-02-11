@@ -57,8 +57,7 @@ library(MASS)
 
 ```{r printInputSettings, echo = FALSE}
 sample_name <- "Test10"
-# sample_name <- "WW_210209_WA"
-# sample_sheet <- data.table::fread(params$sample_sheet)
+
 location_sigmuts <- "signature_mutations"
 date <- "2021-05-06"
 location_name <- "berlin"
@@ -66,45 +65,28 @@ coordinates_lat <- "52.5621572404487"
 coordinates_long <- "13.4155862239246"
 deconvolution_functions <- "deconvolution.R"
 mutation_sheet <- "mutation_sheet_220209_t07.csv"
-# works
 
-# doesnt work
+
+#### amedes-data single-end 
 # vep_file <- "/mnt/bimsb_local/pigx_sarscov2_ww/210531_wastewaterARTICEW109_pigxsarscov2ww_default/output/variants/WW_210427_22-24h_vep_sarscov2_parsed.txt"
-#vep_file <- "/mnt/beast/pathogenomics/pigx_ww/example_report_complete/output/variants/WW_210219_KW1_vep_sarscov2_parsed.txt"
-
-# vep_file <- "/mnt/beast/pathogenomics/vpipe/akalinlab_pathogenomics/misc_src/pigx_sarscov2_ww/tests/output/variants/Test2_vep_sarscov2_parsed.txt"
-
-# vep_file <- "/mnt/beast/pathogenomics/vpipe/akalinlab_pathogenomics/misc_src/pigx_sarscov2_ww/tests/output/variants/Test_empty_vep_vep_sarscov2_parsed.txt"
-# vep_file <- "/mnt/beast/pathogenomics/pigx_ww/210902_ww_berlin_febjune_pub_fastp/output/variants/WW_210225_Berlin_KW1_22-24_vep_sarscov2_parsed.txt"
-# vep_file <- "/mnt/beast/pathogenomics/pigx_ww/210902_ww_berlin_febjune_pub_fastp/output/variants/merged_939_2berlin21051922-24hmix_vep_sarscov2_parsed.txt"
-
-# vep_file <- "/mnt/bimsb_local/covidCG_data/covidCG_NTmatchingAA_t07_parsed.txt"
-
-
-
-# works
-# doesnt work
-# snv_file <- "/mnt/bimsb_local/pigx_sarscov2_ww/210531_wastewaterARTICEW109_pigxsarscov2ww_default/output/variants/WW_210427_22-24h_snv.csv"
-#snv_file <- "/mnt/beast/pathogenomics/pigx_ww/example_report_complete/output/variants/WW_210219_KW1_snv.csv"
-
-# snv_file <- "/mnt/beast/pathogenomics/vpipe/akalinlab_pathogenomics/misc_src/pigx_sarscov2_ww/tests/output/variants/Test2_snv.csv"
-
-# snv_file <- "/mnt/beast/pathogenomics/vpipe/akalinlab_pathogenomics/misc_src/pigx_sarscov2_ww/tests/output/variants/Test_empty_vep_snv.csv"
 
 # snv_file <- "/mnt/beast/pathogenomics/pigx_ww/210902_ww_berlin_febjune_pub_fastp/output/variants/WW_210225_Berlin_KW1_22-24_snv.csv"
 
-### DEBUGGING DECONVOLUTION ###
+#### NY iSeq data
+# vep_file <- "/mnt/beast/pathogenomics/vpipe/akalinlab_pathogenomics/misc_src/pigx_sarscov2_ww/tests/output/variants/Test2_vep_sarscov2_parsed.txt"
+
+# snv_file <- "/mnt/beast/pathogenomics/pigx_ww/210902_ww_berlin_febjune_pub_fastp/output/variants/WW_210225_Berlin_KW1_22-24_snv.csv"
+
+#### NY MiSeq data
+# vep_file <- "/mnt/beast/pathogenomics/vpipe/akalinlab_pathogenomics/misc_src/pigx_sarscov2_ww/tests/output/variants/Test_empty_vep_vep_sarscov2_parsed.txt"
+
+# snv_file <- "/mnt/beast/pathogenomics/pigx_ww/210902_ww_berlin_febjune_pub_fastp/output/variants/WW_210225_Berlin_KW1_22-24_snv.csv"
+
+
+### example working deconvolution-MDC data, Sep 2021 ###
 vep_file <- "trimmed_210916-20-22h-mix_S1_vep_sarscov2_parsed.txt"
 snv_file <- "trimmed_210916-20-22h-mix_S1_snv.csv"
 
-# vep_file <- "/mnt/beast/pathogenomics/pigx_ww/210902_ww_berlin_febjune_pub_fastp/output/variants/WW_210325_Berlin_KW2_morning_vep_sarscov2_parsed.txt"
-# snv_file <- "/mnt/beast/pathogenomics/pigx_ww/210902_ww_berlin_febjune_pub_fastp/output/variants/WW_210325_Berlin_KW2_morning_snv.csv"
-
-# vep_file <- "/mnt/beast/pathogenomics/pigx_ww/210902_ww_berlin_febjune_pub_fastp/output/variants/merged_939_3berlin21052720-22hmix_vep_sarscov2_parsed.txt"
-# snv_file <- "/mnt/beast/pathogenomics/pigx_ww/210902_ww_berlin_febjune_pub_fastp/output/variants/merged_939_3berlin21052720-22hmix_snv.csv"
-
-
-# snv_file <- "/mnt/beast/pathogenomics/pigx_ww/210902_ww_berlin_febjune_pub_fastp/output/variants/merged_939_4berlin21052722-24hmix_snv.csv"
 ``` 
 
 This report shows the variant analysis of SARS-CoV-2 from wastewater samples. Mutations are 
@@ -329,9 +311,6 @@ variants. Table 2 shows all other mutations without any match. The columns are d
 5. reported allele frequency
 6. read coverage of that particular mutation
 
-```{r, message=F, warning=F, echo = FALSE, results = 'asis'}
-cat("\n Table 1: SNVs from sample matching signature mutations")
-```
 ```{r sig_table, message=F, warning=F, echo = FALSE, results = 'asis'}
 # Display the filtered signature mutations and the variants accordingly in scrollable tables
 
@@ -349,9 +328,6 @@ DT::datatable(SignatureTable,
                          scroller = TRUE,
                          dom = 'Bfrtip'),
               filter = "bottom")
-```
-```{r nonsig_table, message=F, warning=F, echo = FALSE, results = 'asis'}
-cat("\n Table 2: SNVs from sample not matching any signature mutations")
 ```
 ```{r non_sig_table, message=F, warning=F, echo = FALSE, results = 'asis'}
 # Display the filtered signature mutations and the variants accordingly in scrollable tables
@@ -546,149 +522,4 @@ ggplot(data = df, aes(name,value,
                          breaks = df$name,
                          labels = df$name) +
      theme_gray(base_family = font_family)
-```
-
-# Methods
-## LoFreq filter
-| LoFreq is used with default filter settings:       |                   |
-|:---------------------------------------------------|:------------------|
-| minimum coverage                                   | 10                |
-| Strand-Bias Multiple Testing Correction, fdr corr. | pvalue > 0.001000 |
-| Minimum SNV Quality (Phred)                        | 63                |
-| Minimum Indel Quality (Phred)                      | 47                |
-
-## VEP settings  
-* Species: SARS-CoV-2  
-* Assembly: ASM985889v3  
-
-|                                                   |        |
-|:--------------------------------------------------|:-------|
-| Matched Annotations from NCBI and EMBL-EBI (MANE) | yes    |
-| Restrict results by severity of consequence       | no     |
-| upstream/downstream distance                      | 5000bp |
-
-
-# Raw data 
-
-```{r, include = F}
-snvs <- readLines(snv_file) %>% paste0(collapse="\n") %>% base64_urlencode()
-```
-Called SNVs:  
-[Download SNVs.csv](`r sprintf('data:text/csv;base64,%s', snvs)`)
-```{r, include = F}
-# can possible be fused together with above. But rigth now it's safer like this. 
-# write.csv2(vepfile.df, "./file.csv") # not sure about the funct of the dataframe here, but it works so I leave it for now
-vep <- readLines(vep_file) %>% paste0(collapse="\n") %>% base64_urlencode()
-```
-Variant effect prediction (*Ensemble VEP output*):  
-[Download VEP_out.csv](`r sprintf('data:text/csv;base64,%s', vep)`)
-
-```{r csv_output_variant_plot, include = F, eval = executeDeconvolution}
-# get all possible variants
-all_variants <- colnames (msig_stable[, -which( names(msig_stable) %in% "muts" )])
-output_variants <- file.path("data_variant_plot.csv")
-
-# 1. write dataframe with this information here
-output_variant_plot <- data.frame (samplename = character(),
-                                   dates = character(),
-                                   location_name = character(),
-                                   coordinates_lat = character(),
-                                   coordinates_long = character())
-# add columns for all possible variants to the dataframe
-for (variant in all_variants) {
-  output_variant_plot[,variant] <- numeric()
-}
-meta_data <- c (samplename = sample_name,
-                dates = date,
-                location_name = location_name,
-                coordinates_lat = coordinates_lat,
-                coordinates_long = coordinates_long)
-
-output_variant_plot <- bind_rows(output_variant_plot, meta_data)
-
-# get rownumber for current sample
-sample_row <- which(grepl(sample_name, output_variant_plot$samplename))
-
-# write mutation frequency values to df
-for (i in all_variants){
-  if (i %in% df$name){
-    # check if variant already has a column
-    if (i %in% colnames(output_variant_plot)) {
-        output_variant_plot[sample_row,][i] <- df$value[df$name == i]
-        output_variant_plot <- output_variant_plot %>% mutate(others = 1-rowSums(across(all_of(variants))))
-}
-  }
-}
-
-# 2. check if file exists already
-if (file.exists (output_variants)) {
-  previous_df <- read.table (output_variants, 
-                             sep = "\t", header = TRUE, colClasses = "character", check.names = FALSE)
-  # convert numeric values to character
-  output_variant_plot <- as.data.frame(lapply(output_variant_plot, as.character), check.names = FALSE)
-  # merge with adding cols and rows
-  output_variant_plot <- full_join(previous_df, output_variant_plot, by = colnames(previous_df), copy = TRUE)
-}
-
-# 3. write to output file
-   write.table(output_variant_plot, output_variants, sep = "\t",
-            na = "NA", row.names = FALSE, quote = FALSE)
-
-
-```
-```{r csv_output_mutation_plot, message = FALSE, warning = FALSE, include = FALSE}
-# # prepare processed mutation values to output them as a csv which will be used for the plots in index.rmd
-# # those outputs are not offically declared as outputs which can lead to issues - that part should be handled by a seperate
-# # file (and maybe rule)
-# # get all possible mutations
-# 
-# # one aa mutation can have different codon mutations reported with different freqs- for the summary table they have to be summed up
-# # (process see line 1872 of documentation)
-# complete.df <- complete.df  %>%
-#   group_by(across(c(-freq,-gene_mut, -gene_mut_collapsed, AA_mut))) %>%
-#   summarise(freq = sum(as.numeric(freq)), gene_mut = paste(gene_mut, collapse = ",")) %>%
-#   ungroup() %>%
-#   rowwise() %>%
-#   mutate(AA_mut = replace(AA_mut,is.na(AA_mut), '\\:\\'))
-# 
-# # report the gene, translated_AA_mut and NT mut accordingly
-# # easier to spot translation inconsitentcies that way
-# #complete.df <- complete.df %>% mutate(pasteries = paste(complete.df$AA_mut[!is.na(complete.df$AA_mut)],complete.df$gene_mut,sep = "::"))
-# all_mutations <- paste(complete.df$AA_mut[!is.na(complete.df$AA_mut)],complete.df$gene_mut,sep = "::")
-# output_mutations <- file.path(mutation_output_dir, paste0(sample_name, "_mutations.csv"))
-# 
-# # 1. write dataframe with this information here
-# output_mutation_frame <- data.frame (samplename = character(),
-#                                    dates = character(),
-#                                    location_name = character(),
-#                                    coordinates_lat = character(),
-#                                    coordinates_long = character())
-# # add columns for all possible mutations to the dataframe
-# for (mutation in all_mutations) {
-#   output_mutation_frame[,mutation] <- numeric()
-# }
-# meta_data <- c (samplename = sample_name,
-#                 dates = date,
-#                 location_name = location_name,
-#                 coordinates_lat = coordinates_lat,
-#                 coordinates_long = coordinates_long)
-# 
-# output_mutation_frame <- bind_rows(output_mutation_frame, meta_data)
-# 
-# # write mutation frequency values to df
-# for (i in all_mutations){
-#   i_AA <- str_split(i,"::")[[1]][1]
-#   if (i_AA %in% complete.df$AA_mut ){ # split gene name to match with AA mut
-#     # check if variant already has a column
-#     if ( i %in% colnames(output_mutation_frame)) {
-#         output_mutation_frame[,i] <- complete.df$freq[ which(complete.df$AA_mut == i_AA)]
-# }}}
-# colnames( output_mutation_frame ) <- as.character( colnames( output_mutation_frame ))
-# output_mutation_frame <- output_mutation_frame %>% dplyr::select( -contains("NA" , ignore.case = FALSE))
-# # convert numeric values to character
-# output_mutation_frame <- as.data.frame( lapply( output_mutation_frame, as.character ), check.names = FALSE)
-# 
-# # 3. write to output file
-# write.table(output_mutation_frame, output_mutations, sep = "\t",
-#         row.names = FALSE, quote = FALSE)
 ```
