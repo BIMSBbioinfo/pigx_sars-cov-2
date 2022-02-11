@@ -88,7 +88,7 @@ AC_ARG_VAR(PYTHONPATH, The search path for all Python packages)
 
 AC_SUBST([capture_environment])
 AC_SUBST_FILE(PIPELINE_META)
-PIPELINE_META=$srcdir/META
+PIPELINE_META=./META
 AC_CONFIG_FILES([Makefile META etc/settings.yaml])
 AC_CONFIG_FILES([tests/tests/vep.sh], [chmod +x tests/tests/vep.sh])
 AC_CONFIG_FILES([test.sh], [chmod +x test.sh])
