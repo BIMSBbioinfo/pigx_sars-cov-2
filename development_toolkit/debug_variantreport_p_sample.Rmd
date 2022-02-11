@@ -76,6 +76,7 @@ mutation_sheet <- "mutation_sheet_220209_t07.csv"
 # only mutations on spike RBD
 # mutation_sheet <- "Muts_RBDOnly_220207_wholegenomeReferene_t02.csv"
 
+### CHANGE PATHES HERE e.g. when using a mount
 
 #### amedes-data real
 ## alignemnts at: /local/Projects/AAkalin_pathogenomics/results/amedes_data/output/mapped_reads
