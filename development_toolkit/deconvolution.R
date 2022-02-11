@@ -28,8 +28,8 @@ createSigMatrix <- function ( mutations.vector, mutation_sheet ) {
 }
 
 simulateWT <- function ( mutations.vector, bulk_freq.vector, simple_sigmat.dataframe, coverage.vector) {
-  # for the deconvolution to work we need the "wild type" frequencies too. The matrix from above got mirrored, 
-  # wild type mutations are simulated the following: e.g. T210I (mutation) -> T210T ("wild type")
+  #' for the deconvolution to work we need the "wild type" frequencies too. The matrix from above got mirrored, 
+  #' wild type mutations are simulated the following: e.g. T210I (mutation) -> T210T ("wild type")
   
   # 1. make "WT mutations" 
   muts_wt <- lapply(mutations.vector,function(x) str_replace(x,regex(".$"), 
@@ -69,7 +69,8 @@ simulateWT <- function ( mutations.vector, bulk_freq.vector, simple_sigmat.dataf
 # a vector with the information about which of the columns were merged. 
 # deduplicate dataframe
 dedupeDF <- function( msig_stable ){
-  # transpose and add mutations as first column
+  #' removed duplicated columns from the signature matrix 
+    # transpose and add mutations as first column
   msig_stable_transposed <- as.data.frame( cbind( variants = colnames(msig_stable), t( msig_stable ) ))
   # mark duplicated columns, forward and backwards to get ALL the duplicates, otherwise the first one would missing
   dupes_variants <- duplicated ( msig_stable_transposed[,-which(names(msig_stable_transposed) %in% 'variants')], 
@@ -80,40 +81,40 @@ dedupeDF <- function( msig_stable ){
 }
 
 dedupeVariants <- function (variant, variants.df, dedup_variants.df) {
-        # get variant group per mutation pattern
-        # duped_variants <- grep (variant, variants.df$variants)
-        duped_variants <- c()
-        row_number_variant <- which( grepl( variant, variants.df$variants ))
-        for (row in 1:nrow( variants.df )) { 
-            if (all ( variants.df[row_number_variant,-1] == variants.df[row,-1] )) { # TODO: what are those magic numbers?
-              duped_variants <- c(duped_variants, variants.df[row,"variants"])
-            }
+    #' to get variant group per mutation pattern
+    # duped_variants <- grep (variant, variants.df$variants)
+    duped_variants <- c()
+    row_number_variant <- which( grepl( variant, variants.df$variants ))
+    for (row in 1:nrow( variants.df )) { 
+        if (all ( variants.df[row_number_variant,-1] == variants.df[row,-1] )) { # TODO: what are those magic numbers?
+          duped_variants <- c(duped_variants, variants.df[row,"variants"])
         }
-       # grouped_variants <- variants.df$variants[duped_variants]
-        groupName_variants <- paste( duped_variants, collapse = "," )
-        for ( row in dedup_variants.df$variants ){
-          if ( grepl( row,groupName_variants )) {
-            
-            # if variants are getting pooled with WT they are just WT and nothing else and also not "others"
-            if (str_detect(groupName_variants, "WT")){
-              rownames ( dedup_variants.df )[rownames(dedup_variants.df) == row] <- "WT"
-              variants_to_drop <- duped_variants[!grepl("WT",duped_variants)]
-            } else{
-              rownames ( dedup_variants.df )[rownames(dedup_variants.df) == row] <- groupName_variants
-              variants_to_drop <- NA
-              # TODO you can stop after this ( I think)
-            }
+    }
+   # grouped_variants <- variants.df$variants[duped_variants]
+    groupName_variants <- paste( duped_variants, collapse = "," )
+    for ( row in dedup_variants.df$variants ){
+      if ( grepl( row,groupName_variants )) {
+        
+        # if variants are getting pooled with WT they are just WT and nothing else and also not "others"
+        if (str_detect(groupName_variants, "WT")){
+          rownames ( dedup_variants.df )[rownames(dedup_variants.df) == row] <- "WT"
+          variants_to_drop <- duped_variants[!grepl("WT",duped_variants)]
+        } else{
+          rownames ( dedup_variants.df )[rownames(dedup_variants.df) == row] <- groupName_variants
+          variants_to_drop <- NA
+          # TODO you can stop after this ( I think)
         }
-        }
-        # clean the vector to know which variants has to be add with value 0 after deconvolution
-        variants_to_drop <- unique(variants_to_drop)[!is.na(variants_to_drop)]
-        return ( list(dedup_variants.df, variants_to_drop) )
+    }
+    }
+    # clean the vector to know which variants has to be add with value 0 after deconvolution
+    variants_to_drop <- unique(variants_to_drop)[!is.na(variants_to_drop)]
+    return ( list(dedup_variants.df, variants_to_drop) )
 }  
 
 deconv <- function (bulk,sig){
   #' This function performs the deconvolution using a signature matrix for the mutations found in the sample 
   #' and bulk frequency values derived by the SNV caller
-  #' it was build by Altuna
+  #' it was written by Altuna
     
   rlm_model = suppressWarnings(MASS::rlm(sig,bulk, maxit = 100, method = "M"))
       
@@ -129,20 +130,10 @@ deconv <- function (bulk,sig){
   as.vector(rlm_coefficients)
 }
 
-deconv_nnls <- function (bulk,sig){
-  #' This function performs the deconvolution using a signature matrix for the mutations found in the sample 
-  #' and bulk frequency values derived by the SNV caller
-  #' it was build by Altuna
-  
-  nnls_model = suppressWarnings(nnls::nnls(sig,bulk))
-    
-  return(nnls_model$x)
-}
 
 deconv_weighted <- function (bulk,sig, weight){
-  #' This function performs the deconvolution using a signature matrix for the mutations found in the sample 
-  #' and bulk frequency values derived by the SNV caller
-  #' it was build by Altuna
+  #' This function performs the deconvolution using a weighted signature matrix for the mutations found in the sample 
+  #' and bulk frequency values derived by the SNV caller. 
     
   rlm_model = suppressWarnings(MASS::rlm(sig,bulk, weights = weight, maxit = 100, wt.method = "case", method = "M"
   ))
@@ -157,27 +148,6 @@ deconv_weighted <- function (bulk,sig, weight){
   rlm_coefficients = rlm_coefficients / sumOfCof  #normalize so coefficients add to 1
   
   as.vector(rlm_coefficients)
-}
-
-
-deconv_weighted_debug_lm <- function (bulk,sig, weight){
-  #' This function performs the deconvolution using a signature matrix for the mutations found in the sample 
-  #' and bulk frequency values derived by the SNV caller
-  #' it was build by Altuna
-    
-  rlm_model = suppressWarnings(MASS::rlm(sig,bulk, weights = weight, maxit = 100, wt.method = "case", method = "M", psi = psi.hampel
-  ))
-      
-      
-  rlm_coefficients = rlm_model$coefficients
-  
-  rlm_coefficients = ifelse(rlm_coefficients < 0, 0, rlm_coefficients)
-  
-  sumOfCof = sum(rlm_coefficients)
-  
-  rlm_coefficients = rlm_coefficients / sumOfCof  #normalize so coefficients add to 1
-  
-  return(list(as.vector(rlm_coefficients), rlm_model$fitted.values))
 }
 
 findPartialRsquared <- function(observed, predicted, ref, vec) {
