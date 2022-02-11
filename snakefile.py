@@ -349,6 +349,26 @@ def fastq_ext(fastq_file):
     return ext
 
 # fixme: single-end version needed
+# Note: fastqc does not process reads in pairs. files are processed as single units.
+rule fastqc_raw_se:
+    input: trim_reads_input
+    output:
+        # all outputs are provided to ensure atomicity 
+        rep = os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.html'),
+        zip = os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.zip'),
+    log: os.path.join(LOG_DIR, 'fastqc_{sample}_raw.log')
+    params:
+        output_dir = os.path.join(FASTQC_DIR, '{sample}')
+    run:
+        # renaming the ".fastq.gz" suffix to "_fastqc.html" 
+        tmp_output = os.path.basename(input[0]).replace(fastq_ext(input[0]), '_fastqc.html')
+        tmp_zip = os.path.basename(input[0]).replace(fastq_ext(input[0]), '_fastqc.zip')
+        shell("""{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1;
+                if [[ {tmp_output} != *{wildcards.sample}* ]]; then
+                    mv {params.output_dir}/{tmp_output} {output.rep} &&\
+                    mv {params.output_dir}/{tmp_zip} {output.zip}
+                fi """)
+ 
 # fixme: or discard completely and change multiqc to use fastp --> fastp rule would have to be adjusted to create reasonable outputs
 rule fastqc_raw:
     input: trim_reads_input
@@ -375,6 +395,16 @@ rule fastqc_raw:
                 fi """)
  
 # TODO: can probably be done by using map_input, no seperate functions neccessary?        
+rule fastqc_trimmed_se:
+    input: os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed.fastq.gz")
+    output:
+        html = os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.html'),
+        zip = os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.zip')
+    log: os.path.join(LOG_DIR, 'fastqc_{sample}_trimmed.log')
+    params:
+        output_dir = os.path.join(FASTQC_DIR, '{sample}')
+    shell: "{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1"
+
 rule fastqc_trimmed_pe:
     input: os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R{read_num}.fastq.gz")
     output:
