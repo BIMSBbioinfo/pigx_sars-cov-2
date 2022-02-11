@@ -654,19 +654,18 @@ rule create_mutations_summary:
     shell: """
         {RSCRIPT_EXEC} {input.script} "{MUTATIONS_DIR}" {output} > {log} 2>&1
         """
-# fixme: script "overview_QC_table.R" should be changed to dynamically determine if there are two read files or not 
+
+# TODO integrate the output of fastp.json to get the number of raw and trimmed reads
 rule create_overviewQC_table: 
     input:
         script = os.path.join(SCRIPTS_DIR, "overview_QC_table.R"),
-        # only run after having read trimming and coverage analysis done for all samples
-        trimmed_reads = expand(os.path.join(TRIMMED_READS_DIR, '{sample}_trimmed_R{read_num}.fastq.gz'), sample=SAMPLES, read_num=[1, 2]),
         cov_summary = expand(os.path.join(COVERAGE_DIR, '{sample}_merged_covs.csv'), sample=SAMPLES)
     output:  os.path.join(OUTPUT_DIR, 'overview_QC.csv')
     log: os.path.join(LOG_DIR, "create_overviewQC_table.log")
     shell: """
         {RSCRIPT_EXEC} {input.script} {OUTPUT_DIR} {SAMPLE_SHEET_CSV} {READS_DIR} {output} > {log} 2>&1
     """
-    
+
 rule render_index:
     input:
       script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
