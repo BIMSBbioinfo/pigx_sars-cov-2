@@ -22,4 +22,14 @@ then
     exit 1
 fi
 
+# Perform a full single end run
+
+${buildir}/pigx-sars-cov2-ww --printshellcmds -s ${srcdir}/tests/settings_se.yaml ${srcdir}/tests/sample_sheet_se.csv
+
+
+if ! test -f "${srcdir}/tests/output/report/index.html"
+then
+    echo "ERROR: Could not find report for single-end run."
+    exit 1
+fi
 
