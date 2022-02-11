@@ -64,23 +64,50 @@ location_name <- "berlin"
 coordinates_lat <- "52.5621572404487"
 coordinates_long <- "13.4155862239246"
 deconvolution_functions <- "deconvolution.R"
+
+### CHANGE HERE when using a different mutation sheet
+
+# mutation sheet containing alpha, beta, gamma, delta, BA1, BA2
 mutation_sheet <- "mutation_sheet_220209_t07.csv"
+
+# simulation experiment: alpha, gamma, delta, BA1, BA2, mu, lambda 
+# mutation_sheet <- "mutation_sheet_simulation_NT_t07_mu_lambda.csv" 
+
+# only mutations on spike RBD
+# mutation_sheet <- "Muts_RBDOnly_220207_wholegenomeReferene_t02.csv"
+
+
+#### amedes-data real
+## alignemnts at: /local/Projects/AAkalin_pathogenomics/results/amedes_data/output/mapped_reads
+## example samples: 12200099 (should show 100% omicron)
+
+# vep_file <- "/local/Projects/AAkalin_pathogenomics/results/220210_simulated_amedes_se/output/variants/12200099_vep_sarscov2_parsed.txt"
+
+# snv_file <- "/local/Projects/AAkalin_pathogenomics/results/220210_simulated_amedes_se/output/variants/12200099_snv.csv"
 
 
 #### amedes-data single-end 
-# vep_file <- "/mnt/bimsb_local/pigx_sarscov2_ww/210531_wastewaterARTICEW109_pigxsarscov2ww_default/output/variants/WW_210427_22-24h_vep_sarscov2_parsed.txt"
+## alignemnts at: /local/Projects/AAkalin_pathogenomics/results/220210_simulated_amedes_se/output/mapped_reads
 
-# snv_file <- "/mnt/beast/pathogenomics/pigx_ww/210902_ww_berlin_febjune_pub_fastp/output/variants/WW_210225_Berlin_KW1_22-24_snv.csv"
+# vep_file <- "/local/Projects/AAkalin_pathogenomics/results/220210_simulated_amedes_se/output/variants/amedes_simulated_se_vep_sarscov2_parsed.txt"
+
+# snv_file <- "/local/Projects/AAkalin_pathogenomics/results/220210_simulated_amedes_se/output/variants/amedes_simulated_se_snv.csv"
 
 #### NY iSeq data
-# vep_file <- "/mnt/beast/pathogenomics/vpipe/akalinlab_pathogenomics/misc_src/pigx_sarscov2_ww/tests/output/variants/Test2_vep_sarscov2_parsed.txt"
+## alignmnts at: /local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_iSeq/mapped_reads
+## example sample to investigate: iSeq_RBD_NY23 (good coverage, good results), iSeq_RBD_NY13(near 0 alignment rate)
 
-# snv_file <- "/mnt/beast/pathogenomics/pigx_ww/210902_ww_berlin_febjune_pub_fastp/output/variants/WW_210225_Berlin_KW1_22-24_snv.csv"
+# vep_file <- "/local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_iSeq/variants/iSeq_RBD_NY23_vep_sarscov2_parsed.txt"
+
+# snv_file <- "/local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_iSeq/variants/iSeq_RBD_NY23_snv.csv"
 
 #### NY MiSeq data
-# vep_file <- "/mnt/beast/pathogenomics/vpipe/akalinlab_pathogenomics/misc_src/pigx_sarscov2_ww/tests/output/variants/Test_empty_vep_vep_sarscov2_parsed.txt"
+## alignmnts at: /local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_iSeq/mapped_reads
+## example sample to investigate: NY10_5-26RBDB_H11_S95 (missing delta)
 
-# snv_file <- "/mnt/beast/pathogenomics/pigx_ww/210902_ww_berlin_febjune_pub_fastp/output/variants/WW_210225_Berlin_KW1_22-24_snv.csv"
+# vep_file <- "/local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_MiSeq/variants/NY10_5-26RBDB_H11_S95"
+
+# snv_file <- "/local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_MiSeq/variants/NY10_5-26RBDB_H11_S95_snv.csv"
 
 
 ### example working deconvolution-MDC data, Sep 2021 ###
