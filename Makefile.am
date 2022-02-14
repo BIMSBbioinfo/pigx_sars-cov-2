@@ -34,13 +34,23 @@ dist_doc_DATA = 									\
 
 EXTRA_DIST = \
   META.in \
+	$(wildcard databases/sigmut_db/*) \
   tests/sample_data/Test_vep_sarscov2_parsed.txt \
   tests/sample_data/test_vep_parsing_input.txt \
   tests/sample_sheet.csv \
   tests/settings.yaml \
   tests/sample_data/test_match.df \
   tests/sample_data/test_sig_mutations.df \
-  $(wildcard databases/sigmut_db/*)
+	tests/sample_data/reads/Test0_R1.fastq.gz \
+	tests/sample_data/reads/Test0_R2.fastq.gz \
+	tests/sample_data/reads/Test2_R1.fastq.gz \
+	tests/sample_data/reads/Test2_R2.fastq.gz \
+	tests/sample_data/reads/Test5_R1.fastq.gz \
+	tests/sample_data/reads/Test5_R2.fastq.gz \
+	tests/sample_data/NC_045512.2.fasta \
+	tests/sample_data/Covid_CG_NTmutation_t07.bed \
+  tests/sample_data/mutation_sheet_211006_covidCG_NT_location.csv
+
 
 AM_TESTS_ENVIRONMENT = srcdir="$(abs_top_srcdir)" builddir="$(abs_top_builddir)" PIGX_UNINSTALLED=1 PIGX_UGLY=1
 
