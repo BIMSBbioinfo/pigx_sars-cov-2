@@ -1,5 +1,5 @@
 ---
-title: "debug variant_report"
+title: "debug variant_report weighted"
 date: 21.04.21
 output:
 rmarkdown::html_document:
@@ -82,17 +82,17 @@ mutation_sheet <- "mutation_sheet_220209_t07.csv"
 ## alignemnts at: /local/Projects/AAkalin_pathogenomics/results/amedes_data/output/mapped_reads
 ## example samples: 12200099 (should show 100% omicron)
 
-# vep_file <- "/local/Projects/AAkalin_pathogenomics/results/220210_simulated_amedes_se/output/variants/12200099_vep_sarscov2_parsed.txt"
-
-# snv_file <- "/local/Projects/AAkalin_pathogenomics/results/220210_simulated_amedes_se/output/variants/12200099_snv.csv"
+# vep_file <- "12200099_vep_sarscov2_parsed.txt"
+# 
+# snv_file <- "12200099_snv.csv"
 
 
 #### amedes-data single-end 
 ## alignemnts at: /local/Projects/AAkalin_pathogenomics/results/220210_simulated_amedes_se/output/mapped_reads
 
-# vep_file <- "/local/Projects/AAkalin_pathogenomics/results/220210_simulated_amedes_se/output/variants/amedes_simulated_se_vep_sarscov2_parsed.txt"
-
-# snv_file <- "/local/Projects/AAkalin_pathogenomics/results/220210_simulated_amedes_se/output/variants/amedes_simulated_se_snv.csv"
+# vep_file <- "amedes_simulated_se_vep_sarscov2_parsed.txt"
+# 
+# snv_file <- "amedes_simulated_se_snv.csv"
 
 #### NY iSeq data
 ## alignmnts at: /local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_iSeq/mapped_reads
@@ -106,14 +106,15 @@ mutation_sheet <- "mutation_sheet_220209_t07.csv"
 ## alignmnts at: /local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_iSeq/mapped_reads
 ## example sample to investigate: NY10_5-26RBDB_H11_S95 (missing delta)
 
-# vep_file <- "/local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_MiSeq/variants/NY10_5-26RBDB_H11_S95"
+vep_file <- "NY10_5-26RBDB_H11_S95_vep_sarscov2_parsed.txt"
 
-# snv_file <- "/local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_MiSeq/variants/NY10_5-26RBDB_H11_S95_snv.csv"
+snv_file <- "NY10_5-26RBDB_H11_S95_snv.csv"
 
 
 ### example working deconvolution-MDC data, Sep 2021 ###
-vep_file <- "trimmed_210916-20-22h-mix_S1_vep_sarscov2_parsed.txt"
-snv_file <- "trimmed_210916-20-22h-mix_S1_snv.csv"
+# vep_file <- "trimmed_210916-20-22h-mix_S1_vep_sarscov2_parsed.txt"
+# snv_file <- "trimmed_210916-20-22h-mix_S1_snv.csv"
+
 
 ``` 
 
@@ -375,7 +376,7 @@ DT::datatable(NoSignatureTable,
               filter = "bottom")
 ```
 
-# Deconvolution
+# Deconvolution - weighted
 
 Deconvolution is done by using robust regression. It relies on signature mutations of each variant. It aims 
 to predict the individual contributions of the variants of concern to the observed mutation frequencies in the bulk 
