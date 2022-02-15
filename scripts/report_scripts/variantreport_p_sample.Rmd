@@ -344,6 +344,7 @@ for (variant in rownames( msig_stable_transposed[-(rownames(msig_stable_transpos
   dropped_variants <- c(dropped_variants, grouping_res[[2]])
 }
 # transpose the data frame back to column format for additional processing
+# TODO the report can break here, in case no mutations where found 
 if ( length(msig_dedupe_transposed) >= 1){
     # the 1 get's rid of the additional first row which is an transposing artifact
     msig_simple_unique <- as.data.frame(t(msig_dedupe_transposed[,-1])) %>%
