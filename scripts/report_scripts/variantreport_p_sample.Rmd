@@ -354,7 +354,7 @@ if ( length(msig_dedupe_transposed) >= 1){
 dropped_variants <- unique(dropped_variants)
 dropped_variants <- dropped_variants[!is.na(dropped_variants)]
 ```
-```{r calculate_sigmat_weigths, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
+```{r calculate_sigmat_weigths, message=F, warning=F, include = FALSE, eval = FALSE}
 
 deconv_lineages <- colnames(msig_simple_unique[,-which( names(msig_simple_unique) %in% c("muts", "WT") )])
 
@@ -384,10 +384,17 @@ for (lineage in deconv_lineages){
 
 # construct additional WT mutations that are not weighted
 
-msig_stable_all <- simulateWT( mutations.vector, bulk_freq.vector, 
-                               msig_simple_unique_weighted[,-which(names(msig_simple_unique_weighted) == "muts")],
-                                match.df$cov)
-msig_stable_unique <- msig_stable_all[[1]]
+if ( exists(msig_simple_unique_weighted)){
+    msig_stable_all <- simulateWT( mutations.vector, bulk_freq.vector, 
+                                   msig_simple_unique_weighted[,-which(names(msig_simple_unique_weighted) == "muts")],
+                                    match.df$cov)
+    msig_stable_unique <- msig_stable_all[[1]]
+} else {
+    msig_stable_all <- simulateWT( mutations.vector, bulk_freq.vector, 
+                                   msig_simple_unique[,-which(names(msig_simple_unique) == "muts")],
+                                    match.df$cov)
+    msig_stable_unique <- msig_stable_all[[1]]
+}
 
 ```
 
