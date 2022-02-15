@@ -76,7 +76,6 @@ def tool(name):
     cmd = config['tools'][name]['executable']
     return cmd + " " + toolArgs(name)
 
-BOWTIE_EXEC          = tool("bowtie2")
 FASTP_EXEC           = tool("fastp")
 FASTQC_EXEC          = tool("fastqc")
 GUNZIP_EXEC          = tool("gunzip")
