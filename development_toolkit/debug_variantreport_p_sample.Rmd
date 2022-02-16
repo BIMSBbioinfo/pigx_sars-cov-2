@@ -68,13 +68,13 @@ deconvolution_functions <- "deconvolution.R"
 ### CHANGE HERE when using a different mutation sheet
 
 # mutation sheet containing alpha, beta, gamma, delta, BA1, BA2
-mutation_sheet <- "mutation_sheet_220209_t07.csv"
+# mutation_sheet <- "mutation_sheet_220209_t07.csv"
 
 # simulation experiment: alpha, gamma, delta, BA1, BA2, mu, lambda 
 # mutation_sheet <- "mutation_sheet_simulation_NT_t07_mu_lambda.csv" 
 
 # only mutations on spike RBD
-# mutation_sheet <- "Muts_RBDOnly_220207_wholegenomeReferene_t02.csv"
+mutation_sheet <- "Muts_RBDOnly_220207_wholegenomeReferene_t02.csv"
 
 ### CHANGE PATHES HERE e.g. when using a mount
 
@@ -96,19 +96,19 @@ mutation_sheet <- "mutation_sheet_220209_t07.csv"
 
 #### NY iSeq data
 ## alignmnts at: /local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_iSeq/mapped_reads
-## example sample to investigate: iSeq_RBD_NY23 (good coverage, good results), iSeq_RBD_NY13(near 0 alignment rate)
+## example sample to investigate: iSeq_RBD_NY13
 
-# vep_file <- "/local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_iSeq/variants/iSeq_RBD_NY23_vep_sarscov2_parsed.txt"
+vep_file <- "iSeq_RBD_NY13_vep_sarscov2_parsed.txt"
 
-# snv_file <- "/local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_iSeq/variants/iSeq_RBD_NY23_snv.csv"
+snv_file <- "iSeq_RBD_NY13_snv.csv"
 
 #### NY MiSeq data
 ## alignmnts at: /local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_iSeq/mapped_reads
 ## example sample to investigate: NY10_5-26RBDB_H11_S95 (missing delta)
 
-vep_file <- "NY10_5-26RBDB_H11_S95_vep_sarscov2_parsed.txt"
-
-snv_file <- "NY10_5-26RBDB_H11_S95_snv.csv"
+# vep_file <- "NY10_5-26RBDB_H11_S95_vep_sarscov2_parsed.txt"
+# 
+# snv_file <- "NY10_5-26RBDB_H11_S95_snv.csv"
 
 
 ### example working deconvolution-MDC data, Sep 2021 ###
@@ -376,7 +376,7 @@ DT::datatable(NoSignatureTable,
               filter = "bottom")
 ```
 
-# Deconvolution - weighted
+# Deconvolution - weighted new
 
 Deconvolution is done by using robust regression. It relies on signature mutations of each variant. It aims 
 to predict the individual contributions of the variants of concern to the observed mutation frequencies in the bulk 
@@ -426,15 +426,17 @@ dropped_variants <- unique(dropped_variants)
 dropped_variants <- dropped_variants[!is.na(dropped_variants)]
 ```
 ```{r calculate_sigmat_weigths, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
-deconv_lineages <- colnames(msig_simple_unique[,-which( names(msig_simple_unique) %in% c("muts", "WT") )])
+deconv_lineages <- colnames(msig_simple_unique[,-which( names(msig_simple_unique) %in% "muts")])
 # create list of proportion values that will be used as weigths
 sigmut_proportion_weights <- list()
 for (lineage in deconv_lineages){
-    if ( grepl(",", lineage)){
+    if ( lineage == "WT"){
+        value <- nrow(msig_simple_unique) / nrow(sigmuts_deduped)
+    } else if ( grepl(",", lineage)){
         group <- unlist(str_split(lineage, ","))
         avrg <- sum(sig_mutations.df$name %in% group) / length(group)
         value <- sum(msig_simple_unique[lineage]) / avrg
-    } else{
+    } else {
         value <- sum(msig_simple_unique[lineage]) / sum(sig_mutations.df$name == lineage)
     }
     sigmut_proportion_weights[lineage] <- value
@@ -444,14 +446,18 @@ sigmut_proportion_weights <- as_tibble(sigmut_proportion_weights)
 # fixme: there should be a way to do this vectorized
 msig_simple_unique_weighted <- msig_simple_unique
 for (lineage in deconv_lineages){
-    msig_simple_unique_weighted[lineage] <- msig_simple_unique_weighted[lineage] / as.numeric(sigmut_proportion_weights[lineage])
+    weight <- msig_simple_unique_weighted[lineage] / as.numeric(sigmut_proportion_weights[lineage])
+    msig_simple_unique_weighted[lineage] <- as.numeric( ifelse( is.na(weight),0, unlist(weight) ))
+    
 }
 ```
 ```{r simulating_WT_mutations, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
 # construct additional WT mutations that are not weighted
+wt_weight <- as.numeric(sigmut_proportion_weights["WT"])
 msig_stable_all <- simulateWT( mutations.vector, bulk_freq.vector,
                                msig_simple_unique_weighted[,-which(names(msig_simple_unique_weighted) == "muts")],
-                                match.df$cov)
+                                match.df$cov,
+                                wt_weight)
 msig_stable_unique <- msig_stable_all[[1]]
 ```
 

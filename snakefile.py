@@ -76,6 +76,7 @@ def tool(name):
     cmd = config['tools'][name]['executable']
     return cmd + " " + toolArgs(name)
 
+BWA_EXEC             = tool("bwa")
 FASTP_EXEC           = tool("fastp")
 FASTQC_EXEC          = tool("fastqc")
 GUNZIP_EXEC          = tool("gunzip")
@@ -169,18 +170,46 @@ def trim_reads_input(args):
   sample = args[0]
   return [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
 
-# TODO check if it is still correct to have the fastqc outputs here too. Coul be that you don't need them here
 def map_input(args):
     sample = args[0]
     reads_files = [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
     if len(reads_files) > 1:
         return [os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R1.fastq.gz".format(sample=sample)),
-                os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R2.fastq.gz".format(sample=sample)),
-                os.path.join(FASTQC_DIR, "{sample}".format(sample=sample), "{sample}_trimmed_R1_fastqc.html".format(sample=sample)),
-                os.path.join(FASTQC_DIR, "{sample}".format(sample=sample), "{sample}_trimmed_R2_fastqc.html".format(sample=sample))]
+                os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R2.fastq.gz".format(sample=sample))
+                ]
     elif len(reads_files) == 1:
-        return [os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_fastq.gz".format(sample=sample)),
-                os.path.join(FASTQC_DIR,"{sample}".format(sample=sample), "{sample}_trimmed_fastqc.html".format(sample=sampel))]
+        return [os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed.fastq.gz".format(sample=sample))
+                ]
+
+# dynamically define the multiqc input files created by FastQC and fastp
+# TODO add kraken reports per sample
+def multiqc_input(args):
+    sample = args[0]
+    reads_files = [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
+    if len(reads_files) > 1:
+        files = [
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_pe_fastp.html'), sample = sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_pe_fastp.json'), sample = sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_R{read_num}_fastqc.html'), sample=sample, read_num=[1, 2]),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_R{read_num}_fastqc.zip'), sample=sample, read_num=[1, 2]),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.html'), sample=sample, read_num=[1, 2]),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.zip'), sample=sample, read_num=[1, 2]),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip'), sample = sample)
+        ]
+    elif len(reads_files) == 1:
+        files = [
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_se_fastp.html'), sample = sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_se_fastp.json'), sample = sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.html'), sample=sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.zip'), sample=sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.html'), sample=sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.zip'), sample=sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample),
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip'), sample = sample)
+        ]
+    return (list(chain.from_iterable(files)))
+
 
 # WIP - until then use hack that create a single line in the lofreq output 
 def vep_input(args):
@@ -203,9 +232,6 @@ def vep_input(args):
         
 # Trimming in three steps: general by qual and cutoff, get remaining adapters out, get remaining primers out
 
-# TODO: do we still need prinseq? --> maybe check with some lowqual samples what difference it makes 
-# TODO: add all the new tools to variable/param lists and to the manifest
-
 rule get_primer_seqs:
     input: 
         ref = REFERENCE_FASTA,
@@ -216,46 +242,57 @@ rule get_primer_seqs:
             -bed {input.bed} -name > {output} 2>> {log} 3>&2"
         
 # TODO the output suffix should be dynamic depending on the input
-# TODO provide the adapter sequence by settings file, maybe also add option for multiple adapter if needed
 # TODO with the use of fastp the use of fastqc becomes partly reduntant, fastqc should be removed or adjusted
 # TODO it should be possible to add customized parameter
 rule fastp:
     input: trim_reads_input
     output:
         r1 = os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R1.fastq.gz"),
-        r2 = os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R2.fastq.gz") 
+        r2 = os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R2.fastq.gz"),
+        html = os.path.join(FASTQC_DIR, '{sample}', '{sample}_pe_fastp.html'),
+        json = os.path.join(FASTQC_DIR, '{sample}', '{sample}_pe_fastp.json')
+    log: os.path.join(LOG_DIR, 'fastp_{sample}.log')
+    shell: """
+         {FASTP_EXEC} -i {input[0]} -I {input[1]} -o {output.r1} -O {output.r2} --html {output.html} --json {output.json} >> {log}t 2>&1
+     """
+
+rule fastp_se:
+    input: trim_reads_input
+    output:
+        r = os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed.fastq.gz"),
+        html = os.path.join(FASTQC_DIR, '{sample}', '{sample}_se_fastp.html'),
+        json = os.path.join(FASTQC_DIR, '{sample}', '{sample}_se_fastp.json')
     log: os.path.join(LOG_DIR, 'fastp_{sample}.log')
     shell: """ 
-        {FASTP_EXEC} --adapter_sequence=AGATCGGAAGAGCACACGTCTGAACTCCAGTCA --adapter_sequence_r2=AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\
-         -i {input[0]} -I {input[1]} -o {output.r1}\
-          -O {output.r2} >> {log} 2>&1
+        {FASTP_EXEC} -i {input[0]} -o {output.r} --html {output.html} --json {output.json} >> {log}t 2>&1
     """
+# !!! 03/01 Not tested if the report output works like that
 
-rule bowtie2_index:
+rule bwa_index:
     input: REFERENCE_FASTA
     output:
-        ref = os.path.join(INDEX_DIR, os.path.basename(REFERENCE_FASTA)),
-        index1 = expand(os.path.join(INDEX_DIR,'{prefix}.{index}.bt2'), prefix='reference', index=range(1,4)),
-        index2 = expand(os.path.join(INDEX_DIR,'{prefix}.rev.{index}.bt2'), prefix='reference', index=range(1,2))
-    params:
-        index_prefix = 'reference' # TODO: make dynamic based on REFERENCE_FASTA input
-    log: os.path.join(LOG_DIR, 'bowtie2_align_{sample}.log')
-    shell: "{BOWTIE_EXEC}-build -f {input} {params.index_prefix} >> {log} 2>&1" # could be that I need an extra EXECT here
+      ref=os.path.join(INDEX_DIR, os.path.basename(REFERENCE_FASTA)),
+      index=os.path.join(INDEX_DIR, "{}.bwt".format(os.path.basename(REFERENCE_FASTA)))
+    log: os.path.join(LOG_DIR, 'bwa_index.log')
+    shell: """
+        mkdir -p {INDEX_DIR};
+        ln -sf {input} {INDEX_DIR};
+        cd {INDEX_DIR};
+        {BWA_EXEC} index {output.ref} >> {log} 2>&1 
+        """
 
-# TODO: use map_input as input
-
-rule bowtie2_align:
+# TODO: use map_input as input 
+# fixme: single-end version needed
+rule bwa_align:
     input:
-        read1 = os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R1.fastq.gz"),
-        read2 = os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R2.fastq.gz"),
-        index1 = expand(os.path.join(INDEX_DIR,'{prefix}.{index}.bt2'), prefix='reference', index=range(1,4)),
-        index2 = expand(os.path.join(INDEX_DIR,'{prefix}.rev.{index}.bt2'), prefix='reference', index=range(1,2))
-    output:
-        os.path.join(MAPPED_READS_DIR, '{sample}_aligned_tmp.sam')
+        fastq = map_input,
+        ref = os.path.join(INDEX_DIR, "{}".format(os.path.basename(REFERENCE_FASTA))),
+        index = os.path.join(INDEX_DIR, "{}.bwt".format(os.path.basename(REFERENCE_FASTA)))
+    output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_tmp.sam')
     params:
-        index_Id = os.path.join(INDEX_DIR,'{prefix}') # TODO: make dynamic based on REFERENCE_FASTA input
-    log: os.path.join(LOG_DIR, 'bowtie_align_{sample}.log')
-    shell: "{BOWTIE_EXEC} -x {params.index_ID} --very-sensitive -1 {input.read1} -2 {input.read2} -S {output} 2>> {log} 3>&2"
+        threads = 4
+    log: os.path.join(LOG_DIR, 'bwa_align_{sample}.log')
+    shell: "{BWA_EXEC} mem -t {params.threads} {input.ref} {input.fastq} > {output} 2>> {log} 3>&2"
 
 rule samtools_filter_aligned:
     input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_tmp.sam')
@@ -267,8 +304,7 @@ rule samtools_filter_unaligned:
     input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_tmp.sam')
     output: os.path.join(MAPPED_READS_DIR, '{sample}_unaligned.bam')
     log: os.path.join(LOG_DIR, 'samtools_filter_unaligned_{sample}.log')
-    shell: # only inlcude (f) unmapped reads (4)
-        "{SAMTOOLS_EXEC} view -bh -f 4 {input} > {output} 2>> {log} 3>&2"
+    shell: "{SAMTOOLS_EXEC} view -bh -F 2 {input} > {output} 2>> {log} 3>&2"
 
 
 rule samtools_sort_preprimertrim:
@@ -310,6 +346,37 @@ rule samtools_index_postprimertrim:
     log: os.path.join(LOG_DIR, 'samtools_index_{sample}.log')
     shell: "{SAMTOOLS_EXEC} index {input} {output} >> {log} 2>&1"
 
+# function to determine the extension of the input files 
+def fastq_ext(fastq_file):
+    "Function to determine the fastq file extension"
+    root, ext = os.path.splitext(fastq_file)
+    if ext == ".gz":
+        root_root, root_ext = os.path.splitext(root)
+        ext = ''.join([root_ext,ext])
+    return ext
+
+# fixme: single-end version needed
+# Note: fastqc does not process reads in pairs. files are processed as single units.
+rule fastqc_raw_se:
+    input: trim_reads_input
+    output:
+        # all outputs are provided to ensure atomicity 
+        rep = os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.html'),
+        zip = os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.zip'),
+    log: os.path.join(LOG_DIR, 'fastqc_{sample}_raw.log')
+    params:
+        output_dir = os.path.join(FASTQC_DIR, '{sample}')
+    run:
+        # renaming the ".fastq.gz" suffix to "_fastqc.html" 
+        tmp_output = os.path.basename(input[0]).replace(fastq_ext(input[0]), '_fastqc.html')
+        tmp_zip = os.path.basename(input[0]).replace(fastq_ext(input[0]), '_fastqc.zip')
+        shell("""{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1;
+                if [[ {tmp_output} != *{wildcards.sample}* ]]; then
+                    mv {params.output_dir}/{tmp_output} {output.rep} &&\
+                    mv {params.output_dir}/{tmp_zip} {output.zip}
+                fi """)
+ 
+# fixme: or discard completely and change multiqc to use fastp --> fastp rule would have to be adjusted to create reasonable outputs
 rule fastqc_raw:
     input: trim_reads_input
     output:
@@ -322,11 +389,10 @@ rule fastqc_raw:
         output_dir = os.path.join(FASTQC_DIR, '{sample}')
     run:
         # renaming the ".fastq.gz" suffix to "_fastqc.html" 
-        # TODO remove magic numbers, use split()
-        tmp_R1_output = os.path.basename(input[0])[:-9] + '_fastqc.html'
-        tmp_R1_zip = os.path.basename(input[0])[:-9] + '_fastqc.zip'
-        tmp_R2_output = os.path.basename(input[1])[:-9] + '_fastqc.html'
-        tmp_R2_zip = os.path.basename(input[1])[:-9] + '_fastqc.zip'
+        tmp_R1_output = os.path.basename(input[0]).replace(fastq_ext(input[0]), '_fastqc.html')
+        tmp_R1_zip = os.path.basename(input[0]).replace(fastq_ext(input[0]),  '_fastqc.zip')
+        tmp_R2_output = os.path.basename(input[1]).replace(fastq_ext(input[0]),'_fastqc.html')
+        tmp_R2_zip = os.path.basename(input[1]).replace(fastq_ext(input[0]),'_fastqc.zip')
         shell("""{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1;
                 if [[ {tmp_R1_output} != *{wildcards.sample}* ]]; then
                     mv {params.output_dir}/{tmp_R1_output} {output.r1_rep} &&\
@@ -336,10 +402,21 @@ rule fastqc_raw:
                 fi """)
  
 # TODO: can probably be done by using map_input, no seperate functions neccessary?        
+rule fastqc_trimmed_se:
+    input: os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed.fastq.gz")
+    output:
+        html = os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.html'),
+        zip = os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.zip')
+    log: os.path.join(LOG_DIR, 'fastqc_{sample}_trimmed.log')
+    params:
+        output_dir = os.path.join(FASTQC_DIR, '{sample}')
+    shell: "{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1"
+
 rule fastqc_trimmed_pe:
     input: os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R{read_num}.fastq.gz")
     output:
-        os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.html')
+        html = os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.html'),
+        zip = os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.zip')
     log: os.path.join(LOG_DIR, 'fastqc_{sample}_trimmed_R{read_num}.log')
     params:
         output_dir = os.path.join(FASTQC_DIR, '{sample}')
@@ -348,23 +425,21 @@ rule fastqc_trimmed_pe:
 rule fastqc_primer_trimmed:
     input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed_sorted.bam')
     output:
-        os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html')
+        html = os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'),
+        zip = os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip'),
     log: os.path.join(LOG_DIR, 'fastqc_{sample}_aligned_primer-trimmed.log')
     params:
         output_dir = os.path.join(FASTQC_DIR, '{sample}')
     shell: "{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1"
-    
+
+# TODO think about adding a global version to include all samples
 rule multiqc:
-  input:
-    fastqc_raw_output = expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_R{read_num}_fastqc.html'), sample=SAMPLES, read_num=[1, 2]),
-    fastqc_trimmed_output = expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.html'), sample=SAMPLES, read_num=[1, 2]),
-    fastqc_primer_trimmed_output = expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = SAMPLES)
+  input: multiqc_input
   output: os.path.join(MULTIQC_DIR, '{sample}', 'multiqc_report.html')
   params:
-    fastqc_dir = os.path.join(FASTQC_DIR, '{sample}'),
     output_dir = os.path.join(MULTIQC_DIR, '{sample}')
   log: os.path.join(LOG_DIR, 'multiqc_{sample}.log')
-  shell: "{MULTIQC_EXEC} -o {params.output_dir} {params.fastqc_dir} >> {log} 2>&1"
+  shell: "{MULTIQC_EXEC} -f -o {params.output_dir} {input} >> {log} 2>&1"
 
 # WIP create a dummy entry if no variant is found - use this as long as the input-function solution doesn't work
 def no_variant_vep(sample, lofreq_output):
@@ -446,7 +521,7 @@ rule krona_report:
     log: os.path.join(LOG_DIR, 'krona_report_{sample}.log')
     shell: "{IMPORT_TAXONOMY_EXEC} -m 3 -t 5 {input.kraken_output} -tax {input.database} -o {output} >> {log} 2>&1"
 
-
+# TODO: change amplicon naming to mutaiton site bc it's missleading
 rule samtools_bedcov:
     input:
         mutations_bed = MUTATIONS_BED,
@@ -465,7 +540,7 @@ rule samtools_coverage:
     log: os.path.join(LOG_DIR, 'samtools_coverage_{sample}.log')
     shell: "{SAMTOOLS_EXEC} coverage {input.aligned_bam} > {output} 2>> {log} 3>&2"
 
-
+# TODO: change amplicon naming to mutation site bc it's missleading
 rule get_qc_table:
     input:
         coverage_csv = os.path.join(COVERAGE_DIR, '{sample}_coverage.csv'),
@@ -519,7 +594,8 @@ rule render_variant_report:
       header = os.path.join( REPORT_DIR, "_navbar.html" )
     output:
       varreport = os.path.join( REPORT_DIR, "{sample}.variantreport_p_sample.html" ),
-      mutations = os.path.join( MUTATIONS_DIR, "{sample}_mutations.csv")
+      mutations = os.path.join( MUTATIONS_DIR, "{sample}_mutations.csv"),
+      variants = os.path.join( VARIANTS_DIR, "{sample}_variants.csv")
     log: os.path.join( LOG_DIR, "reports", "{sample}_variant_report.log" )
     shell: """
             {RSCRIPT_EXEC} {input.script} \
@@ -559,6 +635,16 @@ rule render_qc_report:
   "logo": "{LOGO}" \
 }}' > {log} 2>&1"""
 
+
+rule create_variants_summary:
+    input:
+        script = os.path.join(SCRIPTS_DIR, "creating_variants_summary_table.R"),
+        files = expand(os.path.join(VARIANTS_DIR, "{sample}_variants.csv"), sample = SAMPLES)
+    output: os.path.join(VARIANTS_DIR, 'data_variant_plot.csv')
+    log: os.path.join(LOG_DIR, "create_variants_summary.log")
+    shell: """
+        {RSCRIPT_EXEC} {input.script} "{VARIANTS_DIR}" {output} > {log} 2>&1
+        """
 rule create_mutations_summary:
     input:
         script = os.path.join(SCRIPTS_DIR, "creating_mutation_summary_table.R"),
@@ -568,23 +654,24 @@ rule create_mutations_summary:
     shell: """
         {RSCRIPT_EXEC} {input.script} "{MUTATIONS_DIR}" {output} > {log} 2>&1
         """
+
+# TODO integrate the output of fastp.json to get the number of raw and trimmed reads
 rule create_overviewQC_table: 
     input:
         script = os.path.join(SCRIPTS_DIR, "overview_QC_table.R"),
-        # only run after having read trimming and coverage analysis done for all samples
-        trimmed_reads = expand(os.path.join(TRIMMED_READS_DIR, '{sample}_trimmed_R{read_num}.fastq.gz'), sample=SAMPLES, read_num=[1, 2]),
         cov_summary = expand(os.path.join(COVERAGE_DIR, '{sample}_merged_covs.csv'), sample=SAMPLES)
     output:  os.path.join(OUTPUT_DIR, 'overview_QC.csv')
     log: os.path.join(LOG_DIR, "create_overviewQC_table.log")
     shell: """
         {RSCRIPT_EXEC} {input.script} {OUTPUT_DIR} {SAMPLE_SHEET_CSV} {READS_DIR} {output} > {log} 2>&1
     """
-    
+
 rule render_index:
     input:
       script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
       report=os.path.join(SCRIPTS_DIR, "report_scripts", "index.Rmd"),
       header=os.path.join(REPORT_DIR, "_navbar.html"),
+      variants = os.path.join(VARIANTS_DIR, 'data_variant_plot.csv'),
       mutations = os.path.join(VARIANTS_DIR, 'data_mutation_plot.csv'),
       overviewQC = os.path.join(OUTPUT_DIR, 'overview_QC.csv'),
       # TODO: see comment below
@@ -595,12 +682,7 @@ rule render_index:
       krona=expand(os.path.join(REPORT_DIR, "{sample}.Krona_report.html"), sample = SAMPLES),
       qc=expand(os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.html"), sample = SAMPLES),
       variant=expand(os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.html"), sample = SAMPLES)
-    # TODO: these CSV files should be declared as inputs!  Due to
-    # https://github.com/BIMSBbioinfo/pigx_sarscov2_ww/issues/19 we
-    # cannot do this yet, so we just add the variant reports for all
-    # samples as inputs.
     params:
-      variants = os.path.join(VARIANTS_DIR, 'data_variant_plot.csv'),
       fun_cvrg_scr = os.path.join(SCRIPTS_DIR, 'sample_coverage_score.R'),
       fun_lm = os.path.join(SCRIPTS_DIR, 'pred_mutation_increase.R'),
       fun_tbls = os.path.join(SCRIPTS_DIR, 'table_extraction.R'),
@@ -612,7 +694,7 @@ rule render_index:
     shell: """{RSCRIPT_EXEC} {input.script} \
 {input.report} {output.report} {input.header}   \
 '{{                                      \
-  "variants_csv": "{params.variants}",   \
+  "variants_csv": "{input.variants}",   \
   "mutations_csv": "{input.mutations}", \
   "coverage_dir": "{COVERAGE_DIR}",\
   "sample_sheet": "{SAMPLE_SHEET_CSV}",  \

@@ -68,13 +68,13 @@ deconvolution_functions <- "deconvolution.R"
 ### CHANGE HERE when using a different mutation sheet
 
 # mutation sheet containing alpha, beta, gamma, delta, BA1, BA2
-mutation_sheet <- "mutation_sheet_220209_t07.csv"
+# mutation_sheet <- "mutation_sheet_220209_t07.csv"
 
 # simulation experiment: alpha, gamma, delta, BA1, BA2, mu, lambda 
 # mutation_sheet <- "mutation_sheet_simulation_NT_t07_mu_lambda.csv" 
 
 # only mutations on spike RBD
-# mutation_sheet <- "Muts_RBDOnly_220207_wholegenomeReferene_t02.csv"
+mutation_sheet <- "Muts_RBDOnly_220207_wholegenomeReferene_t02.csv"
 
 ### CHANGE PATHES HERE e.g. when using a mount
 
@@ -96,25 +96,24 @@ mutation_sheet <- "mutation_sheet_220209_t07.csv"
 
 #### NY iSeq data
 ## alignmnts at: /local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_iSeq/mapped_reads
-## example sample to investigate: iSeq_RBD_NY23 (good coverage, good results), iSeq_RBD_NY13(near 0 alignment rate)
+## example sample to investigate: iSeq_RBD_NY13
 
-# vep_file <- "/local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_iSeq/variants/iSeq_RBD_NY23_vep_sarscov2_parsed.txt"
+vep_file <- "iSeq_RBD_NY13_vep_sarscov2_parsed.txt"
 
-# snv_file <- "/local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_iSeq/variants/iSeq_RBD_NY23_snv.csv"
+snv_file <- "iSeq_RBD_NY13_snv.csv"
 
 #### NY MiSeq data
 ## alignmnts at: /local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_iSeq/mapped_reads
 ## example sample to investigate: NY10_5-26RBDB_H11_S95 (missing delta)
 
-vep_file <- "NY10_5-26RBDB_H11_S95_vep_sarscov2_parsed.txt"
-
-snv_file <- "NY10_5-26RBDB_H11_S95_snv.csv"
+# vep_file <- "NY10_5-26RBDB_H11_S95_vep_sarscov2_parsed.txt"
+# 
+# snv_file <- "NY10_5-26RBDB_H11_S95_snv.csv"
 
 
 ### example working deconvolution-MDC data, Sep 2021 ###
 # vep_file <- "trimmed_210916-20-22h-mix_S1_vep_sarscov2_parsed.txt"
 # snv_file <- "trimmed_210916-20-22h-mix_S1_snv.csv"
-
 
 ``` 
 
