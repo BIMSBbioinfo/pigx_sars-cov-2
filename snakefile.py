@@ -281,8 +281,6 @@ rule bwa_index:
         {BWA_EXEC} index {output.ref} >> {log} 2>&1 
         """
 
-# TODO: use map_input as input 
-# fixme: single-end version needed
 rule bwa_align:
     input:
         fastq = map_input,
@@ -355,7 +353,6 @@ def fastq_ext(fastq_file):
         ext = ''.join([root_ext,ext])
     return ext
 
-# fixme: single-end version needed
 # Note: fastqc does not process reads in pairs. files are processed as single units.
 rule fastqc_raw_se:
     input: trim_reads_input
