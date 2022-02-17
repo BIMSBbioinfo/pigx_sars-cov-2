@@ -359,7 +359,7 @@ deconv_lineages <- colnames(msig_simple_unique[,-which( names(msig_simple_unique
 # create list of proportion values that will be used as weigths
 sigmut_proportion_weights <- list()
 for (lineage in deconv_lineages){
-    if ( lineage == "WT"){
+    if ( lineage == "Others"){
         # !! 17/02/2022 It's not yet tested how robust this behaves when one would mindlessly clutter the mutationsheet
         # with lineages that are very unlikely to detect or not detected
         value <- nrow(msig_simple_unique) / nrow(sigmuts_deduped)
@@ -382,18 +382,18 @@ for (lineage in deconv_lineages){
     
 }
 ```
-```{r simulating_WT_mutations, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
+```{r simulating_Others_mutations, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
 
-# construct additional WT mutations that are not weighted
-# TODO maybe the WT should also be weighted
+# construct additional Others mutations that are not weighted
+# TODO maybe the Others should also be weighted
 
 if ( exists("msig_simple_unique_weighted")){
-    msig_stable_all <- simulateWT( mutations.vector, bulk_freq.vector, 
+    msig_stable_all <- simulateOthers( mutations.vector, bulk_freq.vector, 
                                    msig_simple_unique_weighted[,-which(names(msig_simple_unique_weighted) == "muts")],
                                     match.df$cov)
     msig_stable_unique <- msig_stable_all[[1]]
 } else {
-    msig_stable_all <- simulateWT( mutations.vector, bulk_freq.vector, 
+    msig_stable_all <- simulateOthers( mutations.vector, bulk_freq.vector, 
                                    msig_simple_unique[,-which(names(msig_simple_unique) == "muts")],
                                     match.df$cov)
     msig_stable_unique <- msig_stable_all[[1]]
