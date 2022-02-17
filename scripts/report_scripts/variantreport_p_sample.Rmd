@@ -568,7 +568,6 @@ if (!executeDeconvolution) {
       # check if variant already has a column
       if (i %in% colnames(output_variant_plot)) {
           output_variant_plot[sample_row,][i] <- df$value[df$name == i]
-          output_variant_plot <- output_variant_plot %>% mutate(others = 1-rowSums(across(all_of(all_variants)), na.rm = TRUE))
   }
     }
   }
