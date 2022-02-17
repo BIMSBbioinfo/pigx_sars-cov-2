@@ -126,7 +126,7 @@ Variant_colors <- c("#8a3874", "#4d3da1", "#62c742", "#13317a", "#86e5a3", "#6f6
 # TODO maybe skip the whole snippet and print plain warning in report
 if (nrow(approved_var_plot) > 0) { # check if filtered dataframe has actual values
 
-  # TODO change order or "variable" so that "WT" is always displayed on top
+  # TODO change order or "variable" so that "Others" is always displayed on top
 
   melted <- reshape2::melt(approved_var_plot_location_pooled,
     id.vars = c("dates", "samplename")
@@ -175,7 +175,7 @@ get_h <- function() {
 # TODO maybe skip the whole snippet and print plain warning in report
 if (nrow(approved_var_plot) > 0) { # check if filtered dataframe has actual values
 
-  # TODO change order or "variable" so that "WT" is always displayed on top
+  # TODO change order or "variable" so that "Others" is always displayed on top
   # plot variant frequencies by location, no pooling
   melted <- reshape2::melt(approved_var_plot,
                           id.vars = c("dates", "samplename", "location_name",
