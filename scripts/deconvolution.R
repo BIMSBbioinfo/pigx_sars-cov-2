@@ -11,9 +11,9 @@ createSigMatrix <- function ( mutations.vector, mutation_sheet ) {
       mutations.df <- mutations.df[,-(which(names(mutations.df) %in% "source"))]
   }
   # create an empty data frame add a column for the Wildtype
-  # Wildtype in this case means the reference version of SARS-Cov-2
+  # "Others" means that the particular mutation is not found and the mutation site could be mutated otherwise or not at all
   
-  msig <- setNames( data.frame( matrix( ncol = ncol(mutations.df)+1, nrow = 0 )), c("WT", colnames(mutations.df)))
+  msig <- setNames( data.frame( matrix( ncol = ncol(mutations.df)+1, nrow = 0 )), c("Others", colnames(mutations.df)))
   msig <- bind_rows(tibble(muts=mutations.vector), msig)
   # making a matrix with the signature mutations found in the sample
   # make binary matrix matching the mutations to the mutation-list per variant to see how many characterising mutations
@@ -27,30 +27,30 @@ createSigMatrix <- function ( mutations.vector, mutation_sheet ) {
   return( msig[,-match('muts', names(msig))]*1 ) # use the *1 to turn true/false to 0/1
 }
 
-simulateWT <- function ( mutations.vector, bulk_freq.vector, simple_sigmat.dataframe, coverage.vector, wt_weight) {
+simulateOthers <- function ( mutations.vector, bulk_freq.vector, simple_sigmat.dataframe, coverage.vector, Others_weight) {
   #' for the deconvolution to work we need the "wild type" frequencies too. The matrix from above got mirrored, 
   #' wild type mutations are simulated the following: e.g. T210I (mutation) -> T210T ("wild type")
   
-  # 1. make "WT mutations" 
-  muts_wt <- lapply(mutations.vector,function(x) str_replace(x,regex(".$"), 
+  # 1. make "Others mutations" 
+  muts_Others <- lapply(mutations.vector,function(x) str_replace(x,regex(".$"), 
                                                              str_sub(str_split(x,":")[[1]][2], 1,1)))
-  muts_wt.df <- data.frame(muts = unlist(muts_wt))
+  muts_Others.df <- data.frame(muts = unlist(muts_Others))
   # 2. make frequency values, subtract the observed freqs for the real mutations from 1
-  bulk_wt <- lapply(bulk_freq.vector, function (x) {1-x})
+  bulk_Others <- lapply(bulk_freq.vector, function (x) {1-x})
   
-  # 3. make matrix with wt mutations and inverse the values and wild type freqs
-  msig_inverse <- bind_cols(muts_wt.df, as.data.frame(+(!simple_sigmat.dataframe)))
+  # 3. make matrix with Others mutations and inverse the values and wild type freqs
+  msig_inverse <- bind_cols(muts_Others.df, as.data.frame(+(!simple_sigmat.dataframe)))
     
-  # 4. apply WT weight 
+  # 4. apply Others weight 
   # fixme: it could be this can be implemented in the step above already
-  msig_inverse[ msig_inverse == 1] <- 1/wt_weight
+  msig_inverse[ msig_inverse == 1] <- 1/Others_weight
   
   # fixme: not sure if this really is a nice way to concat those things...
     # no it's not you could use dplyr and mutate
-  muts_all <- c(muts_wt,mutations.vector)
+  muts_all <- c(muts_Others,mutations.vector)
   muts_all.df <- data.frame(muts = unlist(muts_all))
   
-  bulk_all <- c(bulk_wt, bulk_freq.vector)
+  bulk_all <- c(bulk_Others, bulk_freq.vector)
   bulk_all.df <- data.frame(freq = unlist(bulk_all))
     
   coverage_all <- c(coverage.vector,coverage.vector)
@@ -98,10 +98,10 @@ dedupeVariants <- function (variant, variants.df, dedup_variants.df) {
         for ( row in dedup_variants.df$variants ){
           if ( grepl( row,groupName_variants )) {
             
-            # if variants are getting pooled with WT they are just WT and nothing else and also not "others"
-            if (str_detect(groupName_variants, "WT")){
-              rownames ( dedup_variants.df )[rownames(dedup_variants.df) == row] <- "WT"
-              variants_to_drop <- duped_variants[!grepl("WT",duped_variants)]
+            # if variants are getting pooled with Others they are just Others and nothing else
+            if (str_detect(groupName_variants, "Others")){
+              rownames ( dedup_variants.df )[rownames(dedup_variants.df) == row] <- "Others"
+              variants_to_drop <- duped_variants[!grepl("Others",duped_variants)]
             } else{
               rownames ( dedup_variants.df )[rownames(dedup_variants.df) == row] <- groupName_variants
               variants_to_drop <- NA
