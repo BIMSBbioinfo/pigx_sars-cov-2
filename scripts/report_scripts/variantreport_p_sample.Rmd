@@ -354,31 +354,33 @@ if ( length(msig_dedupe_transposed) >= 1){
 dropped_variants <- unique(dropped_variants)
 dropped_variants <- dropped_variants[!is.na(dropped_variants)]
 ```
-```{r calculate_sigmat_weigths, message=F, warning=F, include = FALSE, eval = FALSE}
-
-deconv_lineages <- colnames(msig_simple_unique[,-which( names(msig_simple_unique) %in% c("muts", "WT") )])
-
+```{r calculate_sigmat_weigths, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
+deconv_lineages <- colnames(msig_simple_unique[,-which( names(msig_simple_unique) %in% "muts")])
 # create list of proportion values that will be used as weigths
 sigmut_proportion_weights <- list()
 for (lineage in deconv_lineages){
-    if ( grepl(",", lineage)){
+    if ( lineage == "WT"){
+        # !! 17/02/2022 It's not yet tested how robust this behaves when one would mindlessly clutter the mutationsheet
+        # with lineages that are very unlikely to detect or not detected
+        value <- nrow(msig_simple_unique) / nrow(sigmuts_deduped)
+    } else if ( grepl(",", lineage)){
         group <- unlist(str_split(lineage, ","))
         avrg <- sum(sig_mutations.df$name %in% group) / length(group)
         value <- sum(msig_simple_unique[lineage]) / avrg
-    } else{
+    } else {
         value <- sum(msig_simple_unique[lineage]) / sum(sig_mutations.df$name == lineage)
     }
     sigmut_proportion_weights[lineage] <- value
 }
 sigmut_proportion_weights <- as_tibble(sigmut_proportion_weights)
-
 # applying weights on signature matrix
 # fixme: there should be a way to do this vectorized
 msig_simple_unique_weighted <- msig_simple_unique
 for (lineage in deconv_lineages){
-    msig_simple_unique_weighted[lineage] <- msig_simple_unique_weighted[lineage] / as.numeric(sigmut_proportion_weights[lineage])
+    weight <- msig_simple_unique_weighted[lineage] / as.numeric(sigmut_proportion_weights[lineage])
+    msig_simple_unique_weighted[lineage] <- as.numeric( ifelse( is.na(weight),0, unlist(weight) ))
+    
 }
-
 ```
 ```{r simulating_WT_mutations, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
 
