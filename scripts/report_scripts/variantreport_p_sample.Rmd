@@ -384,9 +384,6 @@ for (lineage in deconv_lineages){
 ```
 ```{r simulating_Others_mutations, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
 
-# construct additional Others mutations that are not weighted
-# TODO maybe the Others should also be weighted
-
 if ( exists("msig_simple_unique_weighted")){
     msig_stable_all <- simulateOthers( mutations.vector, bulk_freq.vector, 
                                    msig_simple_unique_weighted[,-which(names(msig_simple_unique_weighted) == "muts")],
