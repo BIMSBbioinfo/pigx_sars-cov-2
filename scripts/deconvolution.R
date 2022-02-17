@@ -27,9 +27,9 @@ createSigMatrix <- function ( mutations.vector, mutation_sheet ) {
   return( msig[,-match('muts', names(msig))]*1 ) # use the *1 to turn true/false to 0/1
 }
 
-simulateWT <- function ( mutations.vector, bulk_freq.vector, simple_sigmat.dataframe, coverage.vector) {
-  # for the deconvolution to work we need the "wild type" frequencies too. The matrix from above got mirrored, 
-  # wild type mutations are simulated the following: e.g. T210I (mutation) -> T210T ("wild type")
+simulateWT <- function ( mutations.vector, bulk_freq.vector, simple_sigmat.dataframe, coverage.vector, wt_weight) {
+  #' for the deconvolution to work we need the "wild type" frequencies too. The matrix from above got mirrored, 
+  #' wild type mutations are simulated the following: e.g. T210I (mutation) -> T210T ("wild type")
   
   # 1. make "WT mutations" 
   muts_wt <- lapply(mutations.vector,function(x) str_replace(x,regex(".$"), 
@@ -40,6 +40,10 @@ simulateWT <- function ( mutations.vector, bulk_freq.vector, simple_sigmat.dataf
   
   # 3. make matrix with wt mutations and inverse the values and wild type freqs
   msig_inverse <- bind_cols(muts_wt.df, as.data.frame(+(!simple_sigmat.dataframe)))
+    
+  # 4. apply WT weight 
+  # fixme: it could be this can be implemented in the step above already
+  msig_inverse[ msig_inverse == 1] <- 1/wt_weight
   
   # fixme: not sure if this really is a nice way to concat those things...
     # no it's not you could use dplyr and mutate
