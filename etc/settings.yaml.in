@@ -62,7 +62,7 @@ tools:
     args: ""
   ivar:
     executable: @IVAR@
-    args: "-q 15 -m 180 -s 4 -e"
+    args: "trim -q 15 -m 180 -s 4 -e"
   lofreq:
     executable: @LOFREQ@
     args: ""

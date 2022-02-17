@@ -327,7 +327,7 @@ rule ivar_primer_trim:
     log: os.path.join(LOG_DIR, 'ivar_{sample}.log')
     # TODO number parameter should be accessible over settings file
     shell: """
-        {IVAR_EXEC} trim -b {input.primers} -p {params.output} -i {input.aligned_reads} >> {log} 2>&1 """ 
+        {IVAR_EXEC} -b {input.primers} -p {params.output} -i {input.aligned_reads} >> {log} 2>&1 """ 
 
 # Vic_0825: I don't know if this double sorting and indexing is really necessary but seemed to be since ivar as 
 # well as lofreq ask for sorted and indexed bam files
