@@ -193,9 +193,7 @@ def multiqc_input(args):
             expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_R{read_num}_fastqc.html'), sample=sample, read_num=[1, 2]),
             expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_R{read_num}_fastqc.zip'), sample=sample, read_num=[1, 2]),
             expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.html'), sample=sample, read_num=[1, 2]),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.zip'), sample=sample, read_num=[1, 2]),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip'), sample = sample)
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.zip'), sample=sample, read_num=[1, 2])
         ]
     elif len(reads_files) == 1:
         files = [
@@ -204,9 +202,7 @@ def multiqc_input(args):
             expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.html'), sample=sample),
             expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.zip'), sample=sample),
             expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.html'), sample=sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.zip'), sample=sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip'), sample = sample)
+            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.zip'), sample=sample)
         ]
     return (list(chain.from_iterable(files)))
 
@@ -317,32 +313,8 @@ rule samtools_index_preprimertrim:
     log: os.path.join(LOG_DIR, 'samtools_index_{sample}.log')
     shell: "{SAMTOOLS_EXEC} index {input} {output} >> {log} 2>&1"
 
-rule ivar_primer_trim:
-    input: 
-        primers = AMPLICONS_BED,
-        aligned_reads = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted.bam')
-    output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed.bam')
-    params:
-        output = os.path.join(MAPPED_READS_DIR, "{sample}_aligned_sorted_primer-trimmed") 
-    log: os.path.join(LOG_DIR, 'ivar_{sample}.log')
-    # TODO number parameter should be accessible over settings file
-    shell: """
-        {IVAR_EXEC} -b {input.primers} -p {params.output} -i {input.aligned_reads} >> {log} 2>&1 """ 
-
 # Vic_0825: I don't know if this double sorting and indexing is really necessary but seemed to be since ivar as 
 # well as lofreq ask for sorted and indexed bam files
-
-rule samtools_sort_postprimertrim:
-    input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed.bam')
-    output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed_sorted.bam')
-    log: os.path.join(LOG_DIR, 'samtools_sort_{sample}.log')
-    shell: "{SAMTOOLS_EXEC} sort -o {output} {input} >> {log} 2>&1"
-    
-rule samtools_index_postprimertrim:
-    input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed_sorted.bam')
-    output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed_sorted.bai')
-    log: os.path.join(LOG_DIR, 'samtools_index_{sample}.log')
-    shell: "{SAMTOOLS_EXEC} index {input} {output} >> {log} 2>&1"
 
 # function to determine the extension of the input files 
 def fastq_ext(fastq_file):
@@ -419,16 +391,6 @@ rule fastqc_trimmed_pe:
         output_dir = os.path.join(FASTQC_DIR, '{sample}')
     shell: "{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1"
 
-rule fastqc_primer_trimmed:
-    input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed_sorted.bam')
-    output:
-        html = os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'),
-        zip = os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip'),
-    log: os.path.join(LOG_DIR, 'fastqc_{sample}_aligned_primer-trimmed.log')
-    params:
-        output_dir = os.path.join(FASTQC_DIR, '{sample}')
-    shell: "{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1"
-
 # TODO think about adding a global version to include all samples
 rule multiqc:
   input: multiqc_input
@@ -453,8 +415,8 @@ def no_variant_vep(sample, lofreq_output):
 # TODO it should be possible to add customized parameter
 rule lofreq:
     input:
-        aligned_bam = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed_sorted.bam'),
-        aligned_bai = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed_sorted.bai'),
+        aligned_bam = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted.bam'),
+        aligned_bai = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted.bai'),
         ref = os.path.join(INDEX_DIR, "{}".format(os.path.basename(REFERENCE_FASTA)))
     output: vcf = os.path.join(VARIANTS_DIR, '{sample}_snv.vcf')
     log: os.path.join(LOG_DIR, 'lofreq_{sample}.log')
