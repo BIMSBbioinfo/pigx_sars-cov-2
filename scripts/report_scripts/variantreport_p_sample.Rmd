@@ -440,9 +440,9 @@ if ( round( sum(df$value),1) == 1 ){
 
 # case 2: in case "others" == 0, both variants can be split up again and being given the value 0 OR
 # case 3: in case multiple vars can really not be distinguished from each other they will be distributed normaly
-if ( any(str_detect(variants, ",")) ) {
-    grouped_rows <- which(str_detect(variants, ","))
-    for ( row in grouped_rows ){
+while ( any(str_detect(df$name, ",")) ) {
+    grouped_rows <- which(str_detect(df$name, ","))
+    for ( row in grouped_rows ){ # fixme: this loop might be unneccessary, since only the first row should been picked, everything else will be handled by the while loop
        if ( df[row,"value"] == 0 ){ 
             grouped_variants <- unlist( str_split(df[row,"name"], ",") )
             for ( variant in grouped_variants ){
