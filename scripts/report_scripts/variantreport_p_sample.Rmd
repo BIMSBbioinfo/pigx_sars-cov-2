@@ -410,6 +410,9 @@ variant_abundance <- deconv(bulk_all,sig)
 "}` 
 
 ```{r plot, message=F, warning=F, echo = FALSE, eval = executeDeconvolution}
+Variant_colors <- c("#8a3874", "#4d3da1", "#62c742", "#13317a", "#86e5a3", "#6f69e5", "#4cdab2", "#999ce4", "#2ce6f3",
+"#6638c6", "#005f29", "#5d73cc", "#616524", "#a8a041", "#e9f600", "#3eaca8", "#62a273", "#4ea5d0", "#655c95", "#67a04e")
+# TODO this shoul be put into a seperate color palette function in a seperate file
 
 variants <- colnames(msig_stable_unique[,-1])
 df <- data.frame(rbind(variant_abundance))
