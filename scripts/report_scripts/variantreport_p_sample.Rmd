@@ -134,7 +134,8 @@ get_protein_mut <- function (vepfile){ # parse together from vep output "Protein
   #' this function is for parsing the information about mutation position in the amino acid sequence, the reference aa and
   #' the alternative mutation into the aa-mutation-notation which is later on comparable to the lists of signature mutations
   
-  # reading in whole vep txt output
+  # reading in whole vep txt output 
+    # TODO: include check about correct VEP file input format
     vepfile.df <- read.table(vepfile, sep = ',', header = T) # you should include in the vep script to parse out the # 
       #in the beginning of the line or include that step here. 
      # parsing snv and protmut location
@@ -410,11 +411,6 @@ variant_abundance <- deconv(bulk_all,sig)
 
 ```{r plot, message=F, warning=F, echo = FALSE, eval = executeDeconvolution}
 
-Variant_colors <- c("#8a3874", "#4d3da1", "#62c742", "#13317a", "#86e5a3", "#6f69e5", "#4cdab2", "#999ce4", "#2ce6f3",
-"#6638c6", "#005f29", "#5d73cc", "#616524", "#a8a041", "#e9f600", "#3eaca8", "#62a273", "#4ea5d0", "#655c95", "#67a04e")
-# TODO this shoul be put into a seperate color palette function in a seperate file
-
-# work in progress...only to show how it theoretically can look like in the report
 variants <- colnames(msig_stable_unique[,-1])
 df <- data.frame(rbind(variant_abundance))
 
