@@ -420,18 +420,7 @@ Variant_colors <- c("#8a3874", "#4d3da1", "#62c742", "#13317a", "#86e5a3", "#6f6
 variants <- colnames(msig_stable_unique[,-1])
 df <- data.frame(rbind(variant_abundance))
 
-# XXX: Replace the long column name consisting of concatenated variant
-# names with "others" and put the variant names in a label.
-# TODO: This should be done much earlier when building the data frame.
-
-condensed_variants_names <-
-    unlist( lapply(variants, function (x) { if (str_detect(x, ".*,.*,.*")) { "others" } else { x }}) )
-
-colnames(df) <- condensed_variants_names
-
-variants_labels <-
-    unlist( lapply(variants, function (x) str_replace_all(x, ",", "\n")) )
-
+colnames(df) <- variants
 df <- df %>% 
     tidyr::pivot_longer( everything() )
 
