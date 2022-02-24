@@ -4,7 +4,7 @@ require(stringr)
 
 concat_overview_table <- function ( sample_sheet, reads_dir, sample_dir ) {
   
-  sample_sheet.df <- read.csv(sample_sheet, header = TRUE)
+  sample_sheet.df <- read.csv(sample_sheet, header = TRUE, stringsAsFactors = FALSE)
   # get read files matching samples
   # TODO No need for having the reads in different rows, since I'm always counting the whole alignment, or then count the read numbers for the single read files each...still...don't do this over multiple lines - and remove the read file columns afterwards for better readibility
   cat("get samples and reads from sample_sheet...\n")
