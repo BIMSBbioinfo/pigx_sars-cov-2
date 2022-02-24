@@ -375,7 +375,7 @@ rule fastqc_raw_se:
         tmp_output = os.path.basename(input[0]).replace(fastq_ext(input[0]), '_fastqc.html')
         tmp_zip = os.path.basename(input[0]).replace(fastq_ext(input[0]), '_fastqc.zip')
         shell("""{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1;
-                if [[ {tmp_output} != *{wildcards.sample}* ]]; then
+                if [[ {tmp_output} != {wildcards.sample}_fastqc.html ]]; then
                     mv {params.output_dir}/{tmp_output} {output.rep} &&\
                     mv {params.output_dir}/{tmp_zip} {output.zip}
                 fi """)
@@ -398,7 +398,7 @@ rule fastqc_raw:
         tmp_R2_output = os.path.basename(input[1]).replace(fastq_ext(input[0]),'_fastqc.html')
         tmp_R2_zip = os.path.basename(input[1]).replace(fastq_ext(input[0]),'_fastqc.zip')
         shell("""{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1;
-                if [[ {tmp_R1_output} != *{wildcards.sample}* ]]; then
+                if [[ {tmp_R1_output} != {wildcards.sample}_R1_fastqc.html ]]; then
                     mv {params.output_dir}/{tmp_R1_output} {output.r1_rep} &&\
                     mv {params.output_dir}/{tmp_R1_zip} {output.r1_zip} &&\
                     mv {params.output_dir}/{tmp_R2_output} {output.r2_rep} &&\
