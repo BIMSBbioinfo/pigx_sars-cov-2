@@ -33,6 +33,8 @@ concat_overview_table <- function ( sample_sheet, reads_dir, sample_dir ) {
   read_counts <- read_counts %>% mutate(unaligned_reads_by_calc = total_reads - as.numeric(aligned_reads) )
   # difference between unaligned reads from file and by calc must be reads filtered by QC
   read_counts <- read_counts %>% mutate(reads_removed_by_QC = unaligned_reads_by_calc - unaligned_reads_from_file )
+  # TODO check if removing file names is okay
+  read_counts <- read_counts %>% select(!starts_with("file"))
   return( read_counts)
 }
 
