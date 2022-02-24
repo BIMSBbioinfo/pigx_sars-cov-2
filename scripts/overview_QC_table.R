@@ -1,5 +1,6 @@
 library(dplyr)
 library(R.utils)
+require(stringr)
 
 concat_overview_table <- function ( sample_sheet, reads_dir, sample_dir ) {
   
@@ -75,8 +76,6 @@ read_num_raw <- function ( raw_reads_vector, reads_dir){
 }
 
 apply_fun_get_read_num <- function (read, reads_dir) {
-  require(stringr)
-  require(R.utils)
 
   file <- file.path(reads_dir, read)
   read_num <- countLines(file)/4
