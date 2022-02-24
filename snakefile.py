@@ -325,14 +325,15 @@ rule samtools_index_preprimertrim:
 rule ivar_primer_trim:
     input: 
         primers = AMPLICONS_BED,
-        aligned_reads = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted.bam')
+        aligned_bam = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted.bam'),
+        aligned_bai = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted.bai')
     output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed.bam')
     params:
         output = os.path.join(MAPPED_READS_DIR, "{sample}_aligned_sorted_primer-trimmed") 
     log: os.path.join(LOG_DIR, 'ivar_{sample}.log')
     # TODO number parameter should be accessible over settings file
     shell: """
-        {IVAR_EXEC} trim -b {input.primers} -p {params.output} -i {input.aligned_reads} -q 15 -m 180 -s 4 >> {log} 2>&1 """ 
+        {IVAR_EXEC} trim -b {input.primers} -p {params.output} -i {input.aligned_bam} -q 15 -m 180 -s 4 >> {log} 2>&1 """
 
 # Vic_0825: I don't know if this double sorting and indexing is really necessary but seemed to be since ivar as 
 # well as lofreq ask for sorted and indexed bam files
