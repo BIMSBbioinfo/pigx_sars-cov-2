@@ -8,7 +8,7 @@ concat_overview_table <- function ( sample_sheet, reads_dir, sample_dir ) {
   # get read files matching samples
   # TODO No need for having the reads in different rows, since I'm always counting the whole alignment, or then count the read numbers for the single read files each...still...don't do this over multiple lines - and remove the read file columns afterwards for better readibility
   cat("get samples and reads from sample_sheet...\n")
-  read_counts <- read_files ( sample_sheet.df)
+  read_counts <- read_files( sample_sheet.df)
   # get read number of raw reads
   cat("get num of total raw reads...\n ")
   read_counts$reads_r1 <- read_num_raw(read_counts$raw_reads1, reads_dir)$read_num
@@ -65,10 +65,24 @@ apply_fun_lookup <- function ( sample, sample_sheet.df ){
   sample_row <- which(sample_sheet.df$name == sample)
   # works only for paired end for now - I don't know how to make num of returned read files conditional based on sample_sheet columns
   # TODO make num of returend reads depended on paired or single end
-  data.frame( samplename = sample,
-              date = sample_sheet.df[sample_row, "date"],
-              raw_reads1 = sample_sheet.df[sample_row,"reads"],
-              raw_reads2 = sample_sheet.df[sample_row, "reads2"])
+  sample_df <- data.frame(
+    samplename = sample,
+    date = sample_sheet.df[sample_row, "date"],
+    paired_end = sample_sheet.df[sample_row, "reads2"] != "",
+    file_raw_reads1 = sample_sheet.df[sample_row,"reads"],
+    file_raw_reads2 = sample_sheet.df[sample_row, "reads2"],
+    stringsAsFactors = FALSE
+  ) %>%
+    mutate(file_trimmed_reads_r1 = ifelse(paired_end,
+                                     paste0(sample,"_trimmed_R1.fastq.gz"),
+                                     paste0(sample, "_trimmed.fastq.gz")),
+           file_trimmed_reads_r2 = ifelse(paired_end,
+                                     paste0(sample,"_trimmed_R1.fastq.gz"),
+                                     ""),
+           file_unaligned_reads = paste0(sample,"_unaligned.fastq")
+           )
+
+  return(sample_df)
 }
 
 read_num_raw <- function ( raw_reads_vector, reads_dir){
