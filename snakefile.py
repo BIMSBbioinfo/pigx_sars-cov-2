@@ -280,8 +280,7 @@ rule bwa_index:
         {BWA_EXEC} index {output.ref} >> {log} 2>&1 
         """
 
-# TODO: use map_input as input 
-# fixme: single-end version needed
+# alignment works with both single and paired-end files
 rule bwa_align:
     input:
         fastq = map_input,
