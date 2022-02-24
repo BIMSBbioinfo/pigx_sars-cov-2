@@ -8,11 +8,18 @@ dist_pkglibexec_SCRIPTS = \
 
 pkglibexec_scriptsdir = $(pkglibexecdir)/scripts
 dist_pkglibexec_scripts_SCRIPTS = \
-  scripts/download_databases.sh \
-  scripts/generateNavigation.R \
+	scripts/creating_mutation_summary_table.R \
+	scripts/deconvolution.R \
+	scripts/download_databases.sh \
+	scripts/generateNavigation.R \
+	scripts/get_qc_table.py \
+	scripts/overview_QC_table.R \
+	scripts/parse_vep.py \
+	scripts/pooling.R \
+	scripts/pred_mutation_increase.R \
   scripts/renderReport.R \
-  scripts/get_qc_table.py \
-  scripts/parse_vep.py \
+	scripts/sample_coverage_score.R \
+	scripts/table_extraction.R \
   scripts/vcfTocsv.py \
   scripts/vep_rule.py
 
@@ -48,6 +55,7 @@ EXTRA_DIST = \
 	tests/sample_data/reads/Test5_R1.fastq.gz \
 	tests/sample_data/reads/Test5_R2.fastq.gz \
 	tests/sample_data/NC_045512.2.fasta \
+	tests/sample_data/nCoV-2019_NCref.bed \
 	tests/sample_data/Covid_CG_NTmutation_t07.bed \
   tests/sample_data/mutation_sheet_211006_covidCG_NT_location.csv
 
