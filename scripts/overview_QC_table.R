@@ -92,7 +92,12 @@ read_num_raw <- function ( raw_reads_vector, reads_dir){
 apply_fun_get_read_num <- function (read, reads_dir) {
 
   file <- file.path(reads_dir, read)
-  read_num <- countLines(file)/4
+  read_num <-
+    if(file.exists(file) & !isDirectory(file)) {
+     countLines(file) / 4
+  } else {
+    0
+  }
 
   data.frame( read_num )
 }
