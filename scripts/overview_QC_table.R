@@ -85,8 +85,8 @@ apply_fun_lookup <- function ( sample, sample_sheet.df ){
   return(sample_df)
 }
 
-read_num_raw <- function ( raw_reads_vector, reads_dir){
-  do.call( bind_rows, lapply(raw_reads_vector, apply_fun_get_read_num, reads_dir = reads_dir))
+read_num_raw <- function ( file_reads_vector, reads_dir){
+  do.call( bind_rows, lapply(file_reads_vector, apply_fun_get_read_num, reads_dir = reads_dir))
 }
 
 apply_fun_get_read_num <- function (read, reads_dir) {
