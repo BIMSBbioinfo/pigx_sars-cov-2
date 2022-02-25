@@ -69,7 +69,7 @@ TESTS = \
 clean-local:
 	-rm -rf .snakemake
 
-CLEANFILES = $(nodist_bin_SCRIPTS) config.json		
+CLEANFILES = $(nodist_bin_SCRIPTS) config.json
 
 integration:
 	$(AM_TESTS_ENVIRONMENT) $(abs_top_srcdir)/pigx-sars-cov2-ww --printshellcmds -s tests/settings.yaml tests/sample_sheet.csv
