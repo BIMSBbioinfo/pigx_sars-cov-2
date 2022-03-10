@@ -1,0 +1,18 @@
+##fileformat=VCFv4.0
+##fileDate=20220218
+##source=/gnu/store/xy33vjzv0lapn111x7qw16fa8kmcqvqw-profile/bin/lofreq call -f /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/index/NC_045512.2.fasta -o /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/variants/Test5_snv.vcf --verbose /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/mapped_reads/Test5_aligned_sorted_primer-trimmed_sorted.bam 
+##reference=/home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/index/NC_045512.2.fasta
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Raw Depth">
+##INFO=<ID=AF,Number=1,Type=Float,Description="Allele Frequency">
+##INFO=<ID=SB,Number=1,Type=Integer,Description="Phred-scaled strand bias at this position">
+##INFO=<ID=DP4,Number=4,Type=Integer,Description="Counts for ref-forward bases, ref-reverse, alt-forward and alt-reverse bases">
+##INFO=<ID=INDEL,Number=0,Type=Flag,Description="Indicates that the variant is an INDEL.">
+##INFO=<ID=CONSVAR,Number=0,Type=Flag,Description="Indicates that the variant is a consensus variant (as opposed to a low frequency variant).">
+##INFO=<ID=HRUN,Number=1,Type=Integer,Description="Homopolymer length to the right of report indel position">
+##FILTER=<ID=min_dp_10,Description="Minimum Coverage 10">
+##FILTER=<ID=sb_fdr,Description="Strand-Bias Multiple Testing Correction: fdr corr. pvalue > 0.001000">
+##FILTER=<ID=min_snvqual_51,Description="Minimum SNV Quality (Phred) 51">
+##FILTER=<ID=min_indelqual_20,Description="Minimum Indel Quality (Phred) 20">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+NC_045512.2	27972	.	C	T	18780	PASS	DP=532;AF=0.996241;SB=0;DP4=0,0,268,262
+NC_045512.2	28048	.	G	T	13664	PASS	DP=375;AF=1.000000;SB=0;DP4=0,0,113,262

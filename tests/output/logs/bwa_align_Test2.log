@@ -1,0 +1,25 @@
+[M::bwa_idx_load_from_disk] read 0 ALT contigs
+[M::process] read 28704 sequences (6131420 bp)...
+[M::mem_pestat] # candidate unique pairs for (FF, FR, RF, RR): (33, 9718, 9, 26)
+[M::mem_pestat] analyzing insert size distribution for orientation FF...
+[M::mem_pestat] (25, 50, 75) percentile: (1835, 7803, 9761)
+[M::mem_pestat] low and high boundaries for computing mean and std.dev: (1, 25613)
+[M::mem_pestat] mean and std.dev: (5900.18, 3834.23)
+[M::mem_pestat] low and high boundaries for proper pairs: (1, 33539)
+[M::mem_pestat] analyzing insert size distribution for orientation FR...
+[M::mem_pestat] (25, 50, 75) percentile: (362, 382, 392)
+[M::mem_pestat] low and high boundaries for computing mean and std.dev: (302, 452)
+[M::mem_pestat] mean and std.dev: (386.44, 12.95)
+[M::mem_pestat] low and high boundaries for proper pairs: (272, 482)
+[M::mem_pestat] skip orientation RF as there are not enough pairs
+[M::mem_pestat] analyzing insert size distribution for orientation RR...
+[M::mem_pestat] (25, 50, 75) percentile: (1835, 9761, 9761)
+[M::mem_pestat] low and high boundaries for computing mean and std.dev: (1, 25613)
+[M::mem_pestat] mean and std.dev: (6993.96, 3750.23)
+[M::mem_pestat] low and high boundaries for proper pairs: (1, 33539)
+[M::mem_pestat] skip orientation FF
+[M::mem_pestat] skip orientation RR
+[M::mem_process_seqs] Processed 28704 reads in 9.519 CPU sec, 2.388 real sec
+[main] Version: 0.7.17-r1188
+[main] CMD: /gnu/store/xy33vjzv0lapn111x7qw16fa8kmcqvqw-profile/bin/bwa mem -t 4 /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/index/NC_045512.2.fasta /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/trimmed_reads/Test2_trimmed_R1.fastq.gz /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/trimmed_reads/Test2_trimmed_R2.fastq.gz
+[main] Real time: 2.600 sec; CPU: 9.718 sec

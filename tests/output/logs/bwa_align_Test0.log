@@ -1,0 +1,30 @@
+[M::bwa_idx_load_from_disk] read 0 ALT contigs
+[M::process] read 29818 sequences (7746073 bp)...
+[M::mem_pestat] # candidate unique pairs for (FF, FR, RF, RR): (56, 14186, 73, 59)
+[M::mem_pestat] analyzing insert size distribution for orientation FF...
+[M::mem_pestat] (25, 50, 75) percentile: (2966, 4758, 6616)
+[M::mem_pestat] low and high boundaries for computing mean and std.dev: (1, 13916)
+[M::mem_pestat] mean and std.dev: (4909.07, 2800.83)
+[M::mem_pestat] low and high boundaries for proper pairs: (1, 17566)
+[M::mem_pestat] analyzing insert size distribution for orientation FR...
+[M::mem_pestat] (25, 50, 75) percentile: (379, 386, 393)
+[M::mem_pestat] low and high boundaries for computing mean and std.dev: (351, 421)
+[M::mem_pestat] mean and std.dev: (388.70, 11.15)
+[M::mem_pestat] low and high boundaries for proper pairs: (337, 435)
+[M::mem_pestat] analyzing insert size distribution for orientation RF...
+[M::mem_pestat] (25, 50, 75) percentile: (2006, 3898, 6867)
+[M::mem_pestat] low and high boundaries for computing mean and std.dev: (1, 16589)
+[M::mem_pestat] mean and std.dev: (4305.03, 2805.18)
+[M::mem_pestat] low and high boundaries for proper pairs: (1, 21450)
+[M::mem_pestat] analyzing insert size distribution for orientation RR...
+[M::mem_pestat] (25, 50, 75) percentile: (2341, 4131, 7306)
+[M::mem_pestat] low and high boundaries for computing mean and std.dev: (1, 17236)
+[M::mem_pestat] mean and std.dev: (4601.12, 2756.52)
+[M::mem_pestat] low and high boundaries for proper pairs: (1, 22201)
+[M::mem_pestat] skip orientation FF
+[M::mem_pestat] skip orientation RF
+[M::mem_pestat] skip orientation RR
+[M::mem_process_seqs] Processed 29818 reads in 9.133 CPU sec, 2.291 real sec
+[main] Version: 0.7.17-r1188
+[main] CMD: /gnu/store/xy33vjzv0lapn111x7qw16fa8kmcqvqw-profile/bin/bwa mem -t 4 /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/index/NC_045512.2.fasta /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/trimmed_reads/Test0_trimmed_R1.fastq.gz /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/trimmed_reads/Test0_trimmed_R2.fastq.gz
+[main] Real time: 2.532 sec; CPU: 9.361 sec

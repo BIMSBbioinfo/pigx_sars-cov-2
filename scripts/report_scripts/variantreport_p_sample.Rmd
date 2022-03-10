@@ -252,11 +252,13 @@ vep.info <- variant_protein_mut
 complete.df <- dplyr::left_join(lofreq.info, vep.info, by = c('gene_mut'='gene_mut'), copy = T) %>% 
                rowwise() %>% mutate(gene_mut_collapsed = paste(genes,gene_mut,sep = ":"))
 
+complete_cov_filtered.df <- complete.df %>% filter(!(as.numeric(cov) < 100))
+
 # filter for mutations which are signature mutations
-match.df <- complete.df %>%
+match.df <- complete_cov_filtered.df %>%
                     filter(!is.na(name))
 # filter for everything that is not a signature mutation
-nomatch.df <- complete.df %>%
+nomatch.df <- complete_cov_filtered.df %>%
                         filter(is.na(name))
 ```
 
@@ -591,7 +593,7 @@ complete.df <- complete.df  %>%
   rowwise() %>%
   mutate(AA_mut = replace(AA_mut,is.na(AA_mut), '\\:\\')) %>%
   # 211006 this exclusion is necessary because this mutation has a wrong entry in VEP which gives two AA_muts instead of probably 1 deletion
-  filter(!(gene_mut %in% "G13477A")) %>%
+  filter(!(gene_mut %in% c("G13477A","G13471T","G13477T", "G13475T", "C13476T", "G27758A", "G13470T"))) %>%
   ungroup()
 
 # report the gene, translated_AA_mut and NT mut accordingly

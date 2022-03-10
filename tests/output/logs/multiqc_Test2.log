@@ -1,0 +1,9 @@
+[WARNING]         multiqc : MultiQC Version v1.12 now available!
+[INFO   ]         multiqc : This is MultiQC v1.10.1
+[INFO   ]         multiqc : Template    : default
+[INFO   ]         multiqc : Searching   : /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/report/fastqc/Test2
+Searching   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 10/10  [INFO   ]          fastqc : Found 5 reports
+[INFO   ]         multiqc : Compressing plot data
+[INFO   ]         multiqc : Report      : report/multiqc/Test2/multiqc_report.html
+[INFO   ]         multiqc : Data        : report/multiqc/Test2/multiqc_data
+[INFO   ]         multiqc : MultiQC complete

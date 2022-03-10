@@ -1,0 +1,5 @@
+sample,total_muts,total_sigmuts,tracked_muts_after_lm,non_sigmuts,sigmuts_ b117,sigmuts_ b1351,sigmuts_ b16172,sigmuts_ p1
+Total,91,26,0,65,25,5,3,7
+Test0,55,22,0,33,22,4,3,7
+Test2,53,18,0,35,17,3,2,5
+Test5,2,2,0,0,2,0,0,0

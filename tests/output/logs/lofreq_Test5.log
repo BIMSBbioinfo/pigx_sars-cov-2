@@ -1,0 +1,5 @@
+Alive and happily crunching away on pos 15504 of NC_045512.2...
+Executing lofreq filter -i /tmp/lofreq2-call-dyn-bonf.UG6reA -o /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/variants/Test5_snv.vcf --snvqual-thresh 51 --indelqual-thresh 20
+Number of substitution tests performed: 1461
+Number of indel tests performed: 0
+Successful exit.

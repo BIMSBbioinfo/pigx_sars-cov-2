@@ -1,0 +1,58 @@
+## ENSEMBL VARIANT EFFECT PREDICTOR v103.1
+## Output produced at 2022-02-18 12:41:38
+## Using cache in /local/Projects/AAkalin_pathogenomics/databases/vep_db/sars_cov_2/101_ASM985889v3
+## Using API version 103, DB version ?
+## assembly version ASM985889v3
+## genebuild version 2020-04
+## Column descriptions:
+## Uploaded_variation : Identifier of uploaded variant
+## Location : Location of variant in standard coordinate format (chr:start or chr:start-end)
+## Allele : The variant allele used to calculate the consequence
+## Gene : Stable ID of affected gene
+## Feature : Stable ID of feature
+## Feature_type : Type of feature - Transcript, RegulatoryFeature or MotifFeature
+## Consequence : Consequence type
+## cDNA_position : Relative position of base pair in cDNA sequence
+## CDS_position : Relative position of base pair in coding sequence
+## Protein_position : Relative position of amino acid in protein
+## Amino_acids : Reference and variant amino acids
+## Codons : Reference and variant codon sequence
+## Existing_variation : Identifier(s) of co-located known variants
+## Extra column keys:
+## IMPACT : Subjective impact classification of consequence type
+## DISTANCE : Shortest distance from variant to transcript
+## STRAND : Strand of the feature (1/-1)
+## FLAGS : Transcript quality flags
+## SYMBOL : Gene symbol (e.g. HGNC)
+## SYMBOL_SOURCE : Source of gene symbol
+## HGNC_ID : Stable identifer of HGNC gene symbol
+## BIOTYPE : Biotype of transcript or regulatory feature
+## MANE_SELECT : MANE Select (Matched Annotation from NCBI and EMBL-EBI) Transcript
+## MANE_PLUS_CLINICAL : MANE Plus Clinical (Matched Annotation from NCBI and EMBL-EBI) Transcript
+## TSL : Transcript support level
+## APPRIS : Annotates alternatively spliced transcripts as primary or alternate based on a range of computational methods
+## ENSP : Protein identifer
+## CLIN_SIG : ClinVar clinical significance of the dbSNP variant
+## SOMATIC : Somatic status of existing variant
+## PHENO : Indicates if existing variant(s) is associated with a phenotype, disease or trait; multiple values correspond to multiple variants
+#Uploaded_variation	Location	Allele	Gene	Feature	Feature_type	Consequence	cDNA_position	CDS_position	Protein_position	Amino_acids	Codons	Existing_variation	Extra
+NC_045512.2_27972_C/T	NC_045512.2:27972	T	ENSSASG00005000004	ENSSAST00005000004.1	Transcript	downstream_gene_variant	-	-	-	-	-	-	IMPACT=MODIFIER;DISTANCE=2588;STRAND=1;SYMBOL=S;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000004
+NC_045512.2_27972_C/T	NC_045512.2:27972	T	ENSSASG00005000005	ENSSAST00005000005.1	Transcript	upstream_gene_variant	-	-	-	-	-	-	IMPACT=MODIFIER;DISTANCE=302;STRAND=1;SYMBOL=N;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000005
+NC_045512.2_27972_C/T	NC_045512.2:27972	T	ENSSASG00005000006	ENSSAST00005000006.1	Transcript	downstream_gene_variant	-	-	-	-	-	-	IMPACT=MODIFIER;DISTANCE=1752;STRAND=1;SYMBOL=ORF3a;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000006
+NC_045512.2_27972_C/T	NC_045512.2:27972	T	ENSSASG00005000007	ENSSAST00005000007.1	Transcript	downstream_gene_variant	-	-	-	-	-	-	IMPACT=MODIFIER;DISTANCE=781;STRAND=1;SYMBOL=M;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000007
+NC_045512.2_27972_C/T	NC_045512.2:27972	T	ENSSASG00005000008	ENSSAST00005000008.1	Transcript	stop_gained	79	79	27	Q/*	Caa/Taa	-	IMPACT=HIGH;STRAND=1;SYMBOL=ORF8;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000008
+NC_045512.2_27972_C/T	NC_045512.2:27972	T	ENSSASG00005000009	ENSSAST00005000009.1	Transcript	downstream_gene_variant	-	-	-	-	-	-	IMPACT=MODIFIER;DISTANCE=213;STRAND=1;SYMBOL=ORF7a;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000009
+NC_045512.2_27972_C/T	NC_045512.2:27972	T	ENSSASG00005000010	ENSSAST00005000010.1	Transcript	downstream_gene_variant	-	-	-	-	-	-	IMPACT=MODIFIER;DISTANCE=1500;STRAND=1;SYMBOL=E;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000010
+NC_045512.2_27972_C/T	NC_045512.2:27972	T	ENSSASG00005000011	ENSSAST00005000011.1	Transcript	downstream_gene_variant	-	-	-	-	-	-	IMPACT=MODIFIER;DISTANCE=585;STRAND=1;SYMBOL=ORF6;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000011
+NC_045512.2_27972_C/T	NC_045512.2:27972	T	ENSSASG00005000012	ENSSAST00005000012.1	Transcript	downstream_gene_variant	-	-	-	-	-	-	IMPACT=MODIFIER;DISTANCE=85;STRAND=1;SYMBOL=ORF7b;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000012
+NC_045512.2_27972_C/T	NC_045512.2:27972	T	ENSSASG00005000013	ENSSAST00005000013.1	Transcript	upstream_gene_variant	-	-	-	-	-	-	IMPACT=MODIFIER;DISTANCE=1586;STRAND=1;SYMBOL=ORF10;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000013
+NC_045512.2_28048_G/T	NC_045512.2:28048	T	ENSSASG00005000004	ENSSAST00005000004.1	Transcript	downstream_gene_variant	-	-	-	-	-	-	IMPACT=MODIFIER;DISTANCE=2664;STRAND=1;SYMBOL=S;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000004
+NC_045512.2_28048_G/T	NC_045512.2:28048	T	ENSSASG00005000005	ENSSAST00005000005.1	Transcript	upstream_gene_variant	-	-	-	-	-	-	IMPACT=MODIFIER;DISTANCE=226;STRAND=1;SYMBOL=N;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000005
+NC_045512.2_28048_G/T	NC_045512.2:28048	T	ENSSASG00005000006	ENSSAST00005000006.1	Transcript	downstream_gene_variant	-	-	-	-	-	-	IMPACT=MODIFIER;DISTANCE=1828;STRAND=1;SYMBOL=ORF3a;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000006
+NC_045512.2_28048_G/T	NC_045512.2:28048	T	ENSSASG00005000007	ENSSAST00005000007.1	Transcript	downstream_gene_variant	-	-	-	-	-	-	IMPACT=MODIFIER;DISTANCE=857;STRAND=1;SYMBOL=M;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000007
+NC_045512.2_28048_G/T	NC_045512.2:28048	T	ENSSASG00005000008	ENSSAST00005000008.1	Transcript	missense_variant	155	155	52	R/I	aGa/aTa	-	IMPACT=MODERATE;STRAND=1;SYMBOL=ORF8;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000008
+NC_045512.2_28048_G/T	NC_045512.2:28048	T	ENSSASG00005000009	ENSSAST00005000009.1	Transcript	downstream_gene_variant	-	-	-	-	-	-	IMPACT=MODIFIER;DISTANCE=289;STRAND=1;SYMBOL=ORF7a;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000009
+NC_045512.2_28048_G/T	NC_045512.2:28048	T	ENSSASG00005000010	ENSSAST00005000010.1	Transcript	downstream_gene_variant	-	-	-	-	-	-	IMPACT=MODIFIER;DISTANCE=1576;STRAND=1;SYMBOL=E;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000010
+NC_045512.2_28048_G/T	NC_045512.2:28048	T	ENSSASG00005000011	ENSSAST00005000011.1	Transcript	downstream_gene_variant	-	-	-	-	-	-	IMPACT=MODIFIER;DISTANCE=661;STRAND=1;SYMBOL=ORF6;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000011
+NC_045512.2_28048_G/T	NC_045512.2:28048	T	ENSSASG00005000012	ENSSAST00005000012.1	Transcript	downstream_gene_variant	-	-	-	-	-	-	IMPACT=MODIFIER;DISTANCE=161;STRAND=1;SYMBOL=ORF7b;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000012
+NC_045512.2_28048_G/T	NC_045512.2:28048	T	ENSSASG00005000013	ENSSAST00005000013.1	Transcript	upstream_gene_variant	-	-	-	-	-	-	IMPACT=MODIFIER;DISTANCE=1510;STRAND=1;SYMBOL=ORF10;SYMBOL_SOURCE=EntrezGene;BIOTYPE=protein_coding;ENSP=ENSSASP00005000013

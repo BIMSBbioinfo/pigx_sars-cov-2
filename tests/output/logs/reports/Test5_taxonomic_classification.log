@@ -1,0 +1,36 @@
+
+
+processing file: taxonomic_classification.Rmd
+  |                                                                              |                                                                      |   0%  |                                                                              |..........                                                            |  14%
+   inline R code fragments
+
+  |                                                                              |....................                                                  |  29%
+label: libs (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |..............................                                        |  43%
+   inline R code fragments
+
+  |                                                                              |........................................                              |  57%
+label: plot table (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |..................................................                    |  71%
+  ordinary text without R code
+
+  |                                                                              |............................................................          |  86%
+label: plot example_table (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |......................................................................| 100%
+  ordinary text without R code
+
+
+output file: /tmp/RtmpsQq2dw/dir15453b9fa200/taxonomic_classification.knit.md
+
+/home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/pigx_work/bin/pandoc +RTS -K512m -RTS /tmp/RtmpsQq2dw/dir15453b9fa200/taxonomic_classification.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/report/Test5.taxonomic_classification.html --lua-filter /gnu/store/rivgmzfbqm0sgg5l3yyqp6y371lvhpcn-r-rmarkdown-2.11/site-library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /gnu/store/rivgmzfbqm0sgg5l3yyqp6y371lvhpcn-r-rmarkdown-2.11/site-library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_smooth_scroll=1 --variable toc_print=1 --template /gnu/store/rivgmzfbqm0sgg5l3yyqp6y371lvhpcn-r-rmarkdown-2.11/site-library/rmarkdown/rmd/h/default.html --highlight-style monochrome --number-sections --variable theme=lumen --css /tmp/RtmpsQq2dw/file154567aeb7adcss --include-in-header /tmp/RtmpsQq2dw/rmarkdown-str1545408d0aae.html --mathjax --variable 'mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --variable code_folding=hide --variable code_menu=1 --include-before-body /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/report/_navbar.html 
+
+Output created: report/Test5.taxonomic_classification.html

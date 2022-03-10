@@ -1,0 +1,69 @@
+
+
+processing file: qc_report_per_sample.Rmd
+  |                                                                              |                                                                      |   0%  |                                                                              |......                                                                |   9%
+   inline R code fragments
+
+  |                                                                              |.............                                                         |  18%
+label: setup (with options) 
+List of 3
+ $ include: logi FALSE
+ $ message: logi FALSE
+ $ warning: logi FALSE
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+  |                                                                              |...................                                                   |  27%
+  ordinary text without R code
+
+  |                                                                              |.........................                                             |  36%
+label: reading data (with options) 
+List of 1
+ $ include: logi FALSE
+
+  |                                                                              |................................                                      |  45%
+  ordinary text without R code
+
+  |                                                                              |......................................                                |  55%
+label: amplicon_coverage (with options) 
+List of 3
+ $ message: logi FALSE
+ $ warning: logi FALSE
+ $ echo   : logi FALSE
+
+  |                                                                              |.............................................                         |  64%
+  ordinary text without R code
+
+  |                                                                              |...................................................                   |  73%
+label: read_coverage (with options) 
+List of 3
+ $ message: logi FALSE
+ $ warning: logi FALSE
+ $ echo   : logi FALSE
+
+  |                                                                              |.........................................................             |  82%
+   inline R code fragments
+
+  |                                                                              |................................................................      |  91%
+label: data_download (with options) 
+List of 1
+ $ include: logi FALSE
+
+  |                                                                              |......................................................................| 100%
+   inline R code fragments
+
+
+output file: /tmp/Rtmp4ddbf4/dir158d726d9d22/qc_report_per_sample.knit.md
+
+/home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/pigx_work/bin/pandoc +RTS -K512m -RTS /tmp/Rtmp4ddbf4/dir158d726d9d22/qc_report_per_sample.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/report/Test2.qc_report_per_sample.html --lua-filter /gnu/store/rivgmzfbqm0sgg5l3yyqp6y371lvhpcn-r-rmarkdown-2.11/site-library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /gnu/store/rivgmzfbqm0sgg5l3yyqp6y371lvhpcn-r-rmarkdown-2.11/site-library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_smooth_scroll=1 --variable toc_print=1 --template /gnu/store/rivgmzfbqm0sgg5l3yyqp6y371lvhpcn-r-rmarkdown-2.11/site-library/rmarkdown/rmd/h/default.html --highlight-style monochrome --number-sections --variable theme=lumen --css /tmp/Rtmp4ddbf4/file158d7433dd6css --include-in-header /tmp/Rtmp4ddbf4/rmarkdown-str158d1f412dd5.html --mathjax --variable 'mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --variable code_folding=hide --variable code_menu=1 --include-before-body /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/report/_navbar.html 
+
+Output created: report/Test2.qc_report_per_sample.html

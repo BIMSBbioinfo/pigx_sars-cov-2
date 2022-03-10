@@ -1,0 +1,6 @@
+Module	Section	Sample Name	Source
+FastQC	all_sections	Test2_R1	/home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/report/fastqc/Test2/Test2_R1_fastqc.zip
+FastQC	all_sections	Test2_trimmed_R2	/home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/report/fastqc/Test2/Test2_trimmed_R2_fastqc.zip
+FastQC	all_sections	Test2_R2	/home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/report/fastqc/Test2/Test2_R2_fastqc.zip
+FastQC	all_sections	Test2_trimmed_R1	/home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/report/fastqc/Test2/Test2_trimmed_R1_fastqc.zip
+FastQC	all_sections	Test2_aligned_sorted_primer-trimmed_sorted	/home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/report/fastqc/Test2/Test2_aligned_sorted_primer-trimmed_sorted_fastqc.zip

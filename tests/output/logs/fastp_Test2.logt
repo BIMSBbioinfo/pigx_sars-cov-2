@@ -1,0 +1,41 @@
+Read1 before filtering:
+total reads: 15000
+total bases: 3765000
+Q20 bases: 3380980(89.8003%)
+Q30 bases: 3248068(86.2701%)
+
+Read2 before filtering:
+total reads: 15000
+total bases: 3765000
+Q20 bases: 3198830(84.9623%)
+Q30 bases: 3029691(80.4699%)
+
+Read1 after filtering:
+total reads: 14352
+total bases: 3065085
+Q20 bases: 2974377(97.0406%)
+Q30 bases: 2927950(95.5259%)
+
+Read2 aftering filtering:
+total reads: 14352
+total bases: 3066335
+Q20 bases: 2918016(95.163%)
+Q30 bases: 2851037(92.9787%)
+
+Filtering result:
+reads passed filter: 28704
+reads failed due to low quality: 1156
+reads failed due to too many N: 0
+reads failed due to too short: 140
+reads with adapter trimmed: 7413
+bases trimmed due to adapters: 1092215
+
+Duplication rate: 48.8534%
+
+Insert size peak (evaluated by paired-end reads): 380
+
+JSON report: fastp.json
+HTML report: fastp.html
+
+/gnu/store/xy33vjzv0lapn111x7qw16fa8kmcqvqw-profile/bin/fastp --adapter_sequence=AGATCGGAAGAGCACACGTCTGAACTCCAGTCA --adapter_sequence_r2=AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT -i /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/sample_data/reads/Test2_R1.fastq.gz -I /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/sample_data/reads/Test2_R2.fastq.gz -o /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/trimmed_reads/Test2_trimmed_R1.fastq.gz -O /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/trimmed_reads/Test2_trimmed_R2.fastq.gz 
+fastp v0.20.1, time used: 1 seconds

@@ -1,0 +1,231 @@
+
+
+processing file: variantreport_p_sample.Rmd
+  |                                                                              |                                                                      |   0%  |                                                                              |..                                                                    |   3%
+   inline R code fragments
+
+  |                                                                              |....                                                                  |   6%
+label: libs (with options) 
+List of 3
+ $ include: logi FALSE
+ $ message: logi FALSE
+ $ warning: logi FALSE
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Loading required package: MASS
+
+Attaching package: 'MASS'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+Loading required package: minpack.lm
+Loading required package: rgl
+Loading required package: robustbase
+Loading required package: Matrix
+
+Attaching package: 'Matrix'
+
+The following objects are masked from 'package:tidyr':
+
+    expand, pack, unpack
+
+
+Attaching package: 'magrittr'
+
+The following object is masked from 'package:tidyr':
+
+    extract
+
+  |                                                                              |.......                                                               |   9%
+  ordinary text without R code
+
+  |                                                                              |.........                                                             |  12%
+label: printInputSettings (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |...........                                                           |  16%
+  ordinary text without R code
+
+  |                                                                              |.............                                                         |  19%
+label: function_parse_snv_csv (with options) 
+List of 3
+ $ include: logi FALSE
+ $ warning: logi FALSE
+ $ message: logi FALSE
+
+  |                                                                              |...............                                                       |  22%
+  ordinary text without R code
+
+  |                                                                              |..................                                                    |  25%
+label: process_signature_mutations (with options) 
+List of 3
+ $ message: logi FALSE
+ $ warning: logi FALSE
+ $ include: logi FALSE
+
+  |                                                                              |....................                                                  |  28%
+  ordinary text without R code
+
+  |                                                                              |......................                                                |  31%
+label: match_snvs_to_signature_mutations (with options) 
+List of 3
+ $ message: logi FALSE
+ $ warning: logi FALSE
+ $ include: logi FALSE
+
+  |                                                                              |........................                                              |  34%
+  ordinary text without R code
+
+  |                                                                              |..........................                                            |  38%
+label: merge_vep_with_lofreq_info (with options) 
+List of 3
+ $ message: logi FALSE
+ $ warning: logi FALSE
+ $ include: logi FALSE
+
+  |                                                                              |............................                                          |  41%
+  ordinary text without R code
+
+  |                                                                              |...............................                                       |  44%
+label: unnamed-chunk-1 (with options) 
+List of 4
+ $ message: logi FALSE
+ $ warning: logi FALSE
+ $ echo   : logi FALSE
+ $ results: chr "asis"
+
+  |                                                                              |.................................                                     |  47%
+label: sig_table (with options) 
+List of 4
+ $ message: logi FALSE
+ $ warning: logi FALSE
+ $ echo   : logi FALSE
+ $ results: chr "asis"
+
+  |                                                                              |...................................                                   |  50%
+label: nonsig_table (with options) 
+List of 4
+ $ message: logi FALSE
+ $ warning: logi FALSE
+ $ echo   : logi FALSE
+ $ results: chr "asis"
+
+  |                                                                              |.....................................                                 |  53%
+label: non_sig_table (with options) 
+List of 4
+ $ message: logi FALSE
+ $ warning: logi FALSE
+ $ echo   : logi FALSE
+ $ results: chr "asis"
+
+  |                                                                              |.......................................                               |  56%
+  ordinary text without R code
+
+  |                                                                              |..........................................                            |  59%
+label: getting_unique_muts_bulk (with options) 
+List of 3
+ $ message: logi FALSE
+ $ warning: logi FALSE
+ $ include: logi FALSE
+
+  |                                                                              |............................................                          |  62%
+  ordinary text without R code
+
+  |                                                                              |..............................................                        |  66%
+label: creating_signature_matrix (with options) 
+List of 4
+ $ message: logi FALSE
+ $ warning: logi FALSE
+ $ include: logi FALSE
+ $ eval   : logi FALSE
+
+  |                                                                              |................................................                      |  69%
+label: calculate_sigmat_weigths (with options) 
+List of 4
+ $ message: logi FALSE
+ $ warning: logi FALSE
+ $ include: logi FALSE
+ $ eval   : logi FALSE
+
+  |                                                                              |..................................................                    |  72%
+label: simulating_WT_mutations (with options) 
+List of 4
+ $ message: logi FALSE
+ $ warning: logi FALSE
+ $ include: logi FALSE
+ $ eval   : logi FALSE
+
+  |                                                                              |....................................................                  |  75%
+  ordinary text without R code
+
+  |                                                                              |.......................................................               |  78%
+label: deconvolution (with options) 
+List of 4
+ $ message: logi FALSE
+ $ warning: logi FALSE
+ $ include: logi FALSE
+ $ eval   : logi FALSE
+
+  |                                                                              |.........................................................             |  81%
+   inline R code fragments
+
+  |                                                                              |...........................................................           |  84%
+label: plot (with options) 
+List of 4
+ $ message: logi FALSE
+ $ warning: logi FALSE
+ $ echo   : logi FALSE
+ $ eval   : logi FALSE
+
+  |                                                                              |.............................................................         |  88%
+  ordinary text without R code
+
+  |                                                                              |...............................................................       |  91%
+label: download_raw (with options) 
+List of 1
+ $ include: logi FALSE
+
+  |                                                                              |..................................................................    |  94%
+   inline R code fragments
+
+  |                                                                              |....................................................................  |  97%
+label: csv_output_variant_plot (with options) 
+List of 2
+ $ include: logi FALSE
+ $ eval   : logi FALSE
+
+  |                                                                              |......................................................................| 100%
+label: csv_output_mutation_plot (with options) 
+List of 3
+ $ message: logi FALSE
+ $ warning: logi FALSE
+ $ include: logi FALSE
+
+`summarise()` has grouped output by 'gene_pos', 'cov', 'gene_mut_loc.1', 'gene_mut_loc.2', 'gene_mut_loc.3', 'prot_mut_loc', 'AAs.1', 'AAs.2', 'Conseq', 'genes', 'AA_mut'. You can override using the `.groups` argument.
+
+output file: /tmp/RtmpH7XPpJ/dir151c13caaff5/variantreport_p_sample.knit.md
+
+/home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/pigx_work/bin/pandoc +RTS -K512m -RTS /tmp/RtmpH7XPpJ/dir151c13caaff5/variantreport_p_sample.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/report/Test5.variantreport_p_sample.html --lua-filter /gnu/store/rivgmzfbqm0sgg5l3yyqp6y371lvhpcn-r-rmarkdown-2.11/site-library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /gnu/store/rivgmzfbqm0sgg5l3yyqp6y371lvhpcn-r-rmarkdown-2.11/site-library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_smooth_scroll=1 --variable toc_print=1 --template /gnu/store/rivgmzfbqm0sgg5l3yyqp6y371lvhpcn-r-rmarkdown-2.11/site-library/rmarkdown/rmd/h/default.html --highlight-style monochrome --number-sections --variable theme=lumen --css /tmp/RtmpH7XPpJ/file151c44bd5532css --include-in-header /tmp/RtmpH7XPpJ/rmarkdown-str151c3bc29b9c.html --mathjax --variable 'mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --variable code_folding=hide --variable code_menu=1 --include-before-body /home/vschuma/pathogenomics/pigx_ww/pigx_sarscov_ww_noprimertrimm/pigx_sarscov2_ww/tests/output/report/_navbar.html 
+
+Output created: report/Test5.variantreport_p_sample.html
+Warning messages:
+1: In rgl.init(initValue, onlyNULL) : RGL: unable to open X11 display
+2: 'rgl.init' failed, running with 'rgl.useNULL = TRUE'. 
+3: `as_data_frame()` was deprecated in tibble 2.0.0.
+Please use `as_tibble()` instead.
+The signature and semantics have changed, see `?as_tibble`.
+This warning is displayed once every 8 hours.
+Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated. 

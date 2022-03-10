@@ -288,21 +288,6 @@ rule bwa_align:
     log: os.path.join(LOG_DIR, 'bwa_align_{sample}.log')
     shell: "{BWA_EXEC} mem -t {params.threads} {input.ref} {input.fastq} > {output} 2>> {log} 3>&2"
 
-rule samtools_filter_aligned:
-    input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_tmp.sam')
-    output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned.bam')
-    log: os.path.join(LOG_DIR, 'samtools_filter_aligned_{sample}.log')
-    shell: """
-            {SAMTOOLS_EXEC} view -h -F 4 {input} |
-            {SAMTOOLS_EXEC} view -bh -F 2048 - > {output} 2>> {log} 3>&2
-           """
-
-rule samtools_filter_unaligned:
-    input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_tmp.sam')
-    output: os.path.join(MAPPED_READS_DIR, '{sample}_unaligned.bam')
-    log: os.path.join(LOG_DIR, 'samtools_filter_unaligned_{sample}.log')
-    shell: "{SAMTOOLS_EXEC} view -bh -F 2 {input} > {output} 2>> {log} 3>&2"
-
 
 rule samtools_sort_preprimertrim:
     input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned.bam')
@@ -524,26 +509,6 @@ rule generate_navbar:
     log: os.path.join(LOG_DIR, "generate_navigation.log")
     shell: "{RSCRIPT_EXEC} {input.script} \
 {params.report_scripts_dir} {SAMPLE_SHEET_CSV} {output} > {log} 2>&1"
-
-
-rule render_kraken2_report:
-    input:
-      script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
-      report=os.path.join(SCRIPTS_DIR, "report_scripts", "taxonomic_classification.Rmd"),
-      header=os.path.join(REPORT_DIR, "_navbar.html"),
-      kraken=os.path.join(KRAKEN_DIR, "{sample}_classified_unaligned_reads.txt"),
-      krona=os.path.join(REPORT_DIR, "{sample}.Krona_report.html")
-    output: os.path.join(REPORT_DIR, "{sample}.taxonomic_classification.html")
-    log: os.path.join(LOG_DIR, "reports", "{sample}_taxonomic_classification.log")
-    shell: """{RSCRIPT_EXEC} {input.script} \
-{input.report} {output} {input.header} \
-'{{\
-  "sample_name": "{wildcards.sample}",  \
-  "site_dir":    "{REPORT_DIR}",        \
-  "krona_file":  "{input.krona}",       \
-  "kraken_file": "{input.kraken}",      \
-  "logo": "{LOGO}" \
-}}' > {log} 2>&1"""
 
 
 rule render_variant_report:

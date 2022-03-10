@@ -1,0 +1,4 @@
+"samplename","date","raw_reads1","raw_reads2","reads_r1","reads_r2","total_reads","read_num_trimmed_r1","read_num_trimmed_r2","unaligned_reads_from_file","aligned_reads","num_sigmuts_covered","percentage_refgenome_covered","unaligned_reads_by_calc","reads_removed_by_QC"
+"Test0","2021-01-01T08:00:00","Test0_R1.fastq.gz","Test0_R2.fastq.gz",15000,15000,30000,14909,14909,1772,"28046","94","97.6725",1954,182
+"Test2","2021-01-03T08:00:00","Test2_R1.fastq.gz","Test2_R2.fastq.gz",15000,15000,30000,14352,14352,13556,"15148","83","83.0853",14852,1296
+"Test5","2021-03-05T20:00:00","Test5_R1.fastq.gz","Test5_R2.fastq.gz",15000,15000,30000,14727,14727,5276,"24178","21","17.3294",5822,546
