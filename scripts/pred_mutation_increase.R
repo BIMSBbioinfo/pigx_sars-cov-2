@@ -76,7 +76,7 @@ refined_lm_model <- function( mutations.df ){
   
   lm_res.df <- lm_res.df %>%
                 # split the suffix from the model away
-                mutate(mutation = str_split(mutation, ".tmp", simplify = TRUE)[,1]) %>%
+                mutate(mutation = str_remove(mutation, ".tmp.*")) %>%
                 # join coeffs and pvalues togehter
                 left_join(coeff_df, by = "mutation")
   
