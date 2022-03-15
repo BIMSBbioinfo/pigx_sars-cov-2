@@ -69,7 +69,6 @@ TESTS = \
 clean-local:
 	-rm -rf .snakemake
 	-rm -rf tests/output
-	-rm -rf tests/output_se
 
 CLEANFILES = $(nodist_bin_SCRIPTS) config.json
 
