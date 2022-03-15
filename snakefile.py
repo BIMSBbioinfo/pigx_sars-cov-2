@@ -297,9 +297,12 @@ rule bwa_align:
 rule samtools_filter_aligned:
     input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_tmp.sam')
     output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned.bam')
+    params:
+        # add 'proper-pair' filter (-f 2) if sample is paired-end
+        proper_pair = lambda wc: "-f 2" if len(trim_reads_input(wc))>1 else ""
     log: os.path.join(LOG_DIR, 'samtools_filter_aligned_{sample}.log')
     shell: # exclude (F) reads that are not mapped (4) and supplementary (2048)
-        "{SAMTOOLS_EXEC} view -bh -F 4 -F 2048 {input} > {output} 2>> {log} 3>&2"
+        "{SAMTOOLS_EXEC} view -bh {params.proper_pair} -F 4 -F 2048 {input} > {output} 2>> {log} 3>&2"
 
 rule samtools_filter_unaligned:
     input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_tmp.sam')
