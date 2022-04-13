@@ -8,7 +8,7 @@ META
 configure
 config.log
 config.status
-pigx-sars-cov2-ww
+pigx-sars-cov-2
 Makefile.in
 Makefile
 autom4te.cache/
