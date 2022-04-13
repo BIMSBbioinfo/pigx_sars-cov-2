@@ -86,7 +86,14 @@ All of these dependencies must be present in the environment at
 configuration time.
 </details>
 
-Then you can use the buildsteps:  
+You will also need to fetch code that is common to all PiGx pipelines by running this:
+
+```sh
+git submodule update --init
+```
+
+Then follow the usual build steps of the GNU build system:
+
 ```sh
 ./bootstrap.sh # to generate the "configure" script
 ./configure
