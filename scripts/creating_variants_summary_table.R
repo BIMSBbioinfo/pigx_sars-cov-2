@@ -7,13 +7,10 @@ get_files <- function ( variants_dir){
   return (files)
 }
 
-create_summary <- function ( files, output_file ){
+create_summary <- function ( files ){
 
   cat(paste("Summarizing", length(files), "variant files."))
-    # write to output file
-    write.table(output_df, output_file, sep = "\t",
-          row.names = FALSE, quote = FALSE)
-  }
+
   # read files into list
   variants_list <- lapply(X = files,
                           FUN = read.table,
@@ -29,6 +26,9 @@ create_summary <- function ( files, output_file ){
                                                     all.x = TRUE ,
                                                     all.y = TRUE),
                             x = variants_list)
+
+  return(merged_variants)
+
 }
 
 args <- commandArgs (trailingOnly=TRUE)
@@ -36,4 +36,6 @@ variants_dir <- args[1]
 output_file <- args[2]
 
 files <- get_files( variants_dir )
-create_summary( files, output_file )
+output <- create_summary( files)
+# write to output file
+write.table(output, output_file, sep = "\t", row.names = FALSE, quote = FALSE)
