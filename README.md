@@ -44,7 +44,7 @@ If you don't have GNU Guix on your system you can also consider using [GNU Guix 
 ## Installation from source
 
 You can also install PiGx-SARS-CoV-2 from source manually. Make sure that all the required dependencies (for this see e.g [configure.ac](https://github.com/BIMSBbioinfo/pigx_sars-cov-2/blob/main/configure.ac))
-are installed e.g. by installing them through a package manager like Conda. However, we can highly recommend using Guix (see above)
+are installed e.g. by installing them through a package manager like Guix or Conda.  We recommend using Guix to install the complete pipeline (see above).
 
 <details>
     <summary> The following tools must be available (latest version): </summary>
