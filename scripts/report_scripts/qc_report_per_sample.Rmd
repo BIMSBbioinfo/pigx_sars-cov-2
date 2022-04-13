@@ -85,14 +85,8 @@ Download: [MultiQC report of raw and processed data](`r params$multiqc_report`)
 
 ## Trimming
 
-To improve alignment rates and mutation calling proper trimming of reads should be considered e.g. based on the provided
-fastqc-reports. Read preprocessing is performed by [*Prinseq*](http://prinseq.sourceforge.net/index.html).
-
-This sample was processed with these settings:
-
-|      |     |  
-|:-----|:----|  
-|trim length cutoff prinseq |0.2|
+To improve alignment rates and mutation calling, proper trimming of reads should be considered e.g. based on the provided
+fastqc-reports.
 
 # Download Stats csv
 ```{r data_download, include = F}
