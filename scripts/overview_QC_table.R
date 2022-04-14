@@ -1,6 +1,6 @@
 library(dplyr)
 library(R.utils)
-require(stringr)
+library(stringr)
 
 concat_overview_table <- function ( sample_sheet, reads_dir, sample_dir ) {
   
