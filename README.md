@@ -18,7 +18,7 @@ which provides an intuitive visual overview about the development of variant abu
 (see our [example report](https://github.com/BIMSBbioinfo/pigx_sars-cov-2#sample-reports)).
 Additionally there will be more detailed reports per sample, which cover the quality control of the samples, 
 the detected variants and a taxonomic classification of all unaligned reads. This version of the pipeline was designed 
-to work with paired-end amplicon sequencing data generated using the ARTIC nCoV-2019 primers.
+to work with single- and paired-end amplicon sequencing data generated using the ARTIC nCoV-2019 primers. But it works with any set of primer.
 
 Features to enable e.g. single-end input are currently under development. We are happy to hear about any other feature 
 request! Please consider using the Issue Tracker for this. 
