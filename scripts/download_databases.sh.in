@@ -14,7 +14,7 @@ function install_kraken_db {
     @WGET@ -qO- https://genome-idx.s3.amazonaws.com/kraken/k2_pluspfp_20210127.tar.gz | tar -C $DBNAME -xzv
 
     # Use the following two lines to use smaller 8GB version instead.
-    # @WGET@ -qO- https://genome-idx.s3.amazonaws.com/kraken/k2_pluspfp_8gb_20210127.tar.gz | tar -C $DIR -xzv
+    # @WGET@ -qO- https://genome-idx.s3.amazonaws.com/kraken/k2_pluspfp_8gb_20210127.tar.gz | tar -C $DBNAME -xzv
 
     @KRAKEN2_BUILD@ --use-ftp --download-taxonomy --db $DBNAME
     @KRAKEN2_BUILD@ --build --db $DBNAME
