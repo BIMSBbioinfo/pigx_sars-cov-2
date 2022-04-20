@@ -519,7 +519,7 @@ rule krona_report:
     log: os.path.join(LOG_DIR, 'krona_report_{sample}.log')
     shell: "{IMPORT_TAXONOMY_EXEC} -m 3 -t 5 {input.kraken_output} -tax {input.database} -o {output} >> {log} 2>&1"
 
-# TODO: change amplicon naming to mutaiton site bc it's missleading
+# TODO: change amplicon naming to mutation site since it is misleading
 rule samtools_bedcov:
     input:
         mutations_bed = MUTATIONS_BED,
@@ -538,7 +538,7 @@ rule samtools_coverage:
     log: os.path.join(LOG_DIR, 'samtools_coverage_{sample}.log')
     shell: "{SAMTOOLS_EXEC} coverage {input.aligned_bam} > {output} 2>> {log} 3>&2"
 
-# TODO: change amplicon naming to mutation site bc it's missleading
+# TODO: change amplicon naming to mutation site because it is misleading
 rule get_qc_table:
     input:
         coverage_csv = os.path.join(COVERAGE_DIR, '{sample}_coverage.csv'),
