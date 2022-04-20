@@ -8,7 +8,7 @@ concat_overview_table <- function ( sample_sheet, reads_dir, sample_dir ) {
   # get read files matching samples
   # TODO No need for having the reads in different rows, since I'm always counting the whole alignment, or then count the read numbers for the single read files each...still...don't do this over multiple lines - and remove the read file columns afterwards for better readibility
   cat("get samples and reads from sample_sheet...\n")
-  read_counts <- read_files( sample_sheet.df)
+  read_counts <- parse_sample_sheet(sample_sheet.df)
   # get read number of raw reads
   cat("get num of total raw reads...\n ")
   read_counts$reads_r1 <- read_num_raw(read_counts$file_raw_reads1, reads_dir)$read_num
@@ -43,31 +43,30 @@ parse_amplicons <- function ( sample_sheet.df, sample_dir ){
   do.call(bind_rows, lapply(samples, apply_fun_parse_coverage_file, sample_dir = sample_dir))
 }
 
-read_files <- function ( sample_sheet.df ){
-  samples <- sample_sheet.df$name
-  do.call( bind_rows, lapply(samples, apply_fun_lookup, sample_sheet = sample_sheet.df))
-}
-
-apply_fun_lookup <- function ( sample, sample_sheet.df ){
-  sample_row <- which(sample_sheet.df$name == sample)
-  # works only for paired end for now - I don't know how to make num of returned read files conditional based on sample_sheet columns
-  # TODO make num of returend reads depended on paired or single end
-  sample_df <- data.frame(
-    samplename = sample,
-    date = sample_sheet.df[sample_row, "date"],
-    paired_end = sample_sheet.df[sample_row, "reads2"] != "",
-    file_raw_reads1 = sample_sheet.df[sample_row,"reads"],
-    file_raw_reads2 = sample_sheet.df[sample_row, "reads2"],
-    stringsAsFactors = FALSE
-  ) %>%
-    mutate(file_trimmed_reads_r1 = ifelse(paired_end,
-                                     paste0(sample,"_trimmed_R1.fastq.gz"),
-                                     paste0(sample, "_trimmed.fastq.gz")),
-           file_trimmed_reads_r2 = ifelse(paired_end,
-                                     paste0(sample,"_trimmed_R1.fastq.gz"),
-                                     ""),
-           file_unaligned_reads = paste0(sample,"_unaligned.fastq")
-           )
+parse_sample_sheet <- function(sample_sheet.df) {
+  # function to interpolate file paths for a given sample sheet
+  # works for single and paired end samples
+  sample_df <- sample_sheet.df %>%
+    select(
+      samplename,
+      date,
+      file_raw_reads1 = reads,
+      file_raw_reads2 = reads2
+    ) %>%
+    mutate(
+      paired_end = reads2 != ""
+    ) %>%
+    mutate(
+      file_trimmed_reads_r1 = ifelse(paired_end,
+        paste0(sample, "_trimmed_R1.fastq.gz"),
+        paste0(sample, "_trimmed.fastq.gz")
+      ),
+      file_trimmed_reads_r2 = ifelse(paired_end,
+        paste0(sample, "_trimmed_R1.fastq.gz"),
+        ""
+      ),
+      file_unaligned_reads = paste0(sample, "_unaligned.fastq")
+    )
 
   return(sample_df)
 }
