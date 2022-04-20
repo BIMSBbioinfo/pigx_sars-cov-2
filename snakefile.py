@@ -260,7 +260,6 @@ rule fastp_se:
     shell: """ 
         {FASTP_EXEC} -i {input[0]} -o {output.r} --html {output.html} --json {output.json} >> {log}t 2>&1
     """
-# !!! 03/01 Not tested if the report output works like that
 
 rule bwa_index:
     input: REFERENCE_FASTA
