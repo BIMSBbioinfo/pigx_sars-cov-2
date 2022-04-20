@@ -185,28 +185,23 @@ def map_input(args):
 def multiqc_input(args):
     sample = args[0]
     reads_files = [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
-    if len(reads_files) > 1:
-        files = [
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_pe_fastp.html'), sample = sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_pe_fastp.json'), sample = sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_R{read_num}_fastqc.html'), sample=sample, read_num=[1, 2]),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_R{read_num}_fastqc.zip'), sample=sample, read_num=[1, 2]),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.html'), sample=sample, read_num=[1, 2]),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.zip'), sample=sample, read_num=[1, 2]),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip'), sample = sample)
-        ]
-    elif len(reads_files) == 1:
-        files = [
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_se_fastp.html'), sample = sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_se_fastp.json'), sample = sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.html'), sample=sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.zip'), sample=sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.html'), sample=sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.zip'), sample=sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip'), sample = sample)
-        ]
+    # read_num is either ["_R1", "_R2"] or [""] depending on number of read files
+    read_num = ["_R" + str(f) if len(reads_files) > 1 else "" for f in range(1,len(reads_files)+1)]
+    se_or_pe = ["pe" if len(reads_files) > 1 else "se"]
+    files = [
+        # fastp on raw files
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_{end}_fastp.html'), sample = sample, end = se_or_pe),
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_{end}_fastp.json'), sample = sample, end = se_or_pe),
+        # fastqc on raw files
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}{read_num}_fastqc.html'), sample=sample, read_num=read_num),
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}{read_num}_fastqc.zip'), sample=sample, read_num=read_num),
+        # fastqc after trimming
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed{read_num}_fastqc.html'), sample=sample, read_num=read_num),
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed{read_num}_fastqc.zip'), sample=sample, read_num=read_num),
+        # fastqc after primer trimming
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample),
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip'), sample = sample)
+    ]
     return (list(chain.from_iterable(files)))
 
 
