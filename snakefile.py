@@ -237,7 +237,6 @@ rule get_primer_seqs:
         
 # TODO the output suffix should be dynamic depending on the input
 # TODO with the use of fastp the use of fastqc becomes partly reduntant, fastqc should be removed or adjusted
-# TODO it should be possible to add customized parameter
 rule fastp:
     input: trim_reads_input
     output:
