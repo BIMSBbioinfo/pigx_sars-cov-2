@@ -205,7 +205,7 @@ def multiqc_input(args):
     return (list(chain.from_iterable(files)))
 
 
-# WIP - until then use hack that create a single line in the lofreq output 
+# WIP - until then use hack that create a single line in the lofreq output
 def vep_input(args):
     sample = args[0]
     lofreq_output = rules.lofreq.output.vcf # this requires the file to be there already - I have no idea how to make the decision about the further input when it requires a rule to run beforhand
@@ -223,18 +223,18 @@ def vep_input(args):
             empty_snv_csv = os.path.join(VARIANTS_DIR, "{sample}_snv_empty.csv".format(sample=sample))
             Path( empty_snv_csv ).touch()
             return [empty_vep_txt, empty_snv_csv]
-        
+
 # Trimming in three steps: general by qual and cutoff, get remaining adapters out, get remaining primers out
 
 rule get_primer_seqs:
-    input: 
+    input:
         ref = REFERENCE_FASTA,
         bed = AMPLICONS_BED
     output: os.path.join(INDEX_DIR, "primer_sequences.fa") # is it ok to put it there it should it have it's own directory?
     log: os.path.join(LOG_DIR, "getfasta_primers.log")
     shell: "{BEDTOOLS_EXEC} getfasta -fi  {input.ref}\
             -bed {input.bed} -name > {output} 2>> {log} 3>&2"
-        
+
 # TODO the output suffix should be dynamic depending on the input
 # TODO with the use of fastp the use of fastqc becomes partly reduntant, fastqc should be removed or adjusted
 rule fastp:
@@ -256,7 +256,7 @@ rule fastp_se:
         html = os.path.join(FASTQC_DIR, '{sample}', '{sample}_se_fastp.html'),
         json = os.path.join(FASTQC_DIR, '{sample}', '{sample}_se_fastp.json')
     log: os.path.join(LOG_DIR, 'fastp_{sample}.log')
-    shell: """ 
+    shell: """
         {FASTP_EXEC} -i {input[0]} -o {output.r} --html {output.html} --json {output.json} >> {log}t 2>&1
     """
 
@@ -270,7 +270,7 @@ rule bwa_index:
         mkdir -p {INDEX_DIR};
         ln -sf {input} {INDEX_DIR};
         cd {INDEX_DIR};
-        {BWA_EXEC} index {output.ref} >> {log} 2>&1 
+        {BWA_EXEC} index {output.ref} >> {log} 2>&1
         """
 
 # alignment works with both single and paired-end files
@@ -317,19 +317,19 @@ rule samtools_index_preprimertrim:
     shell: "{SAMTOOLS_EXEC} index {input} {output} >> {log} 2>&1"
 
 rule ivar_primer_trim:
-    input: 
+    input:
         primers = AMPLICONS_BED,
         aligned_bam = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted.bam'),
         aligned_bai = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted.bai')
     output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed.bam')
     params:
-        output = os.path.join(MAPPED_READS_DIR, "{sample}_aligned_sorted_primer-trimmed") 
+        output = os.path.join(MAPPED_READS_DIR, "{sample}_aligned_sorted_primer-trimmed")
     log: os.path.join(LOG_DIR, 'ivar_{sample}.log')
     # TODO number parameter should be accessible over settings file
     shell: """
         {IVAR_EXEC} trim -b {input.primers} -p {params.output} -i {input.aligned_bam} -q 15 -m 180 -s 4 >> {log} 2>&1 """
 
-# Vic_0825: I don't know if this double sorting and indexing is really necessary but seemed to be since ivar as 
+# Vic_0825: I don't know if this double sorting and indexing is really necessary but seemed to be since ivar as
 # well as lofreq ask for sorted and indexed bam files
 
 rule samtools_sort_postprimertrim:
@@ -337,14 +337,14 @@ rule samtools_sort_postprimertrim:
     output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed_sorted.bam')
     log: os.path.join(LOG_DIR, 'samtools_sort_{sample}.log')
     shell: "{SAMTOOLS_EXEC} sort -o {output} {input} >> {log} 2>&1"
-    
+
 rule samtools_index_postprimertrim:
     input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed_sorted.bam')
     output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed_sorted.bai')
     log: os.path.join(LOG_DIR, 'samtools_index_{sample}.log')
     shell: "{SAMTOOLS_EXEC} index {input} {output} >> {log} 2>&1"
 
-# function to determine the extension of the input files 
+# function to determine the extension of the input files
 def fastq_ext(fastq_file):
     "Function to determine the fastq file extension"
     root, ext = os.path.splitext(fastq_file)
@@ -358,14 +358,14 @@ def fastq_ext(fastq_file):
 rule fastqc_raw_se:
     input: trim_reads_input
     output:
-        # all outputs are provided to ensure atomicity 
+        # all outputs are provided to ensure atomicity
         rep = os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.html'),
         zip = os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.zip'),
     log: os.path.join(LOG_DIR, 'fastqc_{sample}_raw.log')
     params:
         output_dir = os.path.join(FASTQC_DIR, '{sample}')
     run:
-        # renaming the ".fastq.gz" suffix to "_fastqc.html" 
+        # renaming the ".fastq.gz" suffix to "_fastqc.html"
         tmp_output = os.path.basename(input[0]).replace(fastq_ext(input[0]), '_fastqc.html')
         tmp_zip = os.path.basename(input[0]).replace(fastq_ext(input[0]), '_fastqc.zip')
         shell("""{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1;
@@ -373,7 +373,7 @@ rule fastqc_raw_se:
                     mv {params.output_dir}/{tmp_output} {output.rep} &&\
                     mv {params.output_dir}/{tmp_zip} {output.zip}
                 fi """)
- 
+
 # fixme: or discard completely and change multiqc to use fastp --> fastp rule would have to be adjusted to create reasonable outputs
 rule fastqc_raw:
     input: trim_reads_input
@@ -381,12 +381,12 @@ rule fastqc_raw:
         r1_rep = os.path.join(FASTQC_DIR, '{sample}', '{sample}_R1_fastqc.html'),
         r1_zip = os.path.join(FASTQC_DIR, '{sample}', '{sample}_R1_fastqc.zip'),
         r2_rep = os.path.join(FASTQC_DIR, '{sample}', '{sample}_R2_fastqc.html'),
-        r2_zip = os.path.join(FASTQC_DIR, '{sample}', '{sample}_R2_fastqc.zip') # all outputs are provided to ensure atomicity 
+        r2_zip = os.path.join(FASTQC_DIR, '{sample}', '{sample}_R2_fastqc.zip') # all outputs are provided to ensure atomicity
     log: [os.path.join(LOG_DIR, 'fastqc_{sample}_raw_R1.log'), os.path.join(LOG_DIR, 'fastqc_{sample}_raw_R2.log')]
     params:
         output_dir = os.path.join(FASTQC_DIR, '{sample}')
     run:
-        # renaming the ".fastq.gz" suffix to "_fastqc.html" 
+        # renaming the ".fastq.gz" suffix to "_fastqc.html"
         tmp_R1_output = os.path.basename(input[0]).replace(fastq_ext(input[0]), '_fastqc.html')
         tmp_R1_zip = os.path.basename(input[0]).replace(fastq_ext(input[0]),  '_fastqc.zip')
         tmp_R2_output = os.path.basename(input[1]).replace(fastq_ext(input[0]),'_fastqc.html')
@@ -398,8 +398,8 @@ rule fastqc_raw:
                     mv {params.output_dir}/{tmp_R2_output} {output.r2_rep} &&\
                     mv {params.output_dir}/{tmp_R2_zip} {output.r2_zip}
                 fi """)
- 
-# TODO: can probably be done by using map_input, no seperate functions neccessary?        
+
+# TODO: can probably be done by using map_input, no seperate functions neccessary?
 rule fastqc_trimmed_se:
     input: os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed.fastq.gz")
     output:
@@ -450,7 +450,7 @@ def no_variant_vep(sample, lofreq_output):
         print('adding dummy entry to vcf file, because no variants were found')
         open(lofreq_output.format(sample=sample), 'a').write(
             "NC_000000.0\t00\t.\tA\tA\t00\tPASS\tDP=0;AF=0;SB=0;DP4=0,0,0,0")
-        
+
 # TODO it should be possible to add customized parameter
 rule lofreq:
     input:
@@ -459,7 +459,7 @@ rule lofreq:
         ref = os.path.join(INDEX_DIR, "{}".format(os.path.basename(REFERENCE_FASTA)))
     output: vcf = os.path.join(VARIANTS_DIR, '{sample}_snv.vcf')
     log: os.path.join(LOG_DIR, 'lofreq_{sample}.log')
-    run: 
+    run:
         shell("{LOFREQ_EXEC} call -f {input.ref} -o {output} --verbose {input.aligned_bam} >> {log} 2>&1")
         # WIP create a dummy entry if no variant is found - use this as long as the input-function solution doesn't work
         no_variant_vep(wildcards.sample, output.vcf)
@@ -654,7 +654,7 @@ rule create_mutations_summary:
         """
 
 # TODO integrate the output of fastp.json to get the number of raw and trimmed reads
-rule create_overviewQC_table: 
+rule create_overviewQC_table:
     input:
         script = os.path.join(SCRIPTS_DIR, "overview_QC_table.R"),
         cov_summary = expand(os.path.join(COVERAGE_DIR, '{sample}_merged_covs.csv'), sample=SAMPLES)
@@ -685,7 +685,7 @@ rule render_index:
       fun_lm = os.path.join(SCRIPTS_DIR, 'pred_mutation_increase.R'),
       fun_tbls = os.path.join(SCRIPTS_DIR, 'table_extraction.R'),
       fun_pool = os.path.join(SCRIPTS_DIR, 'pooling.R')
-    output: report = os.path.join(REPORT_DIR, "index.html"), 
+    output: report = os.path.join(REPORT_DIR, "index.html"),
             tbl_mut_count = os.path.join(OUTPUT_DIR, "mutations_counts.csv"),
             tbl_lm_res = os.path.join(OUTPUT_DIR, "linear_regression_results.csv")
     log: os.path.join(LOG_DIR, "reports", "index.log")
