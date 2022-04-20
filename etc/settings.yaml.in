@@ -53,7 +53,7 @@ tools:
     args: ""
   Rscript:
     executable: @RSCRIPT@
-    args: "--vanilla --no-environ"
+    args: "--vanilla"
   samtools:
     executable: @SAMTOOLS@
     args: ""
