@@ -16,7 +16,7 @@ concat_overview_table <- function(sample_sheet,
                                     mapped_reads_dir,
                                     coverage_dir)
   # get read number of raw reads
-  cat("get num of total raw reads...\n ")
+  cat("get num of total raw reads...\n")
   read_counts <- read_counts %>%
     mutate(
       reads_r1 = read_num_fastq(file_raw_reads1),
