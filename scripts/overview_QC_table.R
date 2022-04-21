@@ -136,7 +136,7 @@ parse_amplicon_coverage <- function(samples, coverage_dir) {
 args <- commandArgs(trailingOnly = TRUE)
 sample_sheet <- args[1]
 output_file <- args[2]
-raw_reads_dir     <- args[5]
+raw_reads_dir     <- args[3]
 trimmed_reads_dir <- args[4]
 mapped_reads_dir  <- args[5]
 coverage_dir      <- args[6]
