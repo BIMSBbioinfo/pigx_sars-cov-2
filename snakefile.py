@@ -661,7 +661,7 @@ rule create_overviewQC_table:
     output:  os.path.join(OUTPUT_DIR, 'overview_QC.csv')
     log: os.path.join(LOG_DIR, "create_overviewQC_table.log")
     shell: """
-        {RSCRIPT_EXEC} {input.script} {OUTPUT_DIR} {SAMPLE_SHEET_CSV} {READS_DIR} {output} > {log} 2>&1
+        {RSCRIPT_EXEC} {input.script} {SAMPLE_SHEET_CSV} {output} {READS_DIR} {COVERAGE_DIR} {MAPPED_READS_DIR} {TRIMMED_READS_DIR}  > {log} 2>&1
     """
 
 rule render_index:

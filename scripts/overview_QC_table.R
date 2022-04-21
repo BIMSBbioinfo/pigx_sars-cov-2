@@ -2,8 +2,11 @@ library(dplyr)
 library(R.utils)
 library(stringr)
 
-concat_overview_table <- function ( sample_sheet, reads_dir, sample_dir ) {
-  
+concat_overview_table <- function(sample_sheet,
+                                  raw_reads_dir,
+                                  trimmed_reads_dir,
+                                  mapped_reads_dir,
+                                  coverage_dir) {
   sample_sheet.df <- read.csv(sample_sheet, header = TRUE, stringsAsFactors = FALSE)
   # get read files matching samples
   # TODO No need for having the reads in different rows, since I'm always counting the whole alignment, or then count the read numbers for the single read files each...still...don't do this over multiple lines - and remove the read file columns afterwards for better readibility
@@ -102,10 +105,16 @@ apply_fun_parse_coverage_file <- function ( sample, sample_dir ){
 }   
 
 args <- commandArgs(trailingOnly = TRUE)
-sample_dir <- args[1]
-sample_sheet <- args[2]
-reads_dir <- args[3]
-output <- args[4]
+sample_sheet <- args[1]
+output_file <- args[2]
+raw_reads_dir     <- args[5]
+trimmed_reads_dir <- args[4]
+mapped_reads_dir  <- args[5]
+coverage_dir      <- args[6]
 
-df <- concat_overview_table(sample_sheet, reads_dir, sample_dir)
-write.csv(df, output, row.names = FALSE)
+df <- concat_overview_table(sample_sheet,
+                            raw_reads_dir,
+                            trimmed_reads_dir,
+                            mapped_reads_dir,
+                            coverage_dir)
+write.csv(df, output_file, row.names = FALSE)
