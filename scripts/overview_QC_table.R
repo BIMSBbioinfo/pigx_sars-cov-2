@@ -9,9 +9,12 @@ concat_overview_table <- function(sample_sheet,
                                   coverage_dir) {
   sample_sheet.df <- read.csv(sample_sheet, header = TRUE, stringsAsFactors = FALSE)
   # get read files matching samples
-  # TODO No need for having the reads in different rows, since I'm always counting the whole alignment, or then count the read numbers for the single read files each...still...don't do this over multiple lines - and remove the read file columns afterwards for better readibility
   cat("get samples and reads from sample_sheet...\n")
-  read_counts <- parse_sample_sheet(sample_sheet.df)
+  read_counts <- parse_sample_sheet(sample_sheet.df,
+                                    raw_reads_dir,
+                                    trimmed_reads_dir,
+                                    mapped_reads_dir,
+                                    coverage_dir)
   # get read number of raw reads
   cat("get num of total raw reads...\n ")
   read_counts$reads_r1 <- read_num_raw(read_counts$file_raw_reads1, reads_dir)$read_num
@@ -46,29 +49,39 @@ parse_amplicons <- function ( sample_sheet.df, sample_dir ){
   do.call(bind_rows, lapply(samples, apply_fun_parse_coverage_file, sample_dir = sample_dir))
 }
 
-parse_sample_sheet <- function(sample_sheet.df) {
+parse_sample_sheet <- function(sample_sheet.df,
+                               raw_reads_dir,
+                               trimmed_reads_dir,
+                               mapped_reads_dir,
+                               coverage_dir) {
   # function to interpolate file paths for a given sample sheet
   # works for single and paired end samples
   sample_df <- sample_sheet.df %>%
-    select(
-      samplename,
+    transmute(
+      samplename = name,
       date,
-      file_raw_reads1 = reads,
-      file_raw_reads2 = reads2
+      file_raw_reads1 = file.path(raw_reads_dir, reads),
+      file_raw_reads2 = file.path(raw_reads_dir, reads2)
     ) %>%
     mutate(
-      paired_end = reads2 != ""
+      paired_end = file_raw_reads2 != ""
     ) %>%
     mutate(
-      file_trimmed_reads_r1 = ifelse(paired_end,
-        paste0(sample, "_trimmed_R1.fastq.gz"),
-        paste0(sample, "_trimmed.fastq.gz")
+      file_trimmed_reads_r1 = file.path(
+        trimmed_reads_dir,
+        ifelse(paired_end,
+          paste0(samplename, "_trimmed_R1.fastq.gz"),
+          paste0(samplename, "_trimmed.fastq.gz")
+        )
       ),
       file_trimmed_reads_r2 = ifelse(paired_end,
-        paste0(sample, "_trimmed_R1.fastq.gz"),
+        file.path(trimmed_reads_dir, paste0(samplename, "_trimmed_R1.fastq.gz")),
         ""
       ),
-      file_unaligned_reads = paste0(sample, "_unaligned.fastq")
+      file_unaligned_reads = file.path(
+        mapped_reads_dir,
+        paste0(samplename, "_unaligned.fastq")
+      )
     )
 
   return(sample_df)
