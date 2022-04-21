@@ -44,10 +44,6 @@ concat_overview_table <- function(sample_sheet,
   return( read_counts)
 }
 
-parse_amplicons <- function ( sample_sheet.df, sample_dir ){
-  samples <- sample_sheet.df$name
-  do.call(bind_rows, lapply(samples, apply_fun_parse_coverage_file, sample_dir = sample_dir))
-}
 
 parse_sample_sheet <- function(sample_sheet.df,
                                raw_reads_dir,
@@ -101,20 +97,26 @@ read_num_fastq <- function(file_reads_vector) {
   )
 }
 
+parse_amplicon_coverage <- function(samples, coverage_dir) {
+  # vectorized function to query and aggregate coverage files
+  lapply(samples,
+         coverage_dir = coverage_dir,
+    FUN = function(sample, coverage_dir) {
+      coverage.df <- read.table(
+        file.path(coverage_dir, paste0(sample, "_merged_covs.csv")),
+        sep = "\t", header = TRUE) %>%
+        dplyr::na_if("[]") %>%
+        mutate(across(everything(), str_replace, "(\\[|\\])", "")) %>%
+        transmute(
+          samplename = sample,
+          aligned_reads = as.numeric(Total.number.aligned.reads),
+          num_sigmuts_covered = as.numeric(Total.number.of.mutations.covered),
+          percentage_refgenome_covered = as.numeric(Percentage.ref.genome.covered)
+        )
+    }
+  ) %>%
+    bind_rows()
 }
-
-apply_fun_parse_coverage_file <- function ( sample, sample_dir ){
-  
-  coverage_file <- file.path(sample_dir, "coverage", paste0(sample, "_merged_covs.csv"))
-  
-  coverage.df <- read.table(coverage_file, sep = "\t", header = TRUE)
-  coverage.df <- dplyr::na_if(coverage.df, "[]")
-  coverage.df[] <- lapply(coverage.df, function (x) gsub('(\\[|\\])','', x))
-  data.frame( samplename = sample,
-              aligned_reads = coverage.df$Total.number.aligned.reads,
-              num_sigmuts_covered = coverage.df$Total.number.of.mutations.covered,
-              percentage_refgenome_covered = coverage.df$Percentage.ref.genome.covered)
-}   
 
 args <- commandArgs(trailingOnly = TRUE)
 sample_sheet <- args[1]
