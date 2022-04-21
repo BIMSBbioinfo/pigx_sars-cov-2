@@ -17,31 +17,46 @@ concat_overview_table <- function(sample_sheet,
                                     coverage_dir)
   # get read number of raw reads
   cat("get num of total raw reads...\n ")
-  read_counts$reads_r1 <- read_num_raw(read_counts$file_raw_reads1, reads_dir)$read_num
-  read_counts$reads_r2 <- read_num_raw(read_counts$file_raw_reads2, reads_dir)$read_num
-  # NOTE Total read number should be halved for paired end reads
-  read_counts <- read_counts %>% mutate( total_reads = ifelse(paired_end,
-                                                              yes = reads_r1 + reads_r2,
-                                                              no = reads_r1))
+  read_counts <- read_counts %>%
+    mutate(
+      reads_r1 = read_num_fastq(file_raw_reads1),
+      reads_r2 = read_num_fastq(file_raw_reads2)
+    ) %>%
+    mutate(
+      # NOTE Total read number should be halved for paired end reads
+      total_reads = ifelse(paired_end,
+        yes = reads_r1 + reads_r2,
+        no = reads_r1
+      )
+    )
   # get read number after trimming
   cat("get num of reads after trimming...\n")
-  read_counts$read_num_trimmed_r1 <- read_num_raw( read_counts$file_trimmed_reads_r1, file.path(sample_dir,"trimmed_reads"))$read_num
-  read_counts$read_num_trimmed_r2 <- read_num_raw( read_counts$file_trimmed_reads_r2, file.path(sample_dir, "trimmed_reads"))$read_num
-
+  read_counts <- read_counts %>%
+    mutate(
+      read_num_trimmed_r1 = read_num_fastq(file_trimmed_reads_r1),
+      read_num_trimmed_r2 = read_num_fastq(file_trimmed_reads_r2)
+    )
   cat("get num of unaligned reads ...\n")
   # get read number unaligned from files
-  read_counts$unaligned_reads_from_file <- read_num_raw( read_counts$file_unaligned_reads, file.path(sample_dir,"mapped_reads"))$read_num
-  
+  read_counts <- read_counts %>% mutate(
+    unaligned_reads_from_file = read_num_fastq(file_unaligned_reads)
+  )
+
   cat("join counts together...\n")
-  read_counts <- left_join(read_counts, parse_amplicons( sample_sheet.df, sample_dir), by = "samplename") 
-  
+  read_counts <- left_join(read_counts,
+                           parse_amplicon_coverage(sample_sheet.df$name,
+                                                   coverage_dir),
+                           by = "samplename")
   # for double check, unaligend reads by calculation
-  read_counts <- read_counts %>% mutate(unaligned_reads_by_calc = total_reads - as.numeric(aligned_reads) )
+  read_counts <- read_counts %>%
+    mutate(unaligned_reads_by_calc = total_reads - as.numeric(aligned_reads))
   # difference between unaligned reads from file and by calc must be reads filtered by QC
-  read_counts <- read_counts %>% mutate(reads_removed_by_QC = unaligned_reads_by_calc - unaligned_reads_from_file )
+  read_counts <- read_counts %>%
+    mutate(reads_removed_by_QC = unaligned_reads_by_calc - unaligned_reads_from_file)
   # TODO check if removing file names is okay
-  read_counts <- read_counts %>% select(!starts_with("file"))
-  return( read_counts)
+  read_counts <- read_counts %>%
+    select(!starts_with("file"))
+  return(read_counts)
 }
 
 
