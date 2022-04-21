@@ -87,21 +87,20 @@ parse_sample_sheet <- function(sample_sheet.df,
   return(sample_df)
 }
 
-read_num_raw <- function ( file_reads_vector, reads_dir){
-  do.call( bind_rows, lapply(file_reads_vector, apply_fun_get_read_num, reads_dir = reads_dir))
+read_num_fastq <- function(file_reads_vector) {
+  # vectorized function to count the number of reads in a fastq file
+  sapply(
+    file_reads_vector,
+    FUN = function(fastq_file) {
+      if (file.exists(fastq_file) & !isDirectory(fastq_file)) {
+        countLines(fastq_file) / 4
+      } else {
+        0
+      }
+    }
+  )
 }
 
-apply_fun_get_read_num <- function (read, reads_dir) {
-
-  file <- file.path(reads_dir, read)
-  read_num <-
-    if(file.exists(file) & !isDirectory(file)) {
-     countLines(file) / 4
-  } else {
-    0
-  }
-
-  data.frame( read_num )
 }
 
 apply_fun_parse_coverage_file <- function ( sample, sample_dir ){
