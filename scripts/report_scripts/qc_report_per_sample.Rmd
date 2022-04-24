@@ -23,8 +23,13 @@ params:
 
 <sample>`r params$sample_name`</sample>
 
-```{r setup, include=FALSE, message = FALSE, warning = FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```{r setup, include = FALSE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE
+)
+
 library(dplyr)
 library(DT)
 library(magrittr)
@@ -36,7 +41,7 @@ sample and provides the summarized data as downloadable tables.
 For detailed information about the methods please consult the
 [documentation](http://bioinformatics.mdc-berlin.de/pigx_docs/pigx-sars-cov-2.html#output-description).
 
-```{r reading data, include = FALSE}
+```{r reading_data, include = FALSE}
 coverage.df <- read.table(params$coverage_file, sep = "\t", header = TRUE)
 coverage.df <- na_if(coverage.df, "[]")
 coverage.df <- gsub("\\[", "", coverage.df)
@@ -59,7 +64,7 @@ the proportion of covered mutation locations, how many mutations are tracked in
 total, how many of their locations are covered and which locations have no read
 coverage at all. 
  
-```{r amplicon_coverage, message=F, warning=F, echo = FALSE}
+```{r amplicon_coverage, echo = FALSE}
 mut_cov.df <- data.frame(
   "Total number of tracked mutations" = coverage.df[1],
   "Number of mutations covered" = coverage.df[2],
@@ -72,11 +77,11 @@ datatable(t(mut_cov.df), options = list(searching = FALSE, paging = FALSE))
 
 ## Reference Genome
 
-```{r read_coverage, message=F, warning=F, echo = FALSE}
 This table shows the total number of raw reads, number of aligned reads, the 
 mean coverage depth and percentage of the reference genome covered by 
 pre-processed reads.
 
+```{r read_coverage, echo = FALSE}
 Coverage <- data.frame(
   "Number of aligned reads" = coverage.df[4],
   "Total ref. genome coverage" = paste(round(as.integer(coverage.df[5]), 1), "%"),
@@ -112,8 +117,8 @@ be considered e.g. based on the provided
 fastqc-reports.
 
 # Download Stats csv
-```{r data_download, include = F}
 
+```{r data_download, include = FALSE}
 # not sure about the funct of the dataframe here, but it works so I leave it for now
 write.csv2(coverage.df, file.path(
   dirname(params$coverage_file),
