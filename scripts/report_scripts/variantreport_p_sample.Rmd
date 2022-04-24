@@ -41,7 +41,7 @@ library(magrittr)
 library(base64url)
 ```
 
-```{r printInputSettings, echo = FALSE}
+```{r print_input_settings, echo = FALSE}
 sample_name <- params$sample_name
 sample_sheet <- data.table::fread(params$sample_sheet)
 mutation_sheet <- params$mutation_sheet
@@ -68,7 +68,7 @@ mutations). For detailed method description please consult the
 of signature mutations that were found for this sample.  Check with the QC 
 report to be able to assess how trustworthy the results are.*
 
-```{r function_parse_snv_csv, include = FALSE, warning = F, message = F}
+```{r function_parse_snv_csv, include = FALSE}
 parse_snv_csv <- function(snvfile, ...) { # allele frequency from v-pipe vcf
   #' input: csv file derived from vpipe vcf when using LoFreq,
   #' parsing snv-csv file for coverage, frequency and genomic mutation information
@@ -321,7 +321,7 @@ sigmuts_deduped_no_gene <- sigmuts_deduped %>%
   dplyr::select(name, mutation)
 ```
 
-```{r match_snvs_to_signature_mutations, message=F, warning=F, include = FALSE}
+```{r match_snvs_to_signature_mutations, include = FALSE}
 variant_protein_mut <- get_protein_mut(params$vep_file)
 # match the variant names according to the signature mutations, if there is no
 # signature mutation no name will be given
@@ -332,7 +332,7 @@ variant_protein_mut <- dplyr::left_join(variant_protein_mut,
 )
 ```
 
-```{r merge_vep_with_lofreq_info, message=F, warning=F, include = FALSE}
+```{r merge_vep_with_lofreq_info, include = FALSE}
 # get the SNV frequency values and coverage information for the mutations from
 # the LoFreq output
 lofreq.info <- as_data_frame(parse_snv_csv(params$snv_file))
@@ -483,8 +483,7 @@ dropped_variants <- unique(dropped_variants)
 dropped_variants <- dropped_variants[!is.na(dropped_variants)]
 ```
 
-```{r calculate_sigmat_weigths, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
-
+```{r calculate_sigmat_weigths, include = FALSE, eval = executeDeconvolution}
 deconv_lineages <- colnames(msig_simple_unique[, -which(names(msig_simple_unique) %in% c("muts", "WT"))])
 
 # create list of proportion values that will be used as weigths
@@ -512,8 +511,7 @@ for (lineage in deconv_lineages) {
 }
 ```
 
-```{r simulating_WT_mutations, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
-
+```{r simulating_WT_mutations, include = FALSE, eval = executeDeconvolution}
 # construct additional WT mutations that are not weighted
 msig_stable_all <- simulateWT(
   mutations.vector, bulk_freq.vector,
@@ -524,7 +522,7 @@ msig_stable_all <- simulateWT(
 msig_stable_unique <- msig_stable_all[[1]]
 ```
 
-```{r deconvolution, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
+```{r deconvolution, include = FALSE, eval = executeDeconvolution}
 source(deconvolution_functions)
 
 # this hack is necessary because otherwise the deconvolution will throw:
@@ -544,7 +542,7 @@ variant_abundance <- deconv(bulk_all, sig)
 
 `r if (executeDeconvolution) {"The following bar plot shows the proportion of each lineage in the sample as predicted by the deconvolution model. For the case of multiple lineages being indistinguishable because of shared signature mutations, the deconvolution result for this group is distributed equally across each grouped lineage and they all get the same value."}` 
 
-```{r plot, message=F, warning=F, echo = FALSE, eval = executeDeconvolution}
+```{r plot, echo = FALSE, eval = executeDeconvolution}
 Variant_colors <- c(
   "#8a3874",
   "#4d3da1",
@@ -694,7 +692,7 @@ ggplot(data = df, aes(name, value,
 
 # Raw data 
 
-```{r download_raw, include = F}
+```{r download_raw, include = FALSE}
 # make raw/input data downloadable
 snvs <- readLines(params$snv_file) %>%
   paste0(collapse = "\n") %>%
@@ -711,7 +709,7 @@ Called SNVs:
 Variant effect prediction (*Ensemble VEP output*):  
 [Download VEP_out.csv](`r sprintf('data:text/csv;base64,%s', vep)`)
 
-```{r csv_output_variant_plot, include = F, eval = executeDeconvolution}
+```{r csv_output_variant_plot, include = FALSE, eval = executeDeconvolution}
 # prepare processed variant values to output them as a csv which will be used
 # for the plots in index.rmd those outputs are not offically declared as outputs
 # which can lead to issues - that part should be handled by a seperate file
