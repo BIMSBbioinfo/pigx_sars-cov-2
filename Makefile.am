@@ -40,6 +40,7 @@ dist_doc_DATA = 									\
   README.md
 
 EXTRA_DIST = \
+  VERSION \
   META.in \
   $(wildcard databases/sigmut_db/*) \
   tests/sample_data/Test_vep_sarscov2_parsed.txt \
