@@ -37,7 +37,6 @@ AMPLICONS_BED    = config['locations']['amplicons-bed']
 MUTATIONS_BED    = config['locations']['mutations-bed']
 KRAKEN_DB        = config['locations']['kraken-db-dir']
 KRONA_DB         = config['locations']['krona-db-dir']
-SIGMUT_DB        = config['locations']['sigmut-db-dir']
 VEP_DB           = config['locations']['vep-db-dir']
 OUTPUT_DIR       = config['locations']['output-dir']
 
@@ -577,32 +576,32 @@ rule render_kraken2_report:
 
 rule render_variant_report:
     input:
-      vep = os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2_parsed.txt"),
-      snv = os.path.join(VARIANTS_DIR, "{sample}_snv.csv"),
-      deconvolution_functions = os.path.join( SCRIPTS_DIR, "deconvolution.R" ),
-      script = os.path.join( SCRIPTS_DIR, "renderReport.R" ),
-      report = os.path.join( SCRIPTS_DIR,"report_scripts", "variantreport_p_sample.Rmd" ),
-      header = os.path.join( REPORT_DIR, "_navbar.html" )
+        vep=os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2_parsed.txt"),
+        snv=os.path.join(VARIANTS_DIR, "{sample}_snv.csv"),
+        deconvolution_functions=os.path.join(SCRIPTS_DIR, "deconvolution.R"),
+        script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
+        report=os.path.join(SCRIPTS_DIR, "report_scripts", "variantreport_p_sample.Rmd"),
+        header=os.path.join(REPORT_DIR, "_navbar.html"),
     output:
-      varreport = os.path.join( REPORT_DIR, "{sample}.variantreport_p_sample.html" ),
-      mutations = os.path.join( MUTATIONS_DIR, "{sample}_mutations.csv"),
-      variants = os.path.join( VARIANTS_DIR, "{sample}_variants.csv")
-    log: os.path.join( LOG_DIR, "reports", "{sample}_variant_report.log" )
-    shell: """
-            {RSCRIPT_EXEC} {input.script} \
-            {input.report} {output.varreport} {input.header} \
-            '{{\
-              "sample_name":  "{wildcards.sample}",  \
-              "sigmut_db":    "{SIGMUT_DB}",         \
-              "output_dir": "{OUTPUT_DIR}",      \
-              "vep_file":     "{input.vep}",         \
-              "snv_file":     "{input.snv}",         \
-              "sample_sheet": "{SAMPLE_SHEET_CSV}",  \
-              "mutation_sheet": "{MUTATION_SHEET_CSV}", \
-              "deconvolution_functions": "{input.deconvolution_functions}", \
-              "logo": "{LOGO}" \
-            }}' > {log} 2>&1
-           """
+        varreport=os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.html"),
+        mutations=os.path.join(MUTATIONS_DIR, "{sample}_mutations.csv"),
+    log:
+        os.path.join(LOG_DIR, "reports", "{sample}_variant_report.log"),
+    shell:
+        """
+        {RSCRIPT_EXEC} {input.script} \
+        {input.report} {output.varreport} {input.header} \
+        '{{\
+          "sample_name":             "{wildcards.sample}",              \
+          "output_dir":              "{OUTPUT_DIR}",                    \
+          "vep_file":                "{input.vep}",                     \
+          "snv_file":                "{input.snv}",                     \
+          "sample_sheet":            "{SAMPLE_SHEET_CSV}",              \
+          "mutation_sheet":          "{MUTATION_SHEET_CSV}",            \
+          "deconvolution_functions": "{input.deconvolution_functions}", \
+          "logo": "{LOGO}" \
+        }}' > {log} 2>&1
+        """
 
 
 rule render_qc_report:

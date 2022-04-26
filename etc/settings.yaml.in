@@ -5,7 +5,6 @@ locations:
   amplicons-bed: nCoV-2019_NCref.bed
   kraken-db-dir: databases/kraken
   krona-db-dir: databases/krona
-  sigmut-db-dir: databases/sigmut
   vep-db-dir: databases/vep
   mutation-sheet: databases/mutation_sheet.csv
 
