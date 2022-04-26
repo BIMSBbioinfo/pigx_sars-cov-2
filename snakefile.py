@@ -37,7 +37,6 @@ AMPLICONS_BED    = config['locations']['amplicons-bed']
 MUTATIONS_BED    = config['locations']['mutations-bed']
 KRAKEN_DB        = config['locations']['kraken-db-dir']
 KRONA_DB         = config['locations']['krona-db-dir']
-SIGMUT_DB        = config['locations']['sigmut-db-dir']
 VEP_DB           = config['locations']['vep-db-dir']
 OUTPUT_DIR       = config['locations']['output-dir']
 
