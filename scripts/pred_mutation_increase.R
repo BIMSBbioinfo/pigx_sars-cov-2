@@ -1,9 +1,10 @@
+library(dplyr)
+library(stringr)
 
 parsing_mutation_plot_data <- function ( mutation_plot_data ){
   #' taking csv as input which will be made by the variant reports
   #' returns df containing only mutations with frequency values
   
-  require(tidyverse)
   # TODO check file format assumptions
   
   #  get names of mutations (everything after the meta info from the sample sheet)
@@ -25,9 +26,6 @@ refined_lm_model <- function( mutations.df ){
  #' takes data frames with mutations, frequency values over time
  #' returns dataframe with related pvalues
   
-  require(tidyverse)
-  require(stringr)
- 
   # TODO check file format assumptions
   
   # for mutation frequency - a missing value can be assumed as "not found", so NA can be set to 0
