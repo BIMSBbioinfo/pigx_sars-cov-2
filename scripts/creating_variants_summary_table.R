@@ -1,7 +1,8 @@
 
 get_files <- function ( variants_dir){
   files <- list.files(path = variants_dir,
-                    pattern = "_variants.csv",
+                    # TODO: pass file names from args
+                    pattern = "_variants_with_meta.csv",
                     full.names = TRUE,
                     recursive = FALSE)
   return (files)
@@ -18,6 +19,10 @@ create_summary <- function ( files ){
                           header = TRUE,
                           colClasses = "character",
                           check.names = FALSE )
+
+  # remove empty files from list
+  variants_list_has_rows <- sapply(variants_list, nrow)
+  variants_list <- variants_list[variants_list_has_rows > 0]
 
   # merge variant files in pairs
   merged_variants <- Reduce(f = function(df1,df2) merge(df1,
