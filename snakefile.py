@@ -574,31 +574,63 @@ rule render_kraken2_report:
 }}' > {log} 2>&1"""
 
 
-rule render_variant_report:
+rule run_deconvolution:
     input:
+        script=os.path.join(SCRIPTS_DIR, "deconvolution.R"),
         vep=os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2_parsed.txt"),
         snv=os.path.join(VARIANTS_DIR, "{sample}_snv.csv"),
-        deconvolution_functions=os.path.join(SCRIPTS_DIR, "deconvolution.R"),
+        deconvolution_functions=os.path.join(SCRIPTS_DIR, "deconvolution_funs.R"),
+    output:
+        sigmut_df=os.path.join(MUTATIONS_DIR, "{sample}_sigmuts.csv"),
+        non_sigmut_df=os.path.join(MUTATIONS_DIR, "{sample}_non_sigmuts.csv"),
+        variant_proportions=os.path.join(
+            MUTATIONS_DIR, "{sample}_variant_abundance.csv"
+        ),
+        mutations=os.path.join(MUTATIONS_DIR, "{sample}_mutations.csv"),
+    log:
+        os.path.join(LOG_DIR, "reports", "{sample}_deconvolution.log"),
+    shell:
+        """
+        {RSCRIPT_EXEC} {input.script} \
+        "{wildcards.sample}" \
+        "{OUTPUT_DIR}" \
+        "{input.vep}" \
+        "{input.snv}" \
+        "{SAMPLE_SHEET_CSV}" \
+        "{MUTATION_SHEET_CSV}" \
+        "{input.deconvolution_functions}" \
+        > {log} 2>&1
+        """
+
+
+rule render_variant_report:
+    input:
         script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
         report=os.path.join(SCRIPTS_DIR, "report_scripts", "variantreport_p_sample.Rmd"),
         header=os.path.join(REPORT_DIR, "_navbar.html"),
+        sigmut_file=os.path.join(MUTATIONS_DIR, "{sample}_sigmuts.csv"),
+        non_sigmut_file=os.path.join(MUTATIONS_DIR, "{sample}_non_sigmuts.csv"),
+        variant_abundance_file=os.path.join(
+            MUTATIONS_DIR, "{sample}_variant_abundance.csv"
+        ),
+        mutations=os.path.join(MUTATIONS_DIR, "{sample}_mutations.csv"),
+        vep=os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2_parsed.txt"),
+        snv=os.path.join(VARIANTS_DIR, "{sample}_snv.csv"),
     output:
         varreport=os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.html"),
-        mutations=os.path.join(MUTATIONS_DIR, "{sample}_mutations.csv"),
     log:
         os.path.join(LOG_DIR, "reports", "{sample}_variant_report.log"),
     shell:
         """
         {RSCRIPT_EXEC} {input.script} \
         {input.report} {output.varreport} {input.header} \
-        '{{\
-          "sample_name":             "{wildcards.sample}",              \
-          "output_dir":              "{OUTPUT_DIR}",                    \
-          "vep_file":                "{input.vep}",                     \
-          "snv_file":                "{input.snv}",                     \
-          "sample_sheet":            "{SAMPLE_SHEET_CSV}",              \
-          "mutation_sheet":          "{MUTATION_SHEET_CSV}",            \
-          "deconvolution_functions": "{input.deconvolution_functions}", \
+        '{{ \
+          "sample_name": "{wildcards.sample}", \
+          "sigmut_file": "{input.sigmut_file}", \
+          "non_sigmut_file": "{input.non_sigmut_file}", \
+          "variant_abundance_file": "{input.variant_abundance_file}", \
+          "snv_file": "{input.snv}", \
+          "vep_file": "{input.vep}", \
           "logo": "{LOGO}" \
         }}' > {log} 2>&1
         """

@@ -53,6 +53,9 @@ settings <- html_document(includes=includes(before_body=header),
                           toc=TRUE,
                           toc_float=TRUE,
                           number_sections=TRUE)
+
+print(parameters)
+
 render(report,
        output_file=output,
        output_format=settings,
