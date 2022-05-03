@@ -113,25 +113,31 @@ approved_mut_plot <- df_mut %>% filter( samplename  %in% good_samples.df$samplen
 weights <- read.csv(params$overviewQC, header = TRUE, check.names = FALSE)
 weights <- weights %>% dplyr::select( c(samplename, total_reads))
 
-if (nrow(approved_var_plot) > 0) { # check if filtered dataframe has actual values
+# check if filtered dataframe has actual values
+VARIANTS_FOUND <- nrow(approved_var_plot) > 0
+MUTATIONS_FOUND <- nrow(approved_mut_plot) > 0
+
+if (VARIANTS_FOUND) {
   approved_var_plot_location_pooled <- pool_by_weighted_mean(approved_var_plot, weights, "day_location")
 } else {
-    cat("\n No variants found.")
+  warning(paste0("\nNot enough variants were found or passed the quality filters.",
+  "\nThe associated plots are skipped."))
 }
 ```
 
+```{r text_plotting_variants, results='asis', fig.width=4, fig.height=4, eval=VARIANTS_FOUND}
+cat('## Lineage abundances stacked {.tabset .tabset-fade}
 
 ```{r color_palette, echo=F, message=F, warning=F}
 Variant_colors <- c("#8a3874", "#4d3da1", "#62c742", "#13317a", "#86e5a3", "#6f69e5", "#4cdab2", "#999ce4", "#2ce6f3",
 "#6638c6", "#005f29", "#5d73cc", "#616524", "#a8a041", "#e9f600", "#3eaca8", "#62a273", "#4ea5d0", "#655c95", "#67a04e")
+The summary plot shows the results pooled by day and across locations by 
+weighted average using the read number as weights. Please use the tabs 
+to access the not-pooled plots for each location.')
 ```
-```{r variants_pooled, message = FALSE, echo = FALSE}
 
-# TODO maybe skip the whole snippet and print plain warning in report
-if (nrow(approved_var_plot) > 0) { # check if filtered dataframe has actual values
-
+```{r variants_pooled, eval=VARIANTS_FOUND}
   # TODO change order or "variable" so that "WT" is always displayed on top
-
   melted <- reshape2::melt(approved_var_plot_location_pooled,
     id.vars = c("dates", "samplename")
   )
@@ -155,73 +161,69 @@ if (nrow(approved_var_plot) > 0) { # check if filtered dataframe has actual valu
       showlegend = TRUE,
       yaxis = list(title = "Frequency")
     )
-}
 ```
-## Lineage abundances stacked {.tabset .tabset-fade}
 
-The summary plot shows the results pooled by
-day and across locations by weighted average using the read number as weights.  
-Please use the tabs to access the not-pooled plots for each location.  
-
-
-```{r tab_plotting_variants, message = FALSE, echo = FALSE, results='asis', fig.width=4, fig.height=4}
+```{r tab_plotting_variants, eval=VARIANTS_FOUND}
 # Get the current figure size in pixels:
 get_w <- function() {
   with(knitr::opts_current$get(c("fig.width", "dpi", "fig.retina")),
-       fig.width*dpi/fig.retina)
+       fig.width * dpi / fig.retina)
 }
 
 get_h <- function() {
   with(knitr::opts_current$get(c("fig.height", "dpi", "fig.retina")),
-       fig.height*dpi/fig.retina)
+       fig.height * dpi / fig.retina)
 }
 
-# TODO maybe skip the whole snippet and print plain warning in report
-if (nrow(approved_var_plot) > 0) { # check if filtered dataframe has actual values
-
-  # TODO change order or "variable" so that "WT" is always displayed on top
-  # plot variant frequencies by location, no pooling
-  melted <- reshape2::melt(approved_var_plot,
-                          id.vars = c("dates", "samplename", "location_name",
-                                      "coordinates_lat", "coordinates_long"))
-  locations <- unique(melted$location_name)
-  location_plot <- function (loc) {
-                    subset(melted, location_name == loc) %>%
-                        group_by(dates) %>%
-                        arrange(variable) %>%
-                        mutate (value = round (value, 4)) %>%
-                        plot_ly (type = 'scatter',
-                                  mode = 'lines+markers',
-                                  stackgroup = 'one',
-                                  showlegend = TRUE,
-                                  name = ~variable,
-                                  x = ~dates,
-                                  y = ~value,
-                                  color = ~variable,
-                                  colors = viridis_pal(option = "D")(6)) %>%
-                        layout (title = location,
+# TODO change order or "variable" so that "WT" is always displayed on top
+# plot variant frequencies by location, no pooling
+melted <- reshape2::melt(approved_var_plot,
+                        id.vars = c("dates", "samplename", "location_name",
+                                    "coordinates_lat", "coordinates_long"))
+locations <- as.character(unique(melted$location_name))
+location_plot <- function (loc) {
+                  subset(melted, location_name == loc) %>%
+                      group_by(dates) %>%
+                      arrange(variable) %>%
+                      mutate (value = round (value, 4)) %>%
+                      plot_ly (type = 'scatter',
+                                mode = 'lines+markers',
+                                stackgroup = 'one',
                                 showlegend = TRUE,
-                                yaxis = list(title = "Frequency"))
-  }
-  plot_list <- list()
-  for ( i in seq_along(locations)) {
-    plot_name <- locations[i]
-    df <- paste0(locations[i],".df")
-    plot_name <- location_plot(locations[i])
-    plot_list[[i]] <- plot_name
-  }
-
-  if ( length(plot_list) >= 1 ){
-      cat("###", 'Summary over all locations', '{-}', '\n\n')
-      print(htmltools::tagList(ggplotly(p_variant_pooled)))
-      cat('\n\n')
-      for (i in 1:length(locations)){
-        cat("###", locations[i], '{-}', '\n\n')
-        print(htmltools::tagList( ggplotly ( plot_list[[i]])))
-          cat('\n\n')
-      }
-  } else (cat("not enought data to summarize & plot or sample quality is not sufficient enough"))
+                                name = ~variable,
+                                x = ~dates,
+                                y = ~value,
+                                color = ~variable,
+                                colors = viridis_pal(option = "D")(6)) %>%
+                      layout (title = location,
+                              showlegend = TRUE,
+                              yaxis = list(title = "Frequency"))
 }
+plot_list <- list()
+for ( i in seq_along(locations)) {
+  plot_name <- locations[i]
+  df <- paste0(locations[i],".df")
+  plot_name <- location_plot(locations[i])
+  plot_list[[i]] <- plot_name
+}
+
+```
+
+```{r print_tab_plotting_variants, warning=TRUE,results='asis', fig.width=4, fig.height=4, eval=VARIANTS_FOUND}
+
+if (length(plot_list) >= 1) {
+  cat("###", 'Summary over all locations', '{-}', '\n\n')
+  suppressWarnings(print(htmltools::tagList(ggplotly(p_variant_pooled))))
+  cat('\n\n')
+  for (i in 1:length(locations)) {
+    cat("###", locations[i], '{-}', '\n\n')
+    suppressWarnings(print(htmltools::tagList(ggplotly (plot_list[[i]]))))
+    cat('\n\n')
+  }
+} else {
+  warning("Not enough data available to summarize and produce plots.")
+}
+
 ```
 
 
@@ -239,54 +241,74 @@ display all snapshots successively.  Click on a lineage in the legend
 to toggle its visibility in the map; double-click to view only the
 selected lineage.
 
-```{r maps_for_variants, echo=F, message=FALSE, warning=FALSE, out.width="900px", out.height="900px"}
 
+```{r maps_for_variants, out.width="900px", out.height="900px", eval=VARIANTS_FOUND}
 # TODO: the note about arbitray locations should be enable to be turned on and off
-    
-# TODO maybe skip the whole snippet and print plain warning in report
-if (nrow(approved_var_plot) > 0 ){ # check if filtered dataframe has actual values
-    approved_var_plot_day_pooled  <- pool_by_weighted_mean(approved_var_plot, weights, "day")
-    
-  melted <- melt(approved_var_plot_day_pooled,
-                   id.vars = c("dates", "samplename", "location_name",
-                               "coordinates_lat", "coordinates_long"),
-                   rm.NA = TRUE) %>%
-        mutate (value = round (value, 4))
-    
-    locations <- approved_var_plot_day_pooled %>% mutate( dates = as.character( strptime(dates, format = "%Y-%m-%d"))) %>%
-                 melt( id.vars = c("coordinates_lat", "coordinates_long"))
-                                                          
-    plot_ly (type = 'scattermapbox',
-             mode = 'markers',
-             colors = viridis_pal(option = "D")(6),
-                               width = 900,
-                               height = 500) %>%
-        add_trace(data = locations,
-                  size = 1,
-                  lon = ~coordinates_long,
-                  lat = ~coordinates_lat,
-                  opacity = 0.1,
-                  showlegend = FALSE,
-                  hoverinfo = 'none',
-                  marker = list(sizemode = 'diameter',
-                                color = 'rgb(150, 150, 150)',
-                                opacity = 0)) %>%
-        add_trace(data = melted,
-                  lat = ~coordinates_lat,
-                  lon = ~coordinates_long,
-                  legendgroup = ~variable,
-                  showlegend = TRUE,
-                   frame = ~as.character( strptime(dates, format = "%Y-%m-%d")),
-                  size = ~value,
-                  color = ~variable,
-                  hoverinfo = 'text+name',
-                  hovertext = ~paste0("Frequency: ", value),
-                  marker = list (sizemode = 'diameter')) %>%
-        layout (mapbox = list (zoom = 5.5,
-                               center = list(lat = ~median(coordinates_lat, na.rm=TRUE),
-                                             lon = ~median(coordinates_long, na.rm=TRUE)),
-                               style = 'open-street-map'))
-}
+
+approved_var_plot_day_pooled  <-
+  pool_by_weighted_mean(approved_var_plot, weights, "day")
+
+melted <- reshape2::melt(
+  approved_var_plot_day_pooled,
+  id.vars = c(
+    "dates",
+    "samplename",
+    "location_name",
+    "coordinates_lat",
+    "coordinates_long"
+  ),
+  rm.NA = TRUE
+) %>%
+  mutate (value = round (value, 4))
+
+locations <-
+  approved_var_plot_day_pooled %>% mutate(dates = as.character(strptime(dates, format = "%Y-%m-%d"))) %>%
+  reshape2::melt(id.vars = c("coordinates_lat", "coordinates_long"))
+
+plot_ly (
+  type = 'scattermapbox',
+  mode = 'markers',
+  colors = viridis_pal(option = "D")(6),
+  width = 900,
+  height = 500
+) %>%
+  add_trace(
+    data = locations,
+    size = 1,
+    lon = ~ coordinates_long,
+    lat = ~ coordinates_lat,
+    opacity = 0.1,
+    showlegend = FALSE,
+    hoverinfo = 'none',
+    marker = list(
+      sizemode = 'diameter',
+      color = 'rgb(150, 150, 150)',
+      opacity = 0
+    )
+  ) %>%
+  add_trace(
+    data = melted,
+    lat = ~ coordinates_lat,
+    lon = ~ coordinates_long,
+    legendgroup = ~ variable,
+    showlegend = TRUE,
+    frame = ~ as.character(strptime(dates, format = "%Y-%m-%d")),
+    size = ~ value,
+    color = ~ variable,
+    hoverinfo = 'text+name',
+    hovertext = ~ paste0("Frequency: ", value),
+    marker = list (sizemode = 'diameter')
+  ) %>%
+  layout (mapbox = list (
+    zoom = 5.5,
+    center = list(
+      lat = ~ median(coordinates_lat, na.rm = TRUE),
+      lon = ~ median(coordinates_long, na.rm =
+                       TRUE)
+    ),
+    style = 'open-street-map'
+  ))
+
 ```
 
 # Mutation dynamics
