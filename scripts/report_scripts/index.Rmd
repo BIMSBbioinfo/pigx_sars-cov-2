@@ -365,11 +365,14 @@ The following plots provide an overview of detected single nucleotide
 mutations in different locations and how their relative frequency
 changes over time. Furthermore, mutations showing a significant frequency increase over time are highlighted.  
 
-**Mutation notation**  
-Mutations are noted in the pattern of  
-**gene :: protein-sequence mutation : NT-sequence mutation**  
-Please note that this translation was done for single mutations. Combinations of single-NT mutations that taken together 
-may lead to a different amino acid are not yet taken into account. 
+```{r mutation_notation, results='asis'}
+cat(create_html_note(paste(
+  "Mutations are noted in the pattern of:",
+  "\n _**gene :: protein-sequence mutation : NT-sequence mutation**_\n",
+  "Please note that this translation was done for single mutations.",
+  "Combinations of single-NT mutations that taken together may lead to ",
+  "a different amino acid are not yet taken into account.",sep = "\n")))
+```
 
 ## Increasing mutations
 
