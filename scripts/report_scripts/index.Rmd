@@ -38,6 +38,10 @@ params:
 `r knitr::include_graphics(params$logo)`
 </div>
 
+```{r knitr_chunk_options, message=FALSE, warning=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
 
 ```{r libraries_and_input, echo=F, message=F, warning=F}
 library(plotly)
