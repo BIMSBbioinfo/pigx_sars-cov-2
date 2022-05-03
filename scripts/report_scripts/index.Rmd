@@ -273,20 +273,22 @@ if (length(plot_list) >= 1) {
 ```
 
 
-## Lineage abundances geo-localized
+```{r text_maps_for_variants, results='asis', eval=VARIANTS_FOUND}
 
-This plot visualizes proportions of identified lineage abundances at the provided sampling locations.
+cat('## Lineage abundances geo-localized
 
-<div class="notice">
-Locations of wastewater processing plants have been generated arbitrarily and do 
-not correspond to actual locations.
-</div>
+This plot visualizes proportions of identified lineage abundances at the provided sampling locations.')
 
-Use the slider to select a specific date or hit the *Play* button to
-display all snapshots successively.  Click on a lineage in the legend
-to toggle its visibility in the map; double-click to view only the
-selected lineage.
+cat(create_html_note('Locations of wastewater processing plants have been generated arbitrarily and do not correspond to actual locations.'))
 
+cat('Click on a lineage in the legend to toggle its visibility in the map; 
+double-click to view only the selected lineage.',
+ifelse(length(unique(approved_var_plot$dates))>1,
+yes = 'Use the slider to select a specific date or hit the *Play* button to
+display all snapshots successively. ',no = '')
+)
+
+```
 
 ```{r maps_for_variants, out.width="900px", out.height="900px", eval=VARIANTS_FOUND}
 # TODO: the note about arbitray locations should be enable to be turned on and off
