@@ -72,6 +72,22 @@ create_dt <- function(x){
                                scroller = TRUE, 
                                dom = 'Slfrtip'))
 }
+# function to create html formatted notes in panel box with optional toggling
+# see https://about.gitlab.com/handbook/markdown-guide/#additional-information
+create_html_note <- function(x, toggle = FALSE) {
+  paste(
+    '\n\n<div class="panel panel-info">',
+    ifelse(toggle,
+           '<details>\n<summary>**Note**</summary>',
+           '&nbsp;**Note**'),
+    '<div class="panel-body">',
+    gsub('##', '\n', x),
+    '</div>',
+    ifelse(toggle,'','</details>'),
+    '</div>\n\n',
+    sep = '\n'
+  )
+}
 ```
 
 This pipeline performs mutation analysis of SARS-CoV-2 and reports and quantifies the occurrence of
