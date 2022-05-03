@@ -42,6 +42,30 @@ params:
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
 
+```{r alerts}
+# format error, warning and messages with html styles
+# https://selbydavid.com/vignettes/alerts.html
+knitr::knit_hooks$set(
+  error = function(x, options) {
+    paste('\n\n<div class="alert alert-danger">',
+          gsub('^##', '\n', gsub('^##\ Error', '**Error**', x)),
+          '</div>',
+          sep = '\n')
+  },
+  warning = function(x, options) {
+    paste('\n\n<div class="alert alert-warning">',
+          gsub('##', '\n', gsub('^##\ Warning:', '**Warning**', x)),
+          '</div>',
+          sep = '\n')
+  },
+  message = function(x, options) {
+    paste('\n\n<div class="alert alert-info">',
+          gsub('##', '\n', x),
+          '</div>',
+          sep = '\n')
+  }
+)
+```
 
 ```{r libraries}
 library(plotly)
