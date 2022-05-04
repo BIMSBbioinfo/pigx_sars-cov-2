@@ -167,10 +167,11 @@ coverages.df <-
     )
   )
 
-if ( !(length(coverages.df) == 0)){
-    # take only the samples with > 90% mutation coverage
-    good_samples.df <- coverages.df %>% filter( as.numeric(proport_muts_covered) >= 90) # TODO stringecy should be given by user, maybe even through visualization
-    bad_samples.df <- coverages.df %>% filter( !(samplename %in% good_samples.df$samplename))
+if (!(length(coverages.df) == 0)) {
+  # take only the samples with > 90% mutation coverage
+  # TODO stringecy should be given by user, maybe even through visualization
+  good_samples.df <- filter(coverages.df, as.numeric(proport_muts_covered) >= 90)
+  bad_samples.df <- filter(coverages.df, !(samplename %in% good_samples.df$samplename))
 } else {
   warning("\n No coverage values found.")
 }
@@ -346,7 +347,7 @@ melted <- reshape2::melt(
   ),
   rm.NA = TRUE
 ) %>%
-  mutate (value = round (value, 4))
+  mutate(value = round (value, 4))
 
 locations <-
   approved_var_plot_day_pooled %>% mutate(dates = as.character(strptime(dates, format = "%Y-%m-%d"))) %>%
@@ -386,15 +387,19 @@ plot_ly (
     hovertext = ~ paste0("Frequency: ", value),
     marker = list (sizemode = 'diameter')
   ) %>%
-  layout (mapbox = list (
-    zoom = 5.5,
-    center = list(
-      lat = ~ median(coordinates_lat, na.rm = TRUE),
-      lon = ~ median(coordinates_long, na.rm =
-                       TRUE)
-    ),
-    style = 'open-street-map'
-  ))
+  layout(
+    mapbox = list(
+      zoom = 5.5,
+      center = list(
+        lat = ~ median(coordinates_lat, na.rm = TRUE),
+        lon = ~ median(coordinates_long,
+          na.rm =
+            TRUE
+        )
+      ),
+      style = "open-street-map"
+    )
+  )
 
 ```
 
