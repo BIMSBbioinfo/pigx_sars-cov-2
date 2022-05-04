@@ -354,7 +354,7 @@ locations <-
   approved_var_plot_day_pooled %>% mutate(dates = as.character(strptime(dates, format = "%Y-%m-%d"))) %>%
   reshape2::melt(id.vars = c("coordinates_lat", "coordinates_long"))
 
-plot_ly (
+p <- plot_ly(
   type = 'scattermapbox',
   mode = 'markers',
   colors = viridis_pal(option = "D")(6),
@@ -402,6 +402,11 @@ plot_ly (
     )
   )
 
+if (length(unique(approved_var_plot$dates)) > 1) {
+  p %>% animation_slider(currentvalue = list(prefix = "Date: "))
+} else {
+  p
+}
 ```
 
 # Mutation dynamics
@@ -601,7 +606,6 @@ if (exists("approved_mut_plot") && nrow(approved_mut_plot) > 0 && length(approve
    locations <- approved_mut_plot_day_pooled %>% mutate( dates = as.character( strptime(dates, format = "%Y-%m-%d"))) %>%
                  melt( id.vars = c("coordinates_lat", "coordinates_long"))
     
-    plot_ly (type = 'scattermapbox',
              colors = viridis_pal(option = "H")(20),
              mode = 'markers',
                                width = 900,
@@ -634,6 +638,11 @@ if (exists("approved_mut_plot") && nrow(approved_mut_plot) > 0 && length(approve
                                center = list(lat = ~median(coordinates_lat, na.rm=TRUE),
                                              lon = ~median(coordinates_long, na.rm=TRUE)),
                                style = 'open-street-map'))
+p <- plot_ly (type = 'scattermapbox',
+if (length(unique(approved_mut_plot_day_pooled$dates)) > 1) {
+  p %>% animation_slider(currentvalue = list(prefix = "Date: "))
+} else {
+  p
 }
 ```
 
