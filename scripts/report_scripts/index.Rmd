@@ -623,17 +623,25 @@ if (exists("approved_mut_plot") && nrow(approved_mut_plot) > 0 && length(approve
 
 # Data summaries and download
 
-```{r table_var_frqs, echo = FALSE}
-df_var_download <- df_var %>% paste0(collapse="\n") %>% base64_urlencode()
-```
-Frequencies per lineage per sample, derived by deconvolution, pooled by weighted mean by read number")
-[Download variant_frequencies.csv](`r sprintf('data:text/csv;base64,%s', df_var_download)`)
 
-```{r table_mut_freqs, echo = FALSE}
-df_mut_download <- df_mut %>% paste0(collapse="\n") %>% base64_urlencode()
+```{r table_var_frqs}
+df_var_download <- df_var %>%
+  dump_csv() %>%
+  base64url::base64_urlencode()
+```
+
+Frequencies per lineage per sample, derived by deconvolution, pooled by weighted mean by read number: 
+
+`r create_html_download_link(df_var_download,filename = "variant_frequencies.csv")`
+
+```{r table_mut_freqs}
+df_mut_download <- df_mut %>%
+  dump_csv() %>%
+  base64url::base64_urlencode()
 ```
 Frequencies per mutation per sample
-[Download mutation_frequencies.csv](`r sprintf('data:text/csv;base64,%s', df_mut_download)`)
+
+`r create_html_download_link(df_mut_download, filename = "mutation_frequencies.csv")`
 
 
 
@@ -643,25 +651,31 @@ source(params$fun_tbls)
 output_dir <- params$output_dir
 # make the mutation count frame
 if (exists("mutations_sig")){
-count_frame <- write_mutations_count(df_mut, sigmuts.df, mutations_sig)
-
+  count_frame <- write_mutations_count(df_mut, sigmuts.df, mutations_sig)
 } else {
     # write empty files
     count_frame <- data.frame()
     mutations_sig_unfiltered <- data.frame()
 }
 # write to file
-write.csv(count_frame, file.path(output_dir, "mutations_counts.csv"), 
-         na = "NA", row.names = FALSE, quote = FALSE)
-write.csv(mutations_sig_unfiltered, file.path(output_dir, "linear_regression_results.csv"),
-          na = "NA", row.names = FALSE, quote = FALSE)
-
+write.csv(count_frame, file.path(output_dir, "mutations_counts.csv"),
+  na = "NA", row.names = FALSE, quote = FALSE
+)
+write.csv(mutations_sig_unfiltered,
+  file.path(output_dir, "linear_regression_results.csv"),
+  na = "NA", row.names = FALSE, quote = FALSE
+)
 # show and make downloadable
-count_frame <- count_frame %>% paste0(collapse="\n") %>% base64_urlencode()
+count_frame_download <- count_frame %>%
+  dump_csv() %>%
+  base64url::base64_urlencode()
 
-``` 
+```
+
 Counts of mutations found across all sample and per sample
-[Download mutation_counts.csv](`r if (exists("count_frame")){sprintf('data:text/csv;base64,%s', count_frame)}`)
+
+`r create_html_download_link(count_frame_download, "mutation_counts.csv")`
+
 
 # Detailed per-sample reports
 
