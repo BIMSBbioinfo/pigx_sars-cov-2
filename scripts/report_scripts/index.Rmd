@@ -43,6 +43,12 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
 
 ```{r alerts}
+# you may trigger these formatted notifications by enabling the corresponding
+# settings in the respective chunk:
+# error --> error=TRUE
+# warning --> warning=TRUE
+# message --> message=TRUE
+
 # format error, warning and messages with html styles
 # https://selbydavid.com/vignettes/alerts.html
 knitr::knit_hooks$set(
