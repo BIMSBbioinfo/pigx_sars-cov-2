@@ -176,6 +176,7 @@ if (!(length(coverages.df) == 0)) {
   warning("\n No coverage values found.")
 }
 ```
+
 # Lineage abundance
 
 These plots provide an overview of the relative frequency dynamics of
@@ -803,6 +804,7 @@ datatable(df, options = list( fixedColumns = TRUE,
                                scroller = TRUE,
                                dom = 'Slfrtip'))
 ```
+
 # Discarded samples 
 
 Prior visualization and regression analysis each sample gets a quality score depending on proportion of covered reference 
