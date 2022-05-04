@@ -654,59 +654,58 @@ no = ''
 ```
 
 
-```{r mutations_for_locations_and_date, echo=F, message=F, warning=F, out.width="900px", out.height="900px"}
-# TODO: the note about arbitray locations should be enable to be turned on and off
+```{r mutations_for_locations_and_date, out.width="900px", out.height="900px", eval=APPROVED_MUTATIONS_FOUND}
 # TODO: find a way to only show dynamic of one single mutation over the whole time
-    
-if (exists("approved_mut_plot") && nrow(approved_mut_plot) > 0 && length(approved_mut_plot)>5){ # check if the filtered df has actual values besides meta data
-       approved_mut_plot_day_pooled  <- pool_by_mean(approved_mut_plot, TRUE, "day")
-  
-    
 
-  
-    melted <- melt(approved_mut_plot_day_pooled,
-                   id.vars = c("dates", "samplename", "location_name",
-                               "coordinates_lat", "coordinates_long"),
-                   rm.NA = TRUE) 
-     # check if there are actual values except the meta data
-      melted <- melted %>% mutate (value = round (value, 4))
-    
-   locations <- approved_mut_plot_day_pooled %>% mutate( dates = as.character( strptime(dates, format = "%Y-%m-%d"))) %>%
-                 melt( id.vars = c("coordinates_lat", "coordinates_long"))
-    
-    plot_ly (type = 'scattermapbox',
-             colors = viridis_pal(option = "H")(20),
-             mode = 'markers',
-                               width = 900,
-                               height = 500) %>%
-        add_trace(size = 1,
-                  data = locations,
-                  lon = ~coordinates_long,
-                  lat = ~coordinates_lat,
-                  opacity = 0.1,
-                  showlegend = FALSE,
-                  hoverinfo = 'none',
-                  marker = list(sizemode = 'diameter',
-                                color = 'rgb(150, 150, 150)',
-                                opacity = 0)) %>%
-        add_trace(data = melted,
-                  lat = ~coordinates_lat,
-                  lon = ~coordinates_long,
-                  legendgroup = ~variable,
-                  showlegend = TRUE,
-                  frame = ~as.character( strptime(dates, format = "%Y-%m-%d")),
-                  size = ~value,
-                  color = ~variable,
-                  hoverinfo = 'text+name',
-                  hovertext = ~paste0("Frequency: ", value),
-                  marker = list (sizemode = 'diameter')) %>%
-    
-        layout (title = ~dates,
-                autosize = TRUE,
-                mapbox = list (zoom = 5.5,
-                               center = list(lat = ~median(coordinates_lat, na.rm=TRUE),
-                                             lon = ~median(coordinates_long, na.rm=TRUE)),
-                               style = 'open-street-map'))
+approved_mut_plot_day_pooled  <- pool_by_mean(filtered_approved_mut_plot, TRUE, "day")
+
+melted <- reshape2::melt(approved_mut_plot_day_pooled,
+           id.vars = c("dates", "samplename", "location_name",
+                       "coordinates_lat", "coordinates_long"),
+           rm.NA = TRUE)
+# check if there are actual values except the meta data
+melted <- melted %>% mutate (value = round (value, 4))
+
+locations <- approved_mut_plot_day_pooled %>% mutate( dates = as.character( strptime(dates, format = "%Y-%m-%d"))) %>%
+             reshape2::melt( id.vars = c("coordinates_lat", "coordinates_long"))
+
+p <- plot_ly (type = 'scattermapbox',
+         colors = viridis_pal(option = "H")(20),
+         mode = 'markers',
+                           width = 900,
+                           height = 500) %>%
+    add_trace(size = 1,
+              data = locations,
+              lon = ~coordinates_long,
+              lat = ~coordinates_lat,
+              opacity = 0.1,
+              showlegend = FALSE,
+              hoverinfo = 'none',
+              marker = list(sizemode = 'diameter',
+                            color = 'rgb(150, 150, 150)',
+                            opacity = 0)) %>%
+    add_trace(data = melted,
+              lat = ~coordinates_lat,
+              lon = ~coordinates_long,
+              legendgroup = ~variable,
+              showlegend = TRUE,
+              frame = ~as.character(strptime(dates, format = "%Y-%m-%d")),
+              size = ~value,
+              color = ~variable,
+              hoverinfo = 'text+name',
+              hovertext = ~paste0("Frequency: ", value),
+              marker = list (sizemode = 'diameter')) %>%
+      layout (title = ~dates,
+            autosize = TRUE,
+            mapbox = list (zoom = 5.5,
+                           center = list(lat = ~median(coordinates_lat, na.rm=TRUE),
+                                         lon = ~median(coordinates_long, na.rm=TRUE)),
+                           style = 'open-street-map'))
+
+if (length(unique(approved_mut_plot_day_pooled$dates)) > 1) {
+  p %>% animation_slider(currentvalue = list(prefix = "Date: "))
+} else {
+  p
 }
 ```
 
