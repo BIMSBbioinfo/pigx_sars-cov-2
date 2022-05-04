@@ -168,6 +168,15 @@ weights <- weights %>% dplyr::select( c(samplename, total_reads))
 # check if filtered dataframe has actual values
 VARIANTS_FOUND <- nrow(approved_var_plot) > 0
 MUTATIONS_FOUND <- nrow(approved_mut_plot) > 0
+# only run regression if at least two dates are left over
+RUN_MUTATION_REGRESSION <- if (MUTATIONS_FOUND) {
+  length(unique(approved_mut_plot$dates)) > 1
+} else {
+  FALSE
+}
+# predefine to reuse later
+APPROVED_MUTATIONS_FOUND <- RUN_MUTATION_REGRESSION
+
 
 if (VARIANTS_FOUND) {
   approved_var_plot_location_pooled <- pool_by_weighted_mean(approved_var_plot, weights, "day_location")
