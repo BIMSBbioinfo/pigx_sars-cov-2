@@ -156,8 +156,16 @@ Institute of Medical System Biology (BIMSB).
 ```{r sample_quality_score, warning=TRUE}
 source(params$fun_cvrg_scr) # TODO given as input? or only the scripts dir? similar variant_report
 
-coverages.df <- merge(get_genome_cov( params$coverage_dir ), get_mutation_cov( params$coverage_dir), by="samplename")
-coverages.df$proport_muts_covered <- round((as.numeric(coverages.df$total_muts_cvrd) * 100)/as.numeric(coverages.df$total_num_muts), 1)
+coverages.df <-
+  merge(get_genome_cov(params$coverage_dir),
+    get_mutation_cov(params$coverage_dir),
+    by = "samplename"
+  ) %>%
+  mutate(
+    proport_muts_covered = round(
+      (as.numeric(total_muts_cvrd) * 100) / as.numeric(total_num_muts), 1
+    )
+  )
 
 if ( !(length(coverages.df) == 0)){
     # take only the samples with > 90% mutation coverage
@@ -176,12 +184,13 @@ identified lineages at specific wastewater sampling locations over time.
 source(params$fun_pool)
 
 # only use good samples for processing and visualiztaion
-approved_var_plot <- df_var %>% filter( samplename  %in% good_samples.df$samplename )
-approved_var_plot <- unique(approved_var_plot)
+approved_var_plot <-
+  df_var %>% filter(samplename  %in% good_samples.df$samplename) %>% 
+  unique()
 approved_mut_plot <- df_mut %>% filter( samplename  %in% good_samples.df$samplename )
 # pool the samples per day, discard locations
-weights <- read.csv(params$overviewQC, header = TRUE, check.names = FALSE)
-weights <- weights %>% dplyr::select( c(samplename, total_reads))
+weights <- read.csv(params$overviewQC, header = TRUE, check.names = FALSE) %>%
+  dplyr::select( c(samplename, total_reads))
 
 # check if filtered dataframe has actual values
 VARIANTS_FOUND <- nrow(approved_var_plot) > 0
@@ -420,9 +429,6 @@ if(!RUN_MUTATION_REGRESSION) {
 ```{r linear_regression, echo=F, message=F, warning=F}
 source(params$fun_lm)
 mutation_sheet <- params$mutation_sheet
-sigmuts.df <- na_if( read.csv(mutation_sheet, header = TRUE), "" ) 
-# split gene name of for easier matching
-sigmuts.df <- sigmuts.df %>% mutate_all( funs(str_replace(.,'^[^:]*:','')))
 if (nrow(approved_mut_plot) > 0){
     changing_muts <- parsing_mutation_plot_data( approved_mut_plot )
     mutations_sig_unfiltered <- refined_lm_model( changing_muts )
@@ -430,6 +436,10 @@ if (nrow(approved_mut_plot) > 0){
 
   
   if (nrow(mutations_sig) > 0){
+sigmuts.df <- read.csv(mutation_sheet, header = TRUE) %>%
+  na_if("") %>%
+  # split gene name of for easier matching
+  mutate_all(funs(str_replace(., '^[^:]*:', '')))
   # flag if mutation is signature mutation
     mutations_sig <- mutations_sig %>% 
       rowwise() %>%
