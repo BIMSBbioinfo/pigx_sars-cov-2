@@ -377,7 +377,7 @@ The following plots provide an overview of detected single nucleotide
 mutations in different locations and how their relative frequency
 changes over time. Furthermore, mutations showing a significant frequency increase over time are highlighted.  
 
-```{r mutation_notation, results='asis'}
+```{r mutation_notation, results='asis', eval=MUTATIONS_FOUND}
 cat(create_html_note(paste(
   "Mutations are noted in the pattern of:",
   "\n _**gene :: protein-sequence mutation : NT-sequence mutation**_\n",
@@ -386,14 +386,18 @@ cat(create_html_note(paste(
   "a different amino acid are not yet taken into account.",sep = "\n")))
 ```
 
-## Increasing mutations
+
+```{r title_lm_table, results = 'asis', warning=TRUE, eval=MUTATIONS_FOUND}
+  cat(
+"## Increasing mutations
 
 To show the dynamic of significantly changing mutations over time a linear regression model was applied to the mutation
-results across all samples. The following table shows the showing the strongest increasing trend (p <= 0.05). The number
-of trending mutation is restricted to the top 20. 
-
-```{r title_lm_table, echo = FALSE, results = 'asis'}
-cat("\n Mutations with significant increase in frequency over time")
+results across all samples.
+"
+  )
+if(!RUN_MUTATION_REGRESSION) {
+  warning("No mutations or not enough mutations were found to perform a regression analysis.\nThe associated plots are skipped.\n")
+}
 ```
 ```{r linear_regression, echo=F, message=F, warning=F}
 source(params$fun_lm)
