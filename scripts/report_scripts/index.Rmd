@@ -172,7 +172,7 @@ if ( !(length(coverages.df) == 0)){
     good_samples.df <- coverages.df %>% filter( as.numeric(proport_muts_covered) >= 90) # TODO stringecy should be given by user, maybe even through visualization
     bad_samples.df <- coverages.df %>% filter( !(samplename %in% good_samples.df$samplename))
 } else {
-    cat("\n No coverage values found.")
+  warning("\n No coverage values found.")
 }
 ```
 # Lineage abundance
