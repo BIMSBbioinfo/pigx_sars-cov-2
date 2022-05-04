@@ -269,8 +269,8 @@ melted <- reshape2::melt(approved_var_plot,
                         id.vars = c("dates", "samplename", "location_name",
                                     "coordinates_lat", "coordinates_long"))
 locations <- as.character(unique(melted$location_name))
-location_plot <- function (loc) {
-                  subset(melted, location_name == loc) %>%
+location_plot <- function (melted,location) {
+                  subset(melted, location_name == location) %>%
                       group_by(dates) %>%
                       arrange(variable) %>%
                       mutate (value = round (value, 4)) %>%
