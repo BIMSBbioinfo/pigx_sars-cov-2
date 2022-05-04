@@ -437,46 +437,96 @@ if(!RUN_MUTATION_REGRESSION) {
   warning("No mutations or not enough mutations were found to perform a regression analysis.\nThe associated plots are skipped.\n")
 }
 ```
-```{r linear_regression, echo=F, message=F, warning=F}
+
+```{r linear_regression, eval=RUN_MUTATION_REGRESSION}
 source(params$fun_lm)
 mutation_sheet <- params$mutation_sheet
-if (nrow(approved_mut_plot) > 0){
-    changing_muts <- parsing_mutation_plot_data( approved_mut_plot )
-    mutations_sig_unfiltered <- refined_lm_model( changing_muts )
-    mutations_sig <- filter_lm_res_top20( mutations_sig_unfiltered, 0.05 )
-
-  
-  if (nrow(mutations_sig) > 0){
 sigmuts.df <- read.csv(mutation_sheet, header = TRUE) %>%
   na_if("") %>%
   # split gene name of for easier matching
   mutate_all(funs(str_replace(., '^[^:]*:', '')))
-  # flag if mutation is signature mutation
-    mutations_sig <- mutations_sig %>% 
-      rowwise() %>%
-      mutate( sigflag = ifelse( any(sigmuts.df == str_split(mutation, "::")[[1]][2]), "SigMut",'') ) }
-  # filter good samples for only mutations with sig pvalues for plotting
-    approved_mut_plot <- dplyr::select(approved_mut_plot, c(samplename, dates, location_name,
-                                                     coordinates_lat, coordinates_long, 
-                                                     mutations_sig$mutation))
-    approved_mut_plot_location_pooled <- pool_by_mean(approved_mut_plot, na_handling = TRUE, group_fun = "day_location")
-  mutations_sig_download <- mutations_sig %>% paste0(collapse="\n") %>% base64url::base64_urlencode()
-    create_dt(mutations_sig)
-    
-    if (nrow(mutations_sig_unfiltered) > 0){  
-    mutations_sig_unfiltered <- mutations_sig_unfiltered %>%
-      rowwise() %>%
-      mutate( sigflag = ifelse( any(sigmuts.df == str_split(mutation, "::")[[1]][2]), "sigmut", ''))}
-    mutations_sig_unfiltered_download <- mutations_sig_unfiltered %>% paste0(collapse="\n") %>% base64url::base64_urlencode()
-    
-} else { cat("No mutations or not enough mutations found to perform a regression anaylsis.") }
 
 
+changing_muts <- parsing_mutation_plot_data(approved_mut_plot)
+mutations_sig_unfiltered <- refined_lm_model(changing_muts)
+mutations_sig <-
+  filter_lm_res_top20(mutations_sig_unfiltered, 0.05)
 
+# filter good samples for only mutations with sig pvalues for plotting
+filtered_approved_mut_plot <-
+  dplyr::select(
+    approved_mut_plot,
+    c(
+      samplename,
+      dates,
+      location_name,
+      coordinates_lat,
+      coordinates_long,
+      mutations_sig$mutation
+    )
+  )
+
+# check if the filtered df has actual values besides meta data
+APPROVED_MUTATIONS_FOUND <-
+  (length(filtered_approved_mut_plot) > 5) && (nrow(filtered_approved_mut_plot) > 0)
+
+approved_mut_plot_location_pooled <-
+  pool_by_mean(filtered_approved_mut_plot,
+               na_handling = TRUE,
+               group_fun = "day_location")
 ```
 
-[Download significant_mutations.csv](`r if (exists("mutations_sig_download")){  sprintf('data:text/csv;base64,%s', mutations_sig_download)}`)     
-[Download lm_res_all_mutations.csv](`r if (exists("mutations_sig_unfiltered_download")){ sprintf('data:text/csv;base64,%s', mutations_sig_unfiltered_download)}`) (unfiltered)
+
+```{r linear_regression_tables, warning=TRUE, results='asis', eval=RUN_MUTATION_REGRESSION}
+if (nrow(mutations_sig) > 0) {
+  # flag if mutation is signature mutation
+  mutations_sig <- mutations_sig %>%
+    rowwise() %>%
+    mutate(sigflag = ifelse(any(
+     sigmuts.df == str_split(mutation, "::")[[1]][2]
+    ), "SigMut", ''))
+
+  cat(
+    "The following table shows the mutations showing ",
+    "the strongest increasing trend (p <= 0.05).",
+    "The number of trending mutation is restricted to the top 20.",
+    "\n\n**Mutations with significant increase in frequency over time**\n"
+  )
+
+  print(htmltools::tagList(create_dt(mutations_sig)))
+
+  mutations_sig_download <- mutations_sig %>%
+    dump_csv() %>%
+    base64url::base64_urlencode()
+  cat(
+    create_html_download_link(mutations_sig_download,
+                              "significant_mutations.csv"),
+    "\n\n"
+  )
+} else {
+  warning("No Mutation with significant increase in frequency over time found.",
+          "\nThe associated plots are skipped.\n")
+}
+
+if (nrow(mutations_sig_unfiltered) > 0) {
+  mutations_sig_unfiltered <- mutations_sig_unfiltered %>%
+    rowwise() %>%
+    mutate(sigflag = ifelse(any(
+      sigmuts.df == str_split(mutation, "::")[[1]][2]
+    ), "sigmut", ''))
+  mutations_sig_unfiltered_download <- mutations_sig_unfiltered %>%
+    dump_csv() %>%
+    base64url::base64_urlencode()
+  cat(
+    create_html_download_link(
+      mutations_sig_unfiltered_download,
+      "lm_res_all_mutations.csv"
+    ),
+    "\n\n"
+  )
+}
+```
+
 
 
 ```{r mutations_pooled, echo = FALSE, message = FALSE, warning = FALSE}
@@ -606,6 +656,7 @@ if (exists("approved_mut_plot") && nrow(approved_mut_plot) > 0 && length(approve
    locations <- approved_mut_plot_day_pooled %>% mutate( dates = as.character( strptime(dates, format = "%Y-%m-%d"))) %>%
                  melt( id.vars = c("coordinates_lat", "coordinates_long"))
     
+    plot_ly (type = 'scattermapbox',
              colors = viridis_pal(option = "H")(20),
              mode = 'markers',
                                width = 900,
@@ -638,11 +689,6 @@ if (exists("approved_mut_plot") && nrow(approved_mut_plot) > 0 && length(approve
                                center = list(lat = ~median(coordinates_lat, na.rm=TRUE),
                                              lon = ~median(coordinates_long, na.rm=TRUE)),
                                style = 'open-street-map'))
-p <- plot_ly (type = 'scattermapbox',
-if (length(unique(approved_mut_plot_day_pooled$dates)) > 1) {
-  p %>% animation_slider(currentvalue = list(prefix = "Date: "))
-} else {
-  p
 }
 ```
 
