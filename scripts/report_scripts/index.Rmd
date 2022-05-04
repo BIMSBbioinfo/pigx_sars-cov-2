@@ -102,6 +102,14 @@ create_dt <- function(x){
                                scroller = TRUE, 
                                dom = 'Slfrtip'))
 }
+
+# function to dump data in csv formatted string
+dump_csv <- function(data, format = "csv", rownames = FALSE) {
+  if (format != "csv") stop("Data can only be dumped in CSV format.")
+  capture.output(write.csv(data, file = "", quote = FALSE, row.names = rownames)) %>%
+    paste0(collapse = "\n")
+}
+
 # function to create html formatted notes in panel box with optional toggling
 # see https://about.gitlab.com/handbook/markdown-guide/#additional-information
 create_html_note <- function(x, toggle = FALSE) {
