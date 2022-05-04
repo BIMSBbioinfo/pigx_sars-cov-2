@@ -83,7 +83,7 @@ highly reproducible genomics pipelines
 platform](https://bioinformatics.mdc-berlin.de/) at the Berlin
 Institute of Medical System Biology (BIMSB).
 
-```{r sample_quality_score, echo=FALSE, message=FALSE, warning=FALSE}
+```{r sample_quality_score, warning=TRUE}
 source(params$fun_cvrg_scr) # TODO given as input? or only the scripts dir? similar variant_report
 
 coverages.df <- merge(get_genome_cov( params$coverage_dir ), get_mutation_cov( params$coverage_dir), by="samplename")
@@ -102,7 +102,7 @@ if ( !(length(coverages.df) == 0)){
 These plots provide an overview of the relative frequency dynamics of
 identified lineages at specific wastewater sampling locations over time. 
 
-```{r filter_plot_frames_samplescore, echo=F, message=F, warning=F}
+```{r filter_plot_frames_samplescore, warning=TRUE}
 source(params$fun_pool)
 
 # only use good samples for processing and visualiztaion
@@ -529,7 +529,8 @@ Frequencies per mutation per sample
 [Download mutation_frequencies.csv](`r sprintf('data:text/csv;base64,%s', df_mut_download)`)
 
 
-```{r mutation_counts, message = FALSE, echo = FALSE}
+
+```{r mutation_counts}
 # get functions for counting and writing
 source(params$fun_tbls)
 output_dir <- params$output_dir
@@ -567,7 +568,7 @@ For every sample three reports are generated:
 
 The reports for each sample can be accessed here:
 
-```{r generate overview, warning=F, message=F}
+```{r generate overview}
 
 sample_sheet <- fread(params$sample_sheet)
 sample_names <- sample_sheet$name
@@ -599,12 +600,12 @@ Prior visualization and regression analysis each sample gets a quality score dep
 genome and proportion of covered signature mutation locations. Results from samples without sufficient coverage measures 
 (< 90%) are not included in the visualizations or the linear regression calculations. 
 
-```{r title_quality_score, echo=FALSE, message=FALSE, warning=FALSE, results = 'asis'}
+```{r title_quality_score, results = 'asis'}
     # table displaying bad samples which are not further inlcuded 
     cat("\n Table 1: Discarded samples not matching the provided sample quality scoring") # TODO refine this text
 ```
 
-```{r table_ample_quality_score, echo=FALSE, message=FALSE, warning=FALSE}
+```{r table_ample_quality_score}
 
 # TODO the sample quality measure default: 90% should be able to provide by the settings file
 
