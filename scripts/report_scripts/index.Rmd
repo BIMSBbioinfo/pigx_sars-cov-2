@@ -110,6 +110,16 @@ dump_csv <- function(data, format = "csv", rownames = FALSE) {
     paste0(collapse = "\n")
 }
 
+# function to create html link with named downloadable files
+create_html_download_link <- function(base64enc, filename, text = NULL) {
+  if(is.null(text)) text <- sprintf("Download %s",filename)
+  sprintf(paste0(
+    '<a download="%s" href="%s">%s</a>'),
+    filename,
+    sprintf('data:text/csv;base64,%s', base64enc),
+    text
+  )
+}
 # function to create html formatted notes in panel box with optional toggling
 # see https://about.gitlab.com/handbook/markdown-guide/#additional-information
 create_html_note <- function(x, toggle = FALSE) {
