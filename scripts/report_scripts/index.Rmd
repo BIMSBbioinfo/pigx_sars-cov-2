@@ -580,7 +580,7 @@ plot_muts <- function (melted,location) {
                            arrange(variable) %>%
                            ungroup() %>%
                        plot_ly(type = 'scatter', 
-                               mode = "lines+markes",
+                               mode = "lines+markers",
                                symbol = ~sigflag,
                                symbols = c('circle','hourglass'),
                                x = ~dates,
