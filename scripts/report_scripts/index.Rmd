@@ -626,20 +626,32 @@ for (i in 1:length(locations)) {
   cat('\n\n')
 }
 ```
-## Trending mutations geo-localized
-
-This plot visualizes proportions of identified single mutation dynamics at the provided sampling locations.
 
 
-<div class="notice">
-Locations of wastewater processing plants have been generated arbitrarily and do 
-not correspond to actual locations.
-</div>
 
-Use the slider to select a specific date or hit the *Play* button to
-display all snapshots successively.  Click on a mutation in the legend
-to toggle its visibility in the map; double-click to view only the
-selected lineage.
+```{r text_mutations_for_locations_and_date, results='asis', eval=APPROVED_MUTATIONS_FOUND}
+
+
+cat('## Trending mutations geo-localized
+
+This plot visualizes proportions of identified single mutation dynamics
+at the provided sampling locations.'
+)
+
+cat(create_html_note('Locations of wastewater processing plants have been
+generated arbitrarily and do not correspond to actual locations.'
+))
+
+cat('Click on a lineage in the legend to toggle its visibility in the map;
+double-click to view only the selected lineage.',
+ifelse(
+  length(unique(approved_mut_plot$dates)) > 1,
+  yes = 'Use the slider to select a specific date or hit the *Play* button to
+display all snapshots successively. ',
+no = ''
+))
+
+```
 
 
 ```{r mutations_for_locations_and_date, echo=F, message=F, warning=F, out.width="900px", out.height="900px"}
