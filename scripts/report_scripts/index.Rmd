@@ -287,14 +287,11 @@ location_plot <- function (melted,location) {
                               showlegend = TRUE,
                               yaxis = list(title = "Frequency"))
 }
-plot_list <- list()
-for ( i in seq_along(locations)) {
-  plot_name <- locations[i]
-  df <- paste0(locations[i],".df")
-  plot_name <- location_plot(locations[i])
-  plot_list[[i]] <- plot_name
-}
 
+plot_list <- lapply(setNames(locations,
+                             locations),
+                    location_plot,
+                    melted = melted)
 ```
 
 ```{r print_tab_plotting_variants, warning=TRUE,results='asis', fig.width=4, fig.height=4, eval=VARIANTS_FOUND}
@@ -606,13 +603,11 @@ melted <- melted[idx, ]
 
 locations <- as.character(unique(melted$location_name))
 
-plot_list <- list()
-for ( i in seq_along(locations)) {
-  plot_name <- locations[i]
-  df <- paste0(locations[i],".df")
-  plot_name <- plot_muts(melted,locations[i])
-  plot_list[[i]] <- plot_name
-}
+
+plot_list <- lapply(setNames(locations,
+                             locations),
+                    plot_muts,
+                    melted = melted)
 ```
 
 
