@@ -245,7 +245,8 @@ to access the not-pooled plots for each location.')
     layout(
       title = "Summary over time",
       showlegend = TRUE,
-      yaxis = list(title = "Frequency")
+      yaxis = list(title = "Frequency"),
+      xaxis = list(title = "Dates")
     )
 ```
 
