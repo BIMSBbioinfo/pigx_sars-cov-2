@@ -134,7 +134,8 @@ get_protein_mut <- function (vepfile){ # parse together from vep output "Protein
   #' this function is for parsing the information about mutation position in the amino acid sequence, the reference aa and
   #' the alternative mutation into the aa-mutation-notation which is later on comparable to the lists of signature mutations
   
-  # reading in whole vep txt output
+  # reading in whole vep txt output 
+    # TODO: include check about correct VEP file input format
     vepfile.df <- read.table(vepfile, sep = ',', header = T) # you should include in the vep script to parse out the # 
       #in the beginning of the line or include that step here. 
      # parsing snv and protmut location
@@ -251,11 +252,14 @@ vep.info <- variant_protein_mut
 complete.df <- dplyr::left_join(lofreq.info, vep.info, by = c('gene_mut'='gene_mut'), copy = T) %>% 
                rowwise() %>% mutate(gene_mut_collapsed = paste(genes,gene_mut,sep = ":"))
 
+# TODO: let the read coverage filter be set dynamically over the setting file 
+complete_cov_filtered.df <- complete.df %>% filter(!(as.numeric(cov) < 100))
+
 # filter for mutations which are signature mutations
-match.df <- complete.df %>%
+match.df <- complete_cov_filtered.df %>%
                     filter(!is.na(name))
 # filter for everything that is not a signature mutation
-nomatch.df <- complete.df %>%
+nomatch.df <- complete_cov_filtered.df %>%
                         filter(is.na(name))
 ```
 
@@ -354,17 +358,19 @@ dropped_variants <- unique(dropped_variants)
 dropped_variants <- dropped_variants[!is.na(dropped_variants)]
 ```
 ```{r calculate_sigmat_weigths, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
-
-deconv_lineages <- colnames(msig_simple_unique[,-which( names(msig_simple_unique) %in% c("muts", "WT") )])
-
+deconv_lineages <- colnames(msig_simple_unique[,-which( names(msig_simple_unique) %in% "muts")])
 # create list of proportion values that will be used as weigths
 sigmut_proportion_weights <- list()
 for (lineage in deconv_lineages){
-    if ( grepl(",", lineage)){
+    if ( lineage == "Others"){
+        # !! 17/02/2022 It's not yet tested how robust this behaves when one would mindlessly clutter the mutationsheet
+        # with lineages that are very unlikely to detect or not detected
+        value <- nrow(msig_simple_unique) / nrow(sigmuts_deduped)
+    } else if ( grepl(",", lineage)){
         group <- unlist(str_split(lineage, ","))
         avrg <- sum(sig_mutations.df$name %in% group) / length(group)
         value <- sum(msig_simple_unique[lineage]) / avrg
-    } else{
+    } else {
         value <- sum(msig_simple_unique[lineage]) / sum(sig_mutations.df$name == lineage)
     }
     sigmut_proportion_weights[lineage] <- value
@@ -375,19 +381,19 @@ sigmut_proportion_weights <- as_tibble(sigmut_proportion_weights)
 # fixme: there should be a way to do this vectorized
 msig_simple_unique_weighted <- msig_simple_unique
 for (lineage in deconv_lineages){
-    msig_simple_unique_weighted[lineage] <- msig_simple_unique_weighted[lineage] / as.numeric(sigmut_proportion_weights[lineage])
+    weight <- msig_simple_unique_weighted[lineage] / as.numeric(sigmut_proportion_weights[lineage])
+    msig_simple_unique_weighted[lineage] <- as.numeric( ifelse( is.na(weight),0, unlist(weight) ))
+    
 }
-
 ```
-```{r simulating_WT_mutations, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
-
+```{r simulating_Others_mutations, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
 # construct additional WT mutations that are not weighted
-
-msig_stable_all <- simulateWT( mutations.vector, bulk_freq.vector, 
+Others_weight <- as.numeric(sigmut_proportion_weights["Others"])
+msig_stable_all <- simulateOthers( mutations.vector, bulk_freq.vector,
                                msig_simple_unique_weighted[,-which(names(msig_simple_unique_weighted) == "muts")],
-                                match.df$cov)
+                                match.df$cov,
+                                Others_weight)
 msig_stable_unique <- msig_stable_all[[1]]
-
 ```
 
 ```{r deconvolution, message=F, warning=F, include = FALSE, eval = executeDeconvolution}
@@ -407,27 +413,14 @@ variant_abundance <- deconv(bulk_all,sig)
 "}` 
 
 ```{r plot, message=F, warning=F, echo = FALSE, eval = executeDeconvolution}
-
 Variant_colors <- c("#8a3874", "#4d3da1", "#62c742", "#13317a", "#86e5a3", "#6f69e5", "#4cdab2", "#999ce4", "#2ce6f3",
 "#6638c6", "#005f29", "#5d73cc", "#616524", "#a8a041", "#e9f600", "#3eaca8", "#62a273", "#4ea5d0", "#655c95", "#67a04e")
 # TODO this shoul be put into a seperate color palette function in a seperate file
 
-# work in progress...only to show how it theoretically can look like in the report
 variants <- colnames(msig_stable_unique[,-1])
 df <- data.frame(rbind(variant_abundance))
 
-# XXX: Replace the long column name consisting of concatenated variant
-# names with "others" and put the variant names in a label.
-# TODO: This should be done much earlier when building the data frame.
-
-condensed_variants_names <-
-    unlist( lapply(variants, function (x) { if (str_detect(x, ".*,.*,.*")) { "others" } else { x }}) )
-
-colnames(df) <- condensed_variants_names
-
-variants_labels <-
-    unlist( lapply(variants, function (x) str_replace_all(x, ",", "\n")) )
-
+colnames(df) <- variants
 df <- df %>% 
     tidyr::pivot_longer( everything() )
 
@@ -442,9 +435,9 @@ if ( round( sum(df$value),1) == 1 ){
 
 # case 2: in case "others" == 0, both variants can be split up again and being given the value 0 OR
 # case 3: in case multiple vars can really not be distinguished from each other they will be distributed normaly
-if ( any(str_detect(variants, ",")) ) {
-    grouped_rows <- which(str_detect(variants, ","))
-    for ( row in grouped_rows ){
+while ( any(str_detect(df$name, ",")) ) {
+    grouped_rows <- which(str_detect(df$name, ","))
+    for ( row in grouped_rows ){ # fixme: this loop might be unneccessary, since only the first row should been picked, everything else will be handled by the while loop
        if ( df[row,"value"] == 0 ){ 
             grouped_variants <- unlist( str_split(df[row,"name"], ",") )
             for ( variant in grouped_variants ){

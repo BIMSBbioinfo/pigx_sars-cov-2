@@ -13,6 +13,7 @@ dist_pkglibexec_scripts_SCRIPTS = \
   scripts/deconvolution.R \
   scripts/download_databases.sh \
   scripts/generateNavigation.R \
+  scripts/renderReport.R \
   scripts/get_qc_table.py \
   scripts/overview_QC_table.R \
   scripts/parse_vep.py \
