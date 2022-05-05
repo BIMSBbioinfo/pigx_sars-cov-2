@@ -64,6 +64,7 @@ location_name <- "berlin"
 coordinates_lat <- "52.5621572404487"
 coordinates_long <- "13.4155862239246"
 deconvolution_functions <- "deconvolution.R"
+mutation_output_dir <-"."
 
 ### CHANGE HERE when using a different mutation sheet
 
@@ -73,8 +74,11 @@ deconvolution_functions <- "deconvolution.R"
 # simulation experiment: alpha, gamma, delta, BA1, BA2, mu, lambda 
 # mutation_sheet <- "mutation_sheet_simulation_NT_t07_mu_lambda.csv" 
 
+# simulation san diego
+mutation_sheet <- "mutation_sheet_ucsd_220309_t07.csv"
+
 # only mutations on spike RBD
-mutation_sheet <- "Muts_RBDOnly_220207_wholegenomeReferene_t02.csv"
+# mutation_sheet <- "Muts_RBDOnly_220207_wholegenomeReferene_t02.csv"
 
 ### CHANGE PATHES HERE e.g. when using a mount
 
@@ -98,9 +102,9 @@ mutation_sheet <- "Muts_RBDOnly_220207_wholegenomeReferene_t02.csv"
 ## alignmnts at: /local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_iSeq/mapped_reads
 ## example sample to investigate: iSeq_RBD_NY13
 
-vep_file <- "iSeq_RBD_NY13_vep_sarscov2_parsed.txt"
-
-snv_file <- "iSeq_RBD_NY13_snv.csv"
+# vep_file <- "iSeq_RBD_NY13_vep_sarscov2_parsed.txt"
+# 
+# snv_file <- "iSeq_RBD_NY13_snv.csv"
 
 #### NY MiSeq data
 ## alignmnts at: /local/Projects/AAkalin_pathogenomics/results/NY_SpikeRBD_wastewater/output_WholeGenomeRef_iSeq/mapped_reads
@@ -115,7 +119,22 @@ snv_file <- "iSeq_RBD_NY13_snv.csv"
 # vep_file <- "trimmed_210916-20-22h-mix_S1_vep_sarscov2_parsed.txt"
 # snv_file <- "trimmed_210916-20-22h-mix_S1_snv.csv"
 
+#### febjune_0219
 
+# vep_file <- "WW_210219_Berlin_KW1_vep_sarscov2_parsed.txt"
+# snv_file <- "WW_210219_Berlin_KW1_snv.csv"
+
+### amedes_real_data - debug handling value distribution of grouped cases
+# vep_file <- "WW-T12-001_2021-08-28_Berlin_A_vep_sarscov2_parsed.txt"
+# snv_file <- "WW-T12-001_2021-08-28_Berlin_A_snv.csv"
+
+# vep_file <- "WW-T14-003_2021-09-06_Berlin_C_vep_sarscov2_parsed.txt"
+# snv_file <- "WW-T14-003_2021-09-06_Berlin_C_snv.csv"
+
+
+### sandiego
+vep_file <- "file_300_vep_sarscov2_parsed.txt"
+snv_file <- "file_300_snv.csv"
 ``` 
 
 This report shows the variant analysis of SARS-CoV-2 from wastewater samples. Mutations are 
@@ -201,6 +220,7 @@ get_protein_mut <- function (vepfile){ # parse together from vep output "Protein
   #' the alternative mutation into the aa-mutation-notation which is later on comparable to the lists of signature mutations
   
   # reading in whole vep txt output
+  # TODO: include check about correct VEP file input format
     vepfile.df <- read.table(vepfile, sep = ',', header = T) # you should include in the vep script to parse out the # 
       #in the beginning of the line or include that step here. 
     
@@ -324,6 +344,12 @@ match.df <- complete.df %>%
 # filter for everything that is not a signature mutation
 nomatch.df <- complete.df %>%
                         filter(is.na(name))
+```
+```{r try_filter_low_cov_mutations}
+
+match_filtered.df <- match.df %>%
+                        filter( as.numeric(cov) > 100)
+match.df <- match_filtered.df
 ```
 
 # Mutations matching variants of concern
@@ -484,18 +510,7 @@ Variant_colors <- c("#8a3874", "#4d3da1", "#62c742", "#13317a", "#86e5a3", "#6f6
 variants <- colnames(msig_stable_unique[,-1])
 df <- data.frame(rbind(variant_abundance))
 
-# XXX: Replace the long column name consisting of concatenated variant
-# names with "others" and put the variant names in a label.
-# TODO: This should be done much earlier when building the data frame.
-
-condensed_variants_names <-
-    unlist( lapply(variants, function (x) { if (str_detect(x, ".*,.*,.*")) { "others" } else { x }}) )
-
-colnames(df) <- condensed_variants_names
-
-variants_labels <-
-    unlist( lapply(variants, function (x) str_replace_all(x, ",", "\n")) )
-
+colnames(df) <- variants
 df <- df %>% 
     tidyr::pivot_longer( everything() )
 
@@ -510,8 +525,8 @@ if ( round( sum(df$value),1) == 1 ){
 
 # case 2: in case "others" == 0, both variants can be split up again and being given the value 0 OR
 # case 3: in case multiple vars can really not be distinguished from each other they will be distributed normaly
-if ( any(str_detect(variants, ",")) ) {
-    grouped_rows <- which(str_detect(variants, ","))
+while ( any(str_detect(df$name, ",")) ) {
+    grouped_rows <- which(str_detect(df$name, ","))
     for ( row in grouped_rows ){
        if ( df[row,"value"] == 0 ){ 
             grouped_variants <- unlist( str_split(df[row,"name"], ",") )
@@ -557,4 +572,61 @@ ggplot(data = df, aes(name,value,
                          breaks = df$name,
                          labels = df$name) +
      theme_gray(base_family = font_family)
+```
+```{r csv_output_mutation_plot, message = FALSE, warning = FALSE, include = FALSE}
+# prepare processed mutation values to output them as a csv which will be used for the plots in index.rmd
+# those outputs are not offically declared as outputs which can lead to issues - that part should be handled by a seperate
+# file (and maybe rule)
+# get all possible mutations
+
+# one aa mutation can have different codon mutations reported with different freqs- for the summary table they have to be summed up
+# (process see line 1872 of documentation)
+complete.df <- complete.df  %>%
+  group_by(across(c(-freq,-gene_mut, -gene_mut_collapsed, AA_mut))) %>%
+  summarise(freq = sum(as.numeric(freq)), gene_mut = paste(gene_mut, collapse = ",")) %>%
+  rowwise() %>%
+  mutate(AA_mut = replace(AA_mut,is.na(AA_mut), '\\:\\')) %>%
+  # 211006 this exclusion is necessary because this mutation has a wrong entry in VEP which gives two AA_muts instead of probably 1 deletion
+  filter(!(gene_mut %in% "G13477A")) %>%
+  ungroup()
+
+# report the gene, translated_AA_mut and NT mut accordingly
+# easier to spot translation inconsitentcies that way
+all_mutations <- paste(complete.df$AA_mut[!is.na(complete.df$AA_mut)],complete.df$gene_mut,sep = "::")
+output_mutations <- file.path(mutation_output_dir, paste0(sample_name, "_mutations.csv"))
+
+# 1. write dataframe with this information here
+output_mutation_frame <- data.frame (samplename = character(),
+                                   dates = character(),
+                                   location_name = character(),
+                                   coordinates_lat = character(),
+                                   coordinates_long = character())
+# add columns for all possible mutations to the dataframe
+for (mutation in all_mutations) {
+  output_mutation_frame[,mutation] <- numeric()
+}
+meta_data <- c (samplename = sample_name,
+                dates = date,
+                location_name = location_name,
+                coordinates_lat = coordinates_lat,
+                coordinates_long = coordinates_long)
+
+output_mutation_frame <- bind_rows(output_mutation_frame, meta_data)
+
+# write mutation frequency values to df
+for (i in all_mutations){
+  i_NT <- str_split(i,"::")[[1]][2]
+  if (i_NT %in% complete.df$gene_mut ){ # split gene name to match with AA mut
+    # check if variant already has a column
+    if ( i %in% colnames(output_mutation_frame)) {
+        output_mutation_frame[,i] <- complete.df$freq[ which(complete.df$gene_mut == i_NT)]
+}}}
+colnames( output_mutation_frame ) <- as.character( colnames( output_mutation_frame ))
+output_mutation_frame <- output_mutation_frame %>% dplyr::select( -contains("NA" , ignore.case = FALSE))
+# convert numeric values to character
+output_mutation_frame <- as.data.frame( lapply( output_mutation_frame, as.character ), check.names = FALSE)
+
+# 3. write to output file
+write.table(output_mutation_frame, output_mutations, sep = "\t",
+        row.names = FALSE, quote = FALSE)
 ```
