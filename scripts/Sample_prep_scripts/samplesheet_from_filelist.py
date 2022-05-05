@@ -30,7 +30,13 @@ def build_csv(csvfile, sample_dir):
                 raise Exception("The files seem to be not paired-end reads. This script can't deal with that for now."
                                 "You could change the read names to match the pattern of '*_R1.fastq.gz'.")
             
+
 # this is here because WIP 
-csvfile = "/home/vfs/PycharmProjects/Akalinlab_pathogenomics/pigx_sarscov2_ww/tests/auto_sample_sheet.csv"
-sample_dir = "/mnt/bimsb_local/data/210818_ww_berlin2021_merged_fake"
-build_csv(csvfile, sample_dir)
+# csvfile = "/home/vfs/PycharmProjects/Akalinlab_pathogenomics/pigx_sarscov2_ww/tests/auto_sample_sheet.csv"
+# sample_dir = "/mnt/bimsb_local/data/210818_ww_berlin2021_merged_fake"
+# build_csv(csvfile, sample_dir)
+
+if __name__ == '__main__':
+    csvfile = sys.argv[1]
+    sample_dir = sys.argv[2]
+    build_csv(csvfile, sample_dir)

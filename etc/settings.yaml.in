@@ -16,6 +16,12 @@ trimming:
   read-length: 150
   cut-off: 0.8
 
+# These settings are used to set quality control filters for the reports.
+# Results from samples without sufficient coverage measures are not included in
+# the visualizations or the linear regression calculations.
+reporting:
+  mutation-coverage-threshold: 90
+
 execution:
   submit-to-cluster: no
   jobs: 6
@@ -37,7 +43,8 @@ tools:
     args: ""
   fastp:
     executable: @FASTP@
-    args: ""
+    args: "--adapter_sequence=AGATCGGAAGAGCACACGTCTGAACTCCAGTCA --adapter_sequence_r2=AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
+    # Please refer to fastp manual about setting adapter sequences: https://github.com/OpenGene/fastp#adapters
   fastqc:
     executable: @FASTQC@
     args: ""

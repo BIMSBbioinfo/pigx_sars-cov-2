@@ -70,6 +70,7 @@
         "r-tidyverse"
         "r-reshape2"
         "r-r-utils"
+        "r-viridis"
         "python-wrapper"
         "python-pyyaml"))
 

@@ -1,5 +1,6 @@
+library(dplyr)
+
 group_by_day_location <- function( df ){
-  require(dplyr)
   df_grouped <- df %>% 
         # discard location
         dplyr::select ( -location_name, -coordinates_long, -coordinates_lat) %>%
@@ -10,7 +11,6 @@ group_by_day_location <- function( df ){
   return(df_grouped)
 }
 group_by_day <- function( df ){
-  require(dplyr)
   df_grouped <- df %>% # discard time only keep day
         mutate(dates = as.Date( dates )) %>%
         # pool samples per date and calc. the mean for every mutation column
@@ -63,7 +63,6 @@ pool_by_weighted_mean <- function(df, weights, group_fun = c("day_location", "da
   #' weigths is a dataframe with minimum samplenames and total_reads as column 
   #' total reads is the number of reads used for alignment of one sample, should be the sum of read1 and read2 with 
   #' paired end data
-  require(dplyr)
 
   weights <- weights  %>% 
               # only take weights from approved samples

@@ -9,6 +9,7 @@ dist_pkglibexec_SCRIPTS = \
 pkglibexec_scriptsdir = $(pkglibexecdir)/scripts
 dist_pkglibexec_scripts_SCRIPTS = \
   scripts/creating_mutation_summary_table.R \
+  scripts/creating_variants_summary_table.R \
   scripts/deconvolution.R \
   scripts/download_databases.sh \
   scripts/generateNavigation.R \
@@ -68,6 +69,7 @@ TESTS = \
 
 clean-local:
 	-rm -rf .snakemake
+	-rm -rf tests/output
 
 CLEANFILES = $(nodist_bin_SCRIPTS) config.json
 

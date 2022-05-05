@@ -12,14 +12,12 @@ export srcdir=$(@PYTHON@ -c 'import os,sys; print(os.path.realpath(sys.argv[1]))
 
 chmod -R +w ${srcdir}/tests
 
-# Perform a full paired end run
+# Perform a full run
 
 ${builddir}/pigx-sars-cov-2 --printshellcmds -s ${srcdir}/tests/settings.yaml ${srcdir}/tests/sample_sheet.csv
 
 if ! test -f "${srcdir}/tests/output/report/index.html"
 then
-    echo "ERROR: Could not find report for paired-end run."
+    echo "ERROR: Could not find report for complete run."
     exit 1
 fi
-
-
