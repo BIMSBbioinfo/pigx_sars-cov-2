@@ -9,6 +9,7 @@ params:
   coverage_dir: ''
   sample_sheet: ''
   mutation_sheet: ''
+  mutation_coverage_threshold: '90'
   logo: ''
   fun_cvrg_scr: ''
   fun_lm: ''
@@ -90,6 +91,12 @@ library(viridis)
 ```{r input}
 df_var <- read.table(params$variants_csv, sep = "\t", header=TRUE, check.names = FALSE)
 df_mut <- read.table(params$mutations_csv, sep = "\t", header=TRUE, check.names = FALSE)
+
+mutation_coverage_threshold <- as.numeric(params$mutation_coverage_threshold) %>%
+# check if value is given as fraction [0,1] or percentage [0,100]
+  ifelse(. >= 0 & . <= 1,
+      . * 100,
+      .)
 ```
 
 
@@ -168,9 +175,9 @@ coverages.df <-
   )
 
 if (!(length(coverages.df) == 0)) {
-  # take only the samples with > 90% mutation coverage
-  # TODO stringecy should be given by user, maybe even through visualization
-  good_samples.df <- filter(coverages.df, as.numeric(proport_muts_covered) >= 90)
+  # take only the samples passing the mutation_coverage_threshold
+  # NOTE: think about interactive selection for  mutation_coverage_threshold visualization
+  good_samples.df <- filter(coverages.df, as.numeric(proport_muts_covered) >= mutation_coverage_threshold)
   bad_samples.df <- filter(coverages.df, !(samplename %in% good_samples.df$samplename))
 } else {
   warning("\n No coverage values found.")
@@ -804,7 +811,7 @@ datatable(df, options = list( fixedColumns = TRUE,
 
 Prior visualization and regression analysis each sample gets a quality score depending on proportion of covered reference 
 genome and proportion of covered signature mutation locations. Results from samples without sufficient coverage measures 
-(< 90%) are not included in the visualizations or the linear regression calculations. 
+(< `r mutation_coverage_threshold`%) are not included in the visualizations or the linear regression calculations. 
 
 ```{r title_quality_score, results = 'asis'}
     # table displaying bad samples which are not further inlcuded 
@@ -812,9 +819,6 @@ genome and proportion of covered signature mutation locations. Results from samp
 ```
 
 ```{r table_ample_quality_score}
-
-# TODO the sample quality measure default: 90% should be able to provide by the settings file
-
 if ( !(length(coverages.df) == 0)){
     # TODO refine column names --> e.g "coverage in percent", 
     bad_samples.df <- bad_samples.df %>% slice_head(n=20)

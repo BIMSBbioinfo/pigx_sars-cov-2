@@ -45,6 +45,8 @@ OUTPUT_DIR       = config['locations']['output-dir']
 READ_LENGTH      = config['trimming']['read-length']
 CUT_OFF          = config['trimming']['cut-off']
 
+MUTATION_COVERAGE_THRESHOLD = config['reporting']['mutation-coverage-threshold']
+
 INDEX_DIR         = os.path.join(OUTPUT_DIR, 'index')
 TRIMMED_READS_DIR = os.path.join(OUTPUT_DIR, 'trimmed_reads')
 LOG_DIR           = os.path.join(OUTPUT_DIR, 'logs')
@@ -697,6 +699,7 @@ rule render_index:
   "coverage_dir": "{COVERAGE_DIR}",\
   "sample_sheet": "{SAMPLE_SHEET_CSV}",  \
   "mutation_sheet": "{MUTATION_SHEET_CSV}", \
+  "mutation_coverage_threshold": "{MUTATION_COVERAGE_THRESHOLD}", \
   "logo": "{LOGO}", \
   "fun_cvrg_scr": "{params.fun_cvrg_scr}", \
   "fun_lm": "{params.fun_lm}", \
