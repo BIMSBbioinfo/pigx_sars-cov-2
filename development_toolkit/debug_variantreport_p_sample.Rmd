@@ -69,13 +69,13 @@ mutation_output_dir <-"."
 ### CHANGE HERE when using a different mutation sheet
 
 # mutation sheet containing alpha, beta, gamma, delta, BA1, BA2
-# mutation_sheet <- "mutation_sheet_220209_t07.csv"
+ mutation_sheet <- "mutation_sheet_220209_t07.csv"
 
 # simulation experiment: alpha, gamma, delta, BA1, BA2, mu, lambda 
 # mutation_sheet <- "mutation_sheet_simulation_NT_t07_mu_lambda.csv" 
 
 # simulation san diego
-mutation_sheet <- "mutation_sheet_ucsd_220309_t07.csv"
+# mutation_sheet <- "mutation_sheet_ucsd_220309_t07.csv"
 
 # only mutations on spike RBD
 # mutation_sheet <- "Muts_RBDOnly_220207_wholegenomeReferene_t02.csv"
@@ -133,8 +133,8 @@ mutation_sheet <- "mutation_sheet_ucsd_220309_t07.csv"
 
 
 ### sandiego
-vep_file <- "file_300_vep_sarscov2_parsed.txt"
-snv_file <- "file_300_snv.csv"
+vep_file <- "Test0_se_vep_sarscov2_parsed.txt"
+snv_file <- "Test0_se_snv.csv"
 ``` 
 
 This report shows the variant analysis of SARS-CoV-2 from wastewater samples. Mutations are 
