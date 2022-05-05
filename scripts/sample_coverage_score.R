@@ -48,6 +48,7 @@ get_genome_cov <- function ( coverage_dir, samples_names ) {
 
 get_mutation_cov <- function ( coverage_dir ) {
 
+  # TODO: convert these files to proper csv and make names daynamic
   files <- list.files(path = coverage_dir,
                       pattern = "_merged_covs.csv",
                       full.names = TRUE,
@@ -72,7 +73,7 @@ get_mutation_cov <- function ( coverage_dir ) {
   )
 
   mutation_cov.dfs <- lapply( files, function (x){
-    rd_tbl <- read.table(x, sep = '\t', header = TRUE)
+    rd_tbl <- read.csv(x, header = TRUE)
     # check if file has the correct header format
     data <- if (all(names(rd_tbl) %in% mutation_cov_header)) {
       data.frame(

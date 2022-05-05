@@ -5,7 +5,7 @@ parse_snv_csv <- function(snvfile, ...) { # allele frequency from v-pipe vcf
   #' input: csv file derived from vpipe vcf when using LoFreq,
   #' parsing snv-csv file for coverage, frequency and genomic mutation information
 
-  snvtable <- read.table(snvfile, sep = ",", header = TRUE)
+  snvtable <- read.csv(snvfile, sep = ",", header = TRUE)
   freq <- snvtable$AF
   cov <- snvtable$DP
   Ref <- snvtable$Ref
@@ -119,7 +119,7 @@ get_protein_mut <- function(vepfile) {
   # reading in whole vep txt output
   # you should include in the vep script to parse out the #
   # in the beginning of the line or include that step here.
-  vepfile.df <- read.table(vepfile, sep = ",", header = TRUE)
+  vepfile.df <- read.csv(vepfile, sep = ",", header = TRUE)
   # parsing snv and protmut location
 
   # parsing gene mutation

@@ -13,8 +13,7 @@ create_summary <- function ( files ){
 
   # read files into list
   variants_list <- lapply(X = files,
-                          FUN = read.table,
-                          sep = "\t",
+                          FUN = read.csv,                          
                           header = TRUE,
                           colClasses = "character",
                           check.names = FALSE )
@@ -38,4 +37,4 @@ output_file <- args[2]
 files <- get_files( variants_dir )
 output <- create_summary( files)
 # write to output file
-write.table(output, output_file, sep = "\t", row.names = FALSE, quote = FALSE)
+write.csv(output, output_file, row.names = FALSE, quote = FALSE)

@@ -68,7 +68,7 @@ def make_report_input_csv(genome_coverage_file, muts_loc_coverage_file, output_f
     ]
 
     with open(output_file, "a") as f:
-        writer = csv.writer(f, delimiter="\t")
+        writer = csv.writer(f)
         writer.writerow(header)
         writer.writerow(fields)
 

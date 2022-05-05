@@ -34,7 +34,7 @@ amplicon_gr <- makeGRangesFromDataFrame ( amplicon, keep.extra.columns = TRUE )
 ```{r}
 # TODO: make the mutation sheet with nt position for ALL mutatation and loop through it
 # mut <- read.csv("../tests/mutation_sheet_detailed.csv", header = TRUE ) # TODO provide as input
-mut <- read.table("../tests/sample_data/signature_mutations/B117_outbreakinfo_mutation_report_data_2021-03-06.tsv", header = TRUE)
+mut <- read.csv("../tests/sample_data/signature_mutations/B117_outbreakinfo_mutation_report_data_2021-03-06.tsv", header = TRUE)
 #assigning chr name with "NC_045512.2"
 mut$chr <- primer$chr[1]
 mut$strand = "+"

@@ -87,10 +87,16 @@ library(dplyr)
 library(viridis)
 ```
 
-
 ```{r input}
-df_var <- read.table(params$variants_csv, sep = "\t", header=TRUE, check.names = FALSE)
-df_mut <- read.table(params$mutations_csv, sep = "\t", header=TRUE, check.names = FALSE)
+df_var <- read.csv(params$variants_csv,  
+  header = TRUE,
+  check.names = FALSE
+)
+
+df_mut <- read.csv(params$mutations_csv,  
+  header = TRUE,
+  check.names = FALSE
+)
 
 mutation_coverage_threshold <- as.numeric(params$mutation_coverage_threshold) %>%
 # check if value is given as fraction [0,1] or percentage [0,100]

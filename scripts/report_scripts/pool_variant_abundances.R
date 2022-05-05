@@ -51,9 +51,8 @@
 
   # 2. check if file exists already
   if (file.exists(output_variants)) {
-      previous_df <- read.table(
-          output_variants,
-          sep = "\t",
+      previous_df <- read.csv(
+          output_variants,          
           header = TRUE,
           colClasses = "character",
           check.names = FALSE
@@ -73,7 +72,6 @@
 
   # 3. write to output file
   cat("Writing pooled variant file to ", output_variants, "...\n")
-  write.table(output_variant_plot, output_variants,
-      sep = "\t",
+  write.csv(output_variant_plot, output_variants,
       na = "NA", row.names = FALSE, quote = FALSE
   )

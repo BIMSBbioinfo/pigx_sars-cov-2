@@ -117,9 +117,10 @@ parse_amplicon_coverage <- function(samples, coverage_dir) {
   lapply(samples,
          coverage_dir = coverage_dir,
     FUN = function(sample, coverage_dir) {
-      coverage.df <- read.table(
+      # TODO: Convert below file to csv and pass file name from args
+      coverage.df <- read.csv(
         file.path(coverage_dir, paste0(sample, "_merged_covs.csv")),
-        sep = "\t", header = TRUE) %>%
+          header = TRUE) %>%
         dplyr::na_if("[]") %>%
         mutate(across(everything(), str_replace, "(\\[|\\])", "")) %>%
         transmute(
