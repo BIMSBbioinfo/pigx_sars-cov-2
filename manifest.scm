@@ -1,7 +1,7 @@
-;;; PiGx SARS-CoV2 wastewater sequencing pipeline
+;;; PiGx SARS-CoV-2 wastewater sequencing pipeline
 ;;; Copyright © 2021 Ricardo Wurmus <rekado@elephly.net>
 ;;;
-;;; This file is part of PiGx SARS-CoV2 wastewater sequencing pipeline
+;;; This file is part of PiGx SARS-CoV-2 wastewater sequencing pipeline
 ;;;
 ;;; This is free software; see LICENSE file for details.
 ;;;
@@ -70,7 +70,6 @@
         "r-tidyverse"
         "r-reshape2"
         "r-r-utils"
-        "r-viridislite"
         "r-viridis"
         "python-wrapper"
         "python-pyyaml"))

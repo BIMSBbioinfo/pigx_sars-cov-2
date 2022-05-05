@@ -1,49 +1,98 @@
-get_genome_cov <- function ( coverage_dir ) {
-  # TODO check assumptions e.g. if the coverage files exists in dir and if the dir exists
-  require(dplyr)
-  
+get_genome_cov <- function ( coverage_dir, samples_names ) {
+
   files <- list.files(path = coverage_dir,
                       pattern = "_coverage.csv",
-                      full.names = TRUE, 
+                      full.names = TRUE,
                       recursive = FALSE) # why false?
-  if (length(files) > 0) { 
-    genome_cov.df <- data.frame(samplename = c(),
-                                ref_genome_coverage = c())
-    genome_cov.df <- bind_rows(genome_cov.df, lapply( files, function (x){
-      rd_tbl <- read.table(x, sep = '\t') # ignores the row starting with # directly TODO: how to get column names?
-      # TODO check if file has the correct header format
-      data <- c( samplename = strsplit( basename (x), "\\_coverage.csv" )[[1]],
-                 ref_genome_coverage = rd_tbl$V6 )
-      #df <- bind_rows(df, data)
-      return(data)
-    }))
-  }else{ stop("coverage directory is empty or does not exist")}
-  
-  return(genome_cov.df) 
+  # stop if no coverage files exists in dir or if the dir does not exist
+  if (length(files) == 0) {
+    stop("coverage directory is empty or does not exist")
+  }
+
+  # define expected file header
+  samtools_coverage_header <-
+    c(
+      "#rname",
+      "startpos",
+      "endpos",
+      "numreads",
+      "covbases",
+      "coverage",
+      "meandepth",
+      "meanbaseq",
+      "meanmapq"
+    )
+
+  # iterate over files and return either data.frame with correct columns
+  # ("samplename","ref_genome_coverage") or NULL if column names do not
+  # match expected header
+  genome_cov.dfs <- lapply( files, function (x){
+    rd_tbl <- data.table::fread(x)
+    data <- if (all(names(rd_tbl) %in% samtools_coverage_header)) {
+      data.frame(
+        samplename = strsplit(basename (x), "\\_coverage.csv")[[1]],
+        ref_genome_coverage = as.numeric(rd_tbl$coverage)
+      )
+    } else {
+      NULL
+    }
+
+    return(data)
+  })
+  # combine data.frames by row, automatically dropping NULL elements
+  # NOTE: rbindlist is almost thirtee times faster than bind_rows()
+  genome_cov.df <- as.data.frame(data.table::rbindlist(genome_cov.dfs))
+
+  return(genome_cov.df)
 }
 
 get_mutation_cov <- function ( coverage_dir ) {
-  # TODO check assumptions e.g. if the coverage files exists in dir and if the dir exists
-  require(dplyr)
-  require(stringr)
-  
+
   files <- list.files(path = coverage_dir,
                       pattern = "_merged_covs.csv",
-                      full.names = TRUE, 
+                      full.names = TRUE,
                       recursive = FALSE) # why false?
+  # stop if no coverage files exists in dir or if the dir does not exist
+  if (length(files) == 0) {
+    stop("coverage directory is empty or does not exist")
+  }
+
   mutation_cov.df <- data.frame(samplename = c(),
                                 total_num_muts = c(),
                                 total_muts_cvrd = c(),
                                 drop_out_muts = c())
-  mutation_cov.df <- bind_rows(mutation_cov.df, lapply( files, function (x){
+
+  mutation_cov_header <- c(
+    "Total.number.of.tracked.mutations",
+    "Total.number.of.mutations.covered",
+    "Number.of.mutations.not.covered",
+    "Total.number.aligned.reads",
+    "Percentage.ref.genome.covered",
+    "Mean.depth.ref.genome.coverage"
+  )
+
+  mutation_cov.dfs <- lapply( files, function (x){
     rd_tbl <- read.table(x, sep = '\t', header = TRUE)
-    # TODO check if file has the correct header format
-    data <- c( samplename = strsplit( basename (x), "\\_merged_covs.csv" )[[1]],
-               total_num_muts = rd_tbl$Total.number.of.tracked.mutations,
-               total_muts_cvrd = rd_tbl$Total.number.of.mutations.covered,
-               drop_out_muts = str_remove_all(rd_tbl$Number.of.mutations.not.covered,"\\[|\\]|\\s"))
+    # check if file has the correct header format
+    data <- if (all(names(rd_tbl) %in% mutation_cov_header)) {
+      data.frame(
+        samplename = strsplit(basename (x), "\\_merged_covs.csv")[[1]],
+        total_num_muts = rd_tbl$Total.number.of.tracked.mutations,
+        total_muts_cvrd = rd_tbl$Total.number.of.mutations.covered,
+        drop_out_muts = gsub(pattern = "\\[|\\]|\\s",
+                             replacement = "",
+                             x = rd_tbl$Number.of.mutations.not.covered)
+      )
+    } else {
+      NULL
+    }
     return(data)
-  }))
-  
+  })
+
+  # combine data.frames by row, automatically dropping NULL elements
+  # NOTE: rbindlist is almost thirtee times faster than bind_rows()
+  mutation_cov.df <- as.data.frame(data.table::rbindlist(mutation_cov.dfs))
+
+
   return(mutation_cov.df)
 }

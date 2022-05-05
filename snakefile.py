@@ -1,10 +1,9 @@
-# PiGx SARS CoV2 wastewater sequencing pipeline
+# PiGx SARS-CoV-2 wastewater sequencing pipeline
 #
 # Copyright © 2021 Akalin lab.
 #
-# This file is part of the PiGx SARS-CoV2 wastewater sequencing pipeline.
+# This file is part of the PiGx SARS-CoV-2 wastewater sequencing pipeline.
 #
-# This program is free software: you can redistribute it and/or modify
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -19,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Snakefile for PiGx SARS CoV2 wastewater sequencing pipeline
+Snakefile for PiGx SARS-CoV-2 wastewater sequencing pipeline
 """
 
 import os
@@ -45,6 +44,8 @@ OUTPUT_DIR       = config['locations']['output-dir']
 # TODO: get default read length from multiqc
 READ_LENGTH      = config['trimming']['read-length']
 CUT_OFF          = config['trimming']['cut-off']
+
+MUTATION_COVERAGE_THRESHOLD = config['reporting']['mutation-coverage-threshold']
 
 INDEX_DIR         = os.path.join(OUTPUT_DIR, 'index')
 TRIMMED_READS_DIR = os.path.join(OUTPUT_DIR, 'trimmed_reads')
@@ -186,32 +187,27 @@ def map_input(args):
 def multiqc_input(args):
     sample = args[0]
     reads_files = [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
-    if len(reads_files) > 1:
-        files = [
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_pe_fastp.html'), sample = sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_pe_fastp.json'), sample = sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_R{read_num}_fastqc.html'), sample=sample, read_num=[1, 2]),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_R{read_num}_fastqc.zip'), sample=sample, read_num=[1, 2]),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.html'), sample=sample, read_num=[1, 2]),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_R{read_num}_fastqc.zip'), sample=sample, read_num=[1, 2]),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip'), sample = sample)
-        ]
-    elif len(reads_files) == 1:
-        files = [
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_se_fastp.html'), sample = sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_se_fastp.json'), sample = sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.html'), sample=sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.zip'), sample=sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.html'), sample=sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed_fastqc.zip'), sample=sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample),
-            expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip'), sample = sample)
-        ]
+    # read_num is either ["_R1", "_R2"] or [""] depending on number of read files
+    read_num = ["_R" + str(f) if len(reads_files) > 1 else "" for f in range(1,len(reads_files)+1)]
+    se_or_pe = ["pe" if len(reads_files) > 1 else "se"]
+    files = [
+        # fastp on raw files
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_{end}_fastp.html'), sample = sample, end = se_or_pe),
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_{end}_fastp.json'), sample = sample, end = se_or_pe),
+        # fastqc on raw files
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}{read_num}_fastqc.html'), sample=sample, read_num=read_num),
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}{read_num}_fastqc.zip'), sample=sample, read_num=read_num),
+        # fastqc after trimming
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed{read_num}_fastqc.html'), sample=sample, read_num=read_num),
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed{read_num}_fastqc.zip'), sample=sample, read_num=read_num),
+        # fastqc after primer trimming
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample),
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip'), sample = sample)
+    ]
     return (list(chain.from_iterable(files)))
 
 
-# WIP - until then use hack that create a single line in the lofreq output 
+# WIP - until then use hack that create a single line in the lofreq output
 def vep_input(args):
     sample = args[0]
     lofreq_output = rules.lofreq.output.vcf # this requires the file to be there already - I have no idea how to make the decision about the further input when it requires a rule to run beforhand
@@ -229,21 +225,20 @@ def vep_input(args):
             empty_snv_csv = os.path.join(VARIANTS_DIR, "{sample}_snv_empty.csv".format(sample=sample))
             Path( empty_snv_csv ).touch()
             return [empty_vep_txt, empty_snv_csv]
-        
+
 # Trimming in three steps: general by qual and cutoff, get remaining adapters out, get remaining primers out
 
 rule get_primer_seqs:
-    input: 
+    input:
         ref = REFERENCE_FASTA,
         bed = AMPLICONS_BED
     output: os.path.join(INDEX_DIR, "primer_sequences.fa") # is it ok to put it there it should it have it's own directory?
     log: os.path.join(LOG_DIR, "getfasta_primers.log")
     shell: "{BEDTOOLS_EXEC} getfasta -fi  {input.ref}\
             -bed {input.bed} -name > {output} 2>> {log} 3>&2"
-        
+
 # TODO the output suffix should be dynamic depending on the input
 # TODO with the use of fastp the use of fastqc becomes partly reduntant, fastqc should be removed or adjusted
-# TODO it should be possible to add customized parameter
 rule fastp:
     input: trim_reads_input
     output:
@@ -263,10 +258,9 @@ rule fastp_se:
         html = os.path.join(FASTQC_DIR, '{sample}', '{sample}_se_fastp.html'),
         json = os.path.join(FASTQC_DIR, '{sample}', '{sample}_se_fastp.json')
     log: os.path.join(LOG_DIR, 'fastp_{sample}.log')
-    shell: """ 
+    shell: """
         {FASTP_EXEC} -i {input[0]} -o {output.r} --html {output.html} --json {output.json} >> {log}t 2>&1
     """
-# !!! 03/01 Not tested if the report output works like that
 
 rule bwa_index:
     input: REFERENCE_FASTA
@@ -278,9 +272,10 @@ rule bwa_index:
         mkdir -p {INDEX_DIR};
         ln -sf {input} {INDEX_DIR};
         cd {INDEX_DIR};
-        {BWA_EXEC} index {output.ref} >> {log} 2>&1 
+        {BWA_EXEC} index {output.ref} >> {log} 2>&1
         """
 
+# alignment works with both single and paired-end files
 rule bwa_align:
     input:
         fastq = map_input,
@@ -292,18 +287,24 @@ rule bwa_align:
     log: os.path.join(LOG_DIR, 'bwa_align_{sample}.log')
     shell: "{BWA_EXEC} mem -t {params.threads} {input.ref} {input.fastq} > {output} 2>> {log} 3>&2"
 
+# TODO verify that subsequent tools do not require filtering for proper pairs
+# NOTE verification of flags can be done with "samtools view -h -f 4 <file.sam|file.bam> | samtools flagstat -
 rule samtools_filter_aligned:
     input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_tmp.sam')
     output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned.bam')
+    params:
+        # add 'proper-pair' filter (-f 2) if sample is paired-end
+        proper_pair = lambda wc: "-f 2" if len(trim_reads_input(wc))>1 else ""
     log: os.path.join(LOG_DIR, 'samtools_filter_aligned_{sample}.log')
-    shell: "{SAMTOOLS_EXEC} view -bh -f 2 -F 2048 {input} > {output} 2>> {log} 3>&2"
+    shell: # exclude (F) reads that are not mapped (4) and supplementary (2048)
+        "{SAMTOOLS_EXEC} view -bh {params.proper_pair} -F 4 -F 2048 {input} > {output} 2>> {log} 3>&2"
 
 rule samtools_filter_unaligned:
     input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_tmp.sam')
     output: os.path.join(MAPPED_READS_DIR, '{sample}_unaligned.bam')
     log: os.path.join(LOG_DIR, 'samtools_filter_unaligned_{sample}.log')
-    shell: "{SAMTOOLS_EXEC} view -bh -F 2 {input} > {output} 2>> {log} 3>&2"
-
+    shell: # keep (-f) reads that are unmapped (4)
+        "{SAMTOOLS_EXEC} view -bh -f 4 {input} > {output} 2>> {log} 3>&2"
 
 rule samtools_sort_preprimertrim:
     input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned.bam')
@@ -318,18 +319,19 @@ rule samtools_index_preprimertrim:
     shell: "{SAMTOOLS_EXEC} index {input} {output} >> {log} 2>&1"
 
 rule ivar_primer_trim:
-    input: 
+    input:
         primers = AMPLICONS_BED,
-        aligned_reads = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted.bam')
+        aligned_bam = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted.bam'),
+        aligned_bai = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted.bai')
     output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed.bam')
     params:
-        output = os.path.join(MAPPED_READS_DIR, "{sample}_aligned_sorted_primer-trimmed") 
+        output = os.path.join(MAPPED_READS_DIR, "{sample}_aligned_sorted_primer-trimmed")
     log: os.path.join(LOG_DIR, 'ivar_{sample}.log')
     # TODO number parameter should be accessible over settings file
     shell: """
-        {IVAR_EXEC} -b {input.primers} -p {params.output} -i {input.aligned_reads} >> {log} 2>&1 """ 
+        {IVAR_EXEC} trim -b {input.primers} -p {params.output} -i {input.aligned_bam} -q 15 -m 180 -s 4 >> {log} 2>&1 """
 
-# Vic_0825: I don't know if this double sorting and indexing is really necessary but seemed to be since ivar as 
+# Vic_0825: I don't know if this double sorting and indexing is really necessary but seemed to be since ivar as
 # well as lofreq ask for sorted and indexed bam files
 
 rule samtools_sort_postprimertrim:
@@ -337,14 +339,14 @@ rule samtools_sort_postprimertrim:
     output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed_sorted.bam')
     log: os.path.join(LOG_DIR, 'samtools_sort_{sample}.log')
     shell: "{SAMTOOLS_EXEC} sort -o {output} {input} >> {log} 2>&1"
-    
+
 rule samtools_index_postprimertrim:
     input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed_sorted.bam')
     output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed_sorted.bai')
     log: os.path.join(LOG_DIR, 'samtools_index_{sample}.log')
     shell: "{SAMTOOLS_EXEC} index {input} {output} >> {log} 2>&1"
 
-# function to determine the extension of the input files 
+# function to determine the extension of the input files
 def fastq_ext(fastq_file):
     "Function to determine the fastq file extension"
     root, ext = os.path.splitext(fastq_file)
@@ -353,26 +355,27 @@ def fastq_ext(fastq_file):
         ext = ''.join([root_ext,ext])
     return ext
 
+# fixme: single-end version needed
 # Note: fastqc does not process reads in pairs. files are processed as single units.
 rule fastqc_raw_se:
     input: trim_reads_input
     output:
-        # all outputs are provided to ensure atomicity 
+        # all outputs are provided to ensure atomicity
         rep = os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.html'),
         zip = os.path.join(FASTQC_DIR, '{sample}', '{sample}_fastqc.zip'),
     log: os.path.join(LOG_DIR, 'fastqc_{sample}_raw.log')
     params:
         output_dir = os.path.join(FASTQC_DIR, '{sample}')
     run:
-        # renaming the ".fastq.gz" suffix to "_fastqc.html" 
+        # renaming the ".fastq.gz" suffix to "_fastqc.html"
         tmp_output = os.path.basename(input[0]).replace(fastq_ext(input[0]), '_fastqc.html')
         tmp_zip = os.path.basename(input[0]).replace(fastq_ext(input[0]), '_fastqc.zip')
         shell("""{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1;
-                if [[ {tmp_output} != *{wildcards.sample}* ]]; then
+                if [[ {tmp_output} != {wildcards.sample}_fastqc.html ]]; then
                     mv {params.output_dir}/{tmp_output} {output.rep} &&\
                     mv {params.output_dir}/{tmp_zip} {output.zip}
                 fi """)
- 
+
 # fixme: or discard completely and change multiqc to use fastp --> fastp rule would have to be adjusted to create reasonable outputs
 rule fastqc_raw:
     input: trim_reads_input
@@ -380,25 +383,25 @@ rule fastqc_raw:
         r1_rep = os.path.join(FASTQC_DIR, '{sample}', '{sample}_R1_fastqc.html'),
         r1_zip = os.path.join(FASTQC_DIR, '{sample}', '{sample}_R1_fastqc.zip'),
         r2_rep = os.path.join(FASTQC_DIR, '{sample}', '{sample}_R2_fastqc.html'),
-        r2_zip = os.path.join(FASTQC_DIR, '{sample}', '{sample}_R2_fastqc.zip') # all outputs are provided to ensure atomicity 
+        r2_zip = os.path.join(FASTQC_DIR, '{sample}', '{sample}_R2_fastqc.zip') # all outputs are provided to ensure atomicity
     log: [os.path.join(LOG_DIR, 'fastqc_{sample}_raw_R1.log'), os.path.join(LOG_DIR, 'fastqc_{sample}_raw_R2.log')]
     params:
         output_dir = os.path.join(FASTQC_DIR, '{sample}')
     run:
-        # renaming the ".fastq.gz" suffix to "_fastqc.html" 
+        # renaming the ".fastq.gz" suffix to "_fastqc.html"
         tmp_R1_output = os.path.basename(input[0]).replace(fastq_ext(input[0]), '_fastqc.html')
         tmp_R1_zip = os.path.basename(input[0]).replace(fastq_ext(input[0]),  '_fastqc.zip')
         tmp_R2_output = os.path.basename(input[1]).replace(fastq_ext(input[0]),'_fastqc.html')
         tmp_R2_zip = os.path.basename(input[1]).replace(fastq_ext(input[0]),'_fastqc.zip')
         shell("""{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1;
-                if [[ {tmp_R1_output} != *{wildcards.sample}* ]]; then
+                if [[ {tmp_R1_output} != {wildcards.sample}_R1_fastqc.html ]]; then
                     mv {params.output_dir}/{tmp_R1_output} {output.r1_rep} &&\
                     mv {params.output_dir}/{tmp_R1_zip} {output.r1_zip} &&\
                     mv {params.output_dir}/{tmp_R2_output} {output.r2_rep} &&\
                     mv {params.output_dir}/{tmp_R2_zip} {output.r2_zip}
                 fi """)
- 
-# TODO: can probably be done by using map_input, no seperate functions neccessary?        
+
+# TODO: can probably be done by using map_input, no seperate functions neccessary?
 rule fastqc_trimmed_se:
     input: os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed.fastq.gz")
     output:
@@ -449,7 +452,7 @@ def no_variant_vep(sample, lofreq_output):
         print('adding dummy entry to vcf file, because no variants were found')
         open(lofreq_output.format(sample=sample), 'a').write(
             "NC_000000.0\t00\t.\tA\tA\t00\tPASS\tDP=0;AF=0;SB=0;DP4=0,0,0,0")
-        
+
 # TODO it should be possible to add customized parameter
 rule lofreq:
     input:
@@ -458,7 +461,7 @@ rule lofreq:
         ref = os.path.join(INDEX_DIR, "{}".format(os.path.basename(REFERENCE_FASTA)))
     output: vcf = os.path.join(VARIANTS_DIR, '{sample}_snv.vcf')
     log: os.path.join(LOG_DIR, 'lofreq_{sample}.log')
-    run: 
+    run:
         shell("{LOFREQ_EXEC} call -f {input.ref} -o {output} --verbose {input.aligned_bam} >> {log} 2>&1")
         # WIP create a dummy entry if no variant is found - use this as long as the input-function solution doesn't work
         no_variant_vep(wildcards.sample, output.vcf)
@@ -518,7 +521,7 @@ rule krona_report:
     log: os.path.join(LOG_DIR, 'krona_report_{sample}.log')
     shell: "{IMPORT_TAXONOMY_EXEC} -m 3 -t 5 {input.kraken_output} -tax {input.database} -o {output} >> {log} 2>&1"
 
-# TODO: change amplicon naming to mutaiton site bc it's missleading
+# TODO: change amplicon naming to mutation site since it is misleading
 rule samtools_bedcov:
     input:
         mutations_bed = MUTATIONS_BED,
@@ -537,7 +540,7 @@ rule samtools_coverage:
     log: os.path.join(LOG_DIR, 'samtools_coverage_{sample}.log')
     shell: "{SAMTOOLS_EXEC} coverage {input.aligned_bam} > {output} 2>> {log} 3>&2"
 
-# TODO: change amplicon naming to mutation site bc it's missleading
+# TODO: change amplicon naming to mutation site because it is misleading
 rule get_qc_table:
     input:
         coverage_csv = os.path.join(COVERAGE_DIR, '{sample}_coverage.csv'),
@@ -653,14 +656,14 @@ rule create_mutations_summary:
         """
 
 # TODO integrate the output of fastp.json to get the number of raw and trimmed reads
-rule create_overviewQC_table: 
+rule create_overviewQC_table:
     input:
         script = os.path.join(SCRIPTS_DIR, "overview_QC_table.R"),
         cov_summary = expand(os.path.join(COVERAGE_DIR, '{sample}_merged_covs.csv'), sample=SAMPLES)
     output:  os.path.join(OUTPUT_DIR, 'overview_QC.csv')
     log: os.path.join(LOG_DIR, "create_overviewQC_table.log")
     shell: """
-        {RSCRIPT_EXEC} {input.script} {OUTPUT_DIR} {SAMPLE_SHEET_CSV} {READS_DIR} {output} > {log} 2>&1
+        {RSCRIPT_EXEC} {input.script} {SAMPLE_SHEET_CSV} {output} {READS_DIR} {TRIMMED_READS_DIR} {MAPPED_READS_DIR} {COVERAGE_DIR} > {log} 2>&1
     """
 
 rule render_index:
@@ -684,7 +687,7 @@ rule render_index:
       fun_lm = os.path.join(SCRIPTS_DIR, 'pred_mutation_increase.R'),
       fun_tbls = os.path.join(SCRIPTS_DIR, 'table_extraction.R'),
       fun_pool = os.path.join(SCRIPTS_DIR, 'pooling.R')
-    output: report = os.path.join(REPORT_DIR, "index.html"), 
+    output: report = os.path.join(REPORT_DIR, "index.html"),
             tbl_mut_count = os.path.join(OUTPUT_DIR, "mutations_counts.csv"),
             tbl_lm_res = os.path.join(OUTPUT_DIR, "linear_regression_results.csv")
     log: os.path.join(LOG_DIR, "reports", "index.log")
@@ -696,6 +699,7 @@ rule render_index:
   "coverage_dir": "{COVERAGE_DIR}",\
   "sample_sheet": "{SAMPLE_SHEET_CSV}",  \
   "mutation_sheet": "{MUTATION_SHEET_CSV}", \
+  "mutation_coverage_threshold": "{MUTATION_COVERAGE_THRESHOLD}", \
   "logo": "{LOGO}", \
   "fun_cvrg_scr": "{params.fun_cvrg_scr}", \
   "fun_lm": "{params.fun_lm}", \

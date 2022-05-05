@@ -1,3 +1,5 @@
+library(dplyr)
+
 write_lm_results <- function ( df, output ){
   #' takes a dataframe with 3 col: samplename, p-values, sigmutflag
   #' writes them to a csv
@@ -9,7 +11,6 @@ count_muts <- function (x, mutation_sheet.df) { # x = sample row
   #' function used in rowwise apply() call
   #' takes row as input, calculates mutation counts and returns a dataframe
   #'
-  require(dplyr)
   # transform mutation_sheet to one comparable vector
   mutation_sheet.v <- unique( unlist( mutation_sheet.df, use.names = FALSE))
   mutation_sheet.v <- mutation_sheet.v[!is.na(mutation_sheet.v)] 
@@ -39,7 +40,6 @@ count_muts <- function (x, mutation_sheet.df) { # x = sample row
 write_mutations_count <- function ( mutation_plot_data, mutation_sheet.df, mutations_sig ){
   #' takes data_mut_plot.csv df, mutation_sheet.df with NAs at empty cells, mutations_sig.df as input
   #' counts mutations and return them as a dataframe
-  require(dplyr)
 
   # transform mutation_sheet to one comparable vector
   mutation_sheet.v <- unique( unlist( mutation_sheet.df, use.names = FALSE))
