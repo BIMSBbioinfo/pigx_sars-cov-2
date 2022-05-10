@@ -18,6 +18,10 @@ aclocal.m4
 scripts/download_databases.sh
 
 # test files
+tests/output/*
+test.sh
+test.sh.log
+test.sh.trs
 test-suite.log
 tests/tests/*trs
 tests/tests/*log
