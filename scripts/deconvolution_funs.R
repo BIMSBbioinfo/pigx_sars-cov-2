@@ -269,13 +269,21 @@ simulateOthers <- function ( mutations.vector, bulk_freq.vector, simple_sigmat.d
 # deduplicate dataframe
 dedupeDF <- function( msig_stable ){
   # transpose and add mutations as first column
-  msig_stable_transposed <- as.data.frame( cbind( variants = colnames(msig_stable), t( msig_stable ) ))
-  # mark duplicated columns, forward and backwards to get ALL the duplicates, otherwise the first one would missing
-  dupes_variants <- duplicated ( msig_stable_transposed[,-which(names(msig_stable_transposed) %in% 'variants')], 
-                                 fromLast=TRUE)
-  msig_dedupe_transposed <- msig_stable_transposed[!dupes_variants,]
+  msig_stable_transposed <- as.data.frame(cbind(
+    variants = colnames(msig_stable),
+    t(msig_stable)
+  ))
 
-  return( list( msig_stable_transposed, msig_dedupe_transposed) )
+  # mark duplicated columns, forward and backwards to get ALL the duplicates,
+  # otherwise the first one would missing
+  dupes_variants <- duplicated(
+    msig_stable_transposed[, -which(names(msig_stable_transposed) %in% "variants")],
+    fromLast = TRUE
+  )
+
+  msig_dedupe_transposed <- msig_stable_transposed[!dupes_variants, ]
+
+  return(list(msig_stable_transposed, msig_dedupe_transposed))
 }
 
 dedupeVariants <- function (variant, variants.df, dedup_variants.df) {

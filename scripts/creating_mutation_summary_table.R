@@ -28,7 +28,6 @@ create_summary <- function ( files, output_file ){
                             x = mutations_list)
 
   return(merged_mutations)
-
 }
 
 args <- commandArgs (trailingOnly=TRUE)

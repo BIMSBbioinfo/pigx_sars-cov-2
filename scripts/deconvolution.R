@@ -77,8 +77,10 @@ non_sigmut_output_file <- file.path(
 
 mutation_output_file <- file.path(
   mutation_output_dir,
-  paste0(sample_name,
-    "_mutations.csv")
+  paste0(
+    sample_name,
+    "_mutations.csv"
+  )
 )
 
 variant_abundance_file <- file.path(
@@ -196,7 +198,8 @@ if (execute_deconvolution) {
   # for every variant update the rownames with the group they are in
   # FIXME: Shorten this and similar constructs
   for (variant in rownames(
-    msig_stable_transposed[-(rownames(msig_stable_transposed) %in% "muts"), ])
+    msig_stable_transposed[-(rownames(msig_stable_transposed) %in% "muts"), ]
+  )
   ) {
     grouping_res <- dedupeVariants(
       variant,
@@ -252,7 +255,8 @@ if (execute_deconvolution) {
   # FIXME: there should be a way to do this vectorized
   msig_simple_unique_weighted <- msig_simple_unique
   for (lineage in deconv_lineages) {
-    msig_simple_unique_weighted[lineage] <- msig_simple_unique_weighted[lineage] / as.numeric(sigmut_proportion_weights[lineage])
+    weight <- msig_simple_unique_weighted[lineage] / as.numeric(sigmut_proportion_weights[lineage])
+    msig_simple_unique_weighted[lineage] <- as.numeric(ifelse(is.na(weight), 0, unlist(weight)))
   }
 
 
@@ -270,7 +274,6 @@ if (execute_deconvolution) {
     match.df$cov,
     Others_weight
   )
-
   msig_stable_unique <- msig_stable_all[[1]]
 
 
