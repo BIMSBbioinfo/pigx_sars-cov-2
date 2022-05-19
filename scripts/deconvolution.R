@@ -78,8 +78,10 @@ non_sigmut_output_file <- file.path(
 
 mutation_output_file <- file.path(
   mutation_output_dir,
-  paste0(sample_name,
-    "_mutations.csv")
+  paste0(
+    sample_name,
+    "_mutations.csv"
+  )
 )
 
 variant_abundance_file <- file.path(
@@ -88,6 +90,11 @@ variant_abundance_file <- file.path(
     sample_name,
     "_variant_abundance.csv"
   )
+)
+
+variants_with_meta_file <- file.path(
+  variants_output_dir,
+  paste0(sample_name, "_variants_with_meta.csv")
 )
 
 
@@ -189,7 +196,8 @@ if (execute_deconvolution) {
   # for every variant update the rownames with the group they are in
   # FIXME: Shorten this and similar constructs
   for (variant in rownames(
-    msig_stable_transposed[-(rownames(msig_stable_transposed) %in% "muts"), ])
+    msig_stable_transposed[-(rownames(msig_stable_transposed) %in% "muts"), ]
+  )
   ) {
     grouping_res <- dedupeVariants(
       variant,
@@ -242,7 +250,8 @@ if (execute_deconvolution) {
   # FIXME: there should be a way to do this vectorized
   msig_simple_unique_weighted <- msig_simple_unique
   for (lineage in deconv_lineages) {
-    msig_simple_unique_weighted[lineage] <- msig_simple_unique_weighted[lineage] / as.numeric(sigmut_proportion_weights[lineage])
+    weight <- msig_simple_unique_weighted[lineage] / as.numeric(sigmut_proportion_weights[lineage])
+    msig_simple_unique_weighted[lineage] <- as.numeric(ifelse(is.na(weight), 0, unlist(weight)))
   }
 
 
@@ -251,15 +260,14 @@ if (execute_deconvolution) {
 
   # get bulk frequency values, will be input for the deconvolution function
   bulk_freq_vec <- as.numeric(match.df$freq)
-
-  msig_stable_all <- simulateWT(
+  # construct additional WT mutations that are not weighted
+  Others_weight <- as.numeric(sigmut_proportion_weights["Others"])
+  msig_stable_all <- simulateOthers(
     muations_vec, bulk_freq_vec,
-    msig_simple_unique_weighted[, -which(
-      names(msig_simple_unique_weighted) == "muts"
-    )],
-    match.df$cov
+    msig_simple_unique_weighted[, -which(names(msig_simple_unique_weighted) == "muts")],
+    match.df$cov,
+    Others_weight
   )
-
   msig_stable_unique <- msig_stable_all[[1]]
 
 
@@ -359,8 +367,80 @@ if (execute_deconvolution) {
   write.csv(df, variant_abundance_file)
 
   # plot comes here in report
+} else {
+  # write dummy variants file
+  # TODO: do this as a proper emty table with the correct col names
+  file.create(variants_file)
+}
 
+# TODO: check if the else of the above if is handled correctly
 
+## ----csv_output_variant_plot, include = F-------------------------------------
+# prepare processed variant values to output them as a csv which will be used for the plots in index.rmd
+# those outputs are not offically declared as outputs which can lead to issues - that part should be handled by a seperate
+# file (and maybe rule)
+output_variant_plot <- data.frame(
+  samplename = character(),
+  dates = character(),
+  location_name = character(),
+  coordinates_lat = character(),
+  coordinates_long = character()
+)
+if (!execute_deconvolution) {
+  # if no signatur mutation found write empty output file
+  # TODO: sombody should check whether this empty file with header is enough, or a more sensible default is required
+  write.csv(output_variant_plot, variants_with_meta_file,
+    na = "NA", row.names = FALSE, quote = FALSE
+  )
+} else {
+  # get all possible variants
+  all_variants <- colnames(msig_simple[, -which(names(msig_simple) %in% "muts")])
+  # add columns for all possible variants to the dataframe
+  for (variant in all_variants) {
+    output_variant_plot[, variant] <- numeric()
+  }
+  meta_data <- c(
+    samplename = sample_name,
+    dates = date,
+    location_name = location_name,
+    coordinates_lat = coordinates_lat,
+    coordinates_long = coordinates_long
+  )
+
+  output_variant_plot <- bind_rows(output_variant_plot, meta_data)
+
+  # get rownumber for current sample
+  sample_row <- which(grepl(sample_name, output_variant_plot$samplename))
+
+  # write mutation frequency values to df
+  for (i in all_variants) {
+    if (i %in% df$variant) {
+      # check if variant already has a column
+      if (i %in% colnames(output_variant_plot)) {
+        output_variant_plot[sample_row, ][i] <- df$abundance[df$variant == i]
+        output_variant_plot <- output_variant_plot %>% mutate(others = 1 - rowSums(across(all_of(all_variants)), na.rm = TRUE))
+      }
+    }
+  }
+
+  ## # TODO: This chunk hast to go into a seperate rule
+  ## # 2. check if file exists already
+  ## if (file.exists (variants_with_meta_file)) {
+  ##   previous_df <- read.csv (variants_with_meta_file,
+  ##                              header = TRUE, colClasses = "character", check.names = FALSE)
+  ##   # convert numeric values to character
+  ##   output_variant_plot <- as.data.frame(lapply(output_variant_plot, as.character), check.names = FALSE)
+  ##   # merge with adding cols and rows
+  ##   output_variant_plot <- full_join(previous_df, output_variant_plot, by = colnames(previous_df), copy = TRUE)
+  ## }
+
+  # 3. write to output file
+  write.csv(output_variant_plot, variants_with_meta_file,
+    na = "NA", row.names = FALSE, quote = FALSE
+  )
+}
+
+if (execute_deconvolution) {
   ## ----csv_output_mutation_plot, include = FALSE------------------------------
   # prepare processed mutation values to output them as a csv which will be used
   # for the plots in index.rmd those outputs are not officially declared as
@@ -445,7 +525,6 @@ if (execute_deconvolution) {
   write.csv(output_mutation_frame, mutation_output_file,
     row.names = FALSE, quote = FALSE
   )
-
 } else {
   # write dummy files
 
@@ -485,5 +564,4 @@ if (execute_deconvolution) {
     "Deconvolution not run, this is a dummy file.",
     mutation_output_file
   )
-
 }
