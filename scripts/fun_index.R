@@ -16,8 +16,8 @@ create_dt <- function(x) {
 dump_csv <- function(data, format = "csv", rownames = FALSE) {
   if (format != "csv") stop("Data can only be dumped in CSV format.")
   capture.output(write.csv(data,
-                           file = "",
-                           quote = FALSE, row.names = rownames
+    file = "",
+    quote = FALSE, row.names = rownames
   )) %>%
     paste0(collapse = "\n")
 }
@@ -40,8 +40,8 @@ create_html_note <- function(x, toggle = FALSE) {
   paste(
     '\n\n<div class="panel panel-info">',
     ifelse(toggle,
-           "<details>\n<summary>**Note**</summary>",
-           "&nbsp;**Note**"
+      "<details>\n<summary>**Note**</summary>",
+      "&nbsp;**Note**"
     ),
     '<div class="panel-body">',
     gsub("##", "\n", x),
