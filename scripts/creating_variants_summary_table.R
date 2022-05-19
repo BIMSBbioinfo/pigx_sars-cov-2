@@ -18,6 +18,10 @@ create_summary <- function ( files ){
                           colClasses = "character",
                           check.names = FALSE )
 
+  # remove empty files from list
+  variants_list_has_rows <- sapply(variants_list, nrow)
+  variants_list <- variants_list[variants_list_has_rows > 0]
+
   # merge variant files in pairs
   merged_variants <- Reduce(f = function(df1,df2) merge(df1,
                                                     df2,
