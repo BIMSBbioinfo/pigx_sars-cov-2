@@ -31,95 +31,177 @@ from pathlib import Path
 
 
 def toolArgs(name):
-    if 'args' in config['tools'][name]:
-        return config['tools'][name]['args']
+    if "args" in config["tools"][name]:
+        return config["tools"][name]["args"]
     else:
         return ""
 
+
 def tool(name):
-    cmd = config['tools'][name]['executable']
+    cmd = config["tools"][name]["executable"]
     return cmd + " " + toolArgs(name)
+
 
 # Convenience function to access fields of sample sheet columns that
 # match the predicate.  The predicate may be a string.
 def lookup(column, predicate, fields=[]):
-  if inspect.isfunction(predicate):
-    records = [line for line in SAMPLE_SHEET if predicate(line[column])]
-  else:
-    records = [line for line in SAMPLE_SHEET if line[column]==predicate]
-  return [record[field] for record in records for field in fields]
+    if inspect.isfunction(predicate):
+        records = [line for line in SAMPLE_SHEET if predicate(line[column])]
+    else:
+        records = [line for line in SAMPLE_SHEET if line[column] == predicate]
+    return [record[field] for record in records for field in fields]
+
 
 
 # function to pass read files to trim/filter/qc improvement
 def trim_reads_input(args):
-  sample = args[0]
-  return [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
+    sample = args[0]
+    return [
+        os.path.join(READS_DIR, f)
+        for f in lookup("name", sample, ["reads", "reads2"])
+        if f
+    ]
+
 
 def map_input(args):
     sample = args[0]
-    reads_files = [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
+    reads_files = [
+        os.path.join(READS_DIR, f)
+        for f in lookup("name", sample, ["reads", "reads2"])
+        if f
+    ]
     if len(reads_files) > 1:
-        return [os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R1.fastq.gz".format(sample=sample)),
-                os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R2.fastq.gz".format(sample=sample))
-                ]
+        return [
+            os.path.join(
+                TRIMMED_READS_DIR, "{sample}_trimmed_R1.fastq.gz".format(sample=sample)
+            ),
+            os.path.join(
+                TRIMMED_READS_DIR, "{sample}_trimmed_R2.fastq.gz".format(sample=sample)
+            ),
+        ]
     elif len(reads_files) == 1:
-        return [os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed.fastq.gz".format(sample=sample))
-                ]
+        return [
+            os.path.join(
+                TRIMMED_READS_DIR, "{sample}_trimmed.fastq.gz".format(sample=sample)
+            )
+        ]
+
 
 # dynamically define the multiqc input files created by FastQC and fastp
 # TODO add kraken reports per sample
 def multiqc_input(args):
     sample = args[0]
-    reads_files = [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
+    reads_files = [
+        os.path.join(READS_DIR, f)
+        for f in lookup("name", sample, ["reads", "reads2"])
+        if f
+    ]
     # read_num is either ["_R1", "_R2"] or [""] depending on number of read files
-    read_num = ["_R" + str(f) if len(reads_files) > 1 else "" for f in range(1,len(reads_files)+1)]
+    read_num = [
+        "_R" + str(f) if len(reads_files) > 1 else ""
+        for f in range(1, len(reads_files) + 1)
+    ]
     se_or_pe = ["pe" if len(reads_files) > 1 else "se"]
     files = [
         # fastp on raw files
-        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_{end}_fastp.html'), sample = sample, end = se_or_pe),
-        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_{end}_fastp.json'), sample = sample, end = se_or_pe),
+        expand(
+            os.path.join(FASTQC_DIR, "{sample}", "{sample}_{end}_fastp.html"),
+            sample=sample,
+            end=se_or_pe,
+        ),
+        expand(
+            os.path.join(FASTQC_DIR, "{sample}", "{sample}_{end}_fastp.json"),
+            sample=sample,
+            end=se_or_pe,
+        ),
         # fastqc on raw files
-        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}{read_num}_fastqc.html'), sample=sample, read_num=read_num),
-        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}{read_num}_fastqc.zip'), sample=sample, read_num=read_num),
+        expand(
+            os.path.join(FASTQC_DIR, "{sample}", "{sample}{read_num}_fastqc.html"),
+            sample=sample,
+            read_num=read_num,
+        ),
+        expand(
+            os.path.join(FASTQC_DIR, "{sample}", "{sample}{read_num}_fastqc.zip"),
+            sample=sample,
+            read_num=read_num,
+        ),
         # fastqc after trimming
-        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed{read_num}_fastqc.html'), sample=sample, read_num=read_num),
-        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed{read_num}_fastqc.zip'), sample=sample, read_num=read_num),
+        expand(
+            os.path.join(
+                FASTQC_DIR, "{sample}", "{sample}_trimmed{read_num}_fastqc.html"
+            ),
+            sample=sample,
+            read_num=read_num,
+        ),
+        expand(
+            os.path.join(
+                FASTQC_DIR, "{sample}", "{sample}_trimmed{read_num}_fastqc.zip"
+            ),
+            sample=sample,
+            read_num=read_num,
+        ),
         # fastqc after primer trimming
-        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample),
-        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip'), sample = sample)
+        expand(
+            os.path.join(
+                FASTQC_DIR,
+                "{sample}",
+                "{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html",
+            ),
+            sample=sample,
+        ),
+        expand(
+            os.path.join(
+                FASTQC_DIR,
+                "{sample}",
+                "{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip",
+            ),
+            sample=sample,
+        ),
     ]
-    return (list(chain.from_iterable(files)))
+    return list(chain.from_iterable(files))
 
 
 # WIP - until then use hack that create a single line in the lofreq output
 def vep_input(args):
     sample = args[0]
-    lofreq_output = rules.lofreq.output.vcf # this requires the file to be there already - I have no idea how to make the decision about the further input when it requires a rule to run beforhand
+    lofreq_output = (
+        rules.lofreq.output.vcf
+    )  # this requires the file to be there already - I have no idea how to make the decision about the further input when it requires a rule to run beforhand
     logger.info(lofreq_output.format(sample=sample))
-    with open(lofreq_output.format(sample=sample), 'r') as vcf:
+    with open(lofreq_output.format(sample=sample), "r") as vcf:
         content = vcf.read()
-        if re.findall('^NC', content, re.MULTILINE): # regex ok or not?
+        if re.findall("^NC", content, re.MULTILINE):  # regex ok or not?
             # trigger vep path
-            return [os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2_parsed.txt".format(sample=sample)),
-                    os.path.join(VARIANTS_DIR, "{sample}_snv.csv".format(sample=sample))]
+            return [
+                os.path.join(
+                    VARIANTS_DIR,
+                    "{sample}_vep_sarscov2_parsed.txt".format(sample=sample),
+                ),
+                os.path.join(VARIANTS_DIR, "{sample}_snv.csv".format(sample=sample)),
+            ]
         else:
             # skipp execution of all vep related rules and directly have smth that the report can work with
-            empty_vep_txt = os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2_empty.txt".format(sample=sample))
-            Path( empty_vep_txt ).touch()
-            empty_snv_csv = os.path.join(VARIANTS_DIR, "{sample}_snv_empty.csv".format(sample=sample))
-            Path( empty_snv_csv ).touch()
+            empty_vep_txt = os.path.join(
+                VARIANTS_DIR, "{sample}_vep_sarscov2_empty.txt".format(sample=sample)
+            )
+            Path(empty_vep_txt).touch()
+            empty_snv_csv = os.path.join(
+                VARIANTS_DIR, "{sample}_snv_empty.csv".format(sample=sample)
+            )
+            Path(empty_snv_csv).touch()
             return [empty_vep_txt, empty_snv_csv]
+
 
 # WIP create a dummy entry if no variant is found - use this as long as the input-function solution doesn't work
 def no_variant_vep(sample, lofreq_output):
-    content = open(lofreq_output.format(sample=sample), 'r').read()
-    if re.findall('^NC', content, re.MULTILINE):  # regex ok or not?
+    content = open(lofreq_output.format(sample=sample), "r").read()
+    if re.findall("^NC", content, re.MULTILINE):  # regex ok or not?
         # trigger vep path
-        logger.info('File can be used for downstream processing')
+        logger.info("File can be used for downstream processing")
     else:
         # write smth so that vep does not crash - deal with everything later in the variant_report
-        logger.info('adding dummy entry to vcf file, because no variants were found')
-        open(lofreq_output.format(sample=sample), 'a').write(
+        logger.info("adding dummy entry to vcf file, because no variants were found")
+        open(lofreq_output.format(sample=sample), "a").write(
             "NC_000000.0\t00\t.\tA\tA\t00\tPASS\tDP=0;AF=0;SB=0;DP4=0,0,0,0")
 
 # function to determine the extension of the input files
@@ -128,7 +210,7 @@ def fastq_ext(fastq_file):
     root, ext = os.path.splitext(fastq_file)
     if ext == ".gz":
         root_root, root_ext = os.path.splitext(root)
-        ext = ''.join([root_ext,ext])
+        ext = "".join([root_ext, ext])
     return ext
 
 
