@@ -30,6 +30,9 @@ import inspect
 from pathlib import Path
 
 
+# Helper functions
+
+
 def toolArgs(name):
     """
     Helper function to retrieve all preset arguments for a given tool.
@@ -60,6 +63,18 @@ def lookup(column, predicate, fields=[]):
     else:
         records = [line for line in SAMPLE_SHEET if line[column] == predicate]
     return [record[field] for record in records for field in fields]
+
+
+def fastq_ext(fastq_file):
+    "Function to determine the fastq file extension"
+    root, ext = os.path.splitext(fastq_file)
+    if ext == ".gz":
+        root_root, root_ext = os.path.splitext(root)
+        ext = "".join([root_ext, ext])
+    return ext
+
+
+# Input functions
 
 
 # function to pass read files to trim/filter/qc improvement
@@ -232,15 +247,6 @@ def no_variant_vep(sample, lofreq_output):
         logger.info("adding dummy entry to vcf file, because no variants were found")
         open(lofreq_output.format(sample=sample), "a").write(
             "NC_000000.0\t00\t.\tA\tA\t00\tPASS\tDP=0;AF=0;SB=0;DP4=0,0,0,0")
-
-# function to determine the extension of the input files
-def fastq_ext(fastq_file):
-    "Function to determine the fastq file extension"
-    root, ext = os.path.splitext(fastq_file)
-    if ext == ".gz":
-        root_root, root_ext = os.path.splitext(root)
-        ext = "".join([root_ext, ext])
-    return ext
 
 
 SAMPLE_SHEET_CSV = config['locations']['sample-sheet']
