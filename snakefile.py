@@ -31,6 +31,9 @@ from pathlib import Path
 
 
 def toolArgs(name):
+    """
+    Helper function to retrieve all preset arguments for a given tool.
+    """
     if "args" in config["tools"][name]:
         return config["tools"][name]["args"]
     else:
@@ -38,6 +41,9 @@ def toolArgs(name):
 
 
 def tool(name):
+    """
+    Helper function to bundle a tool with its preset arguments.
+    """
     cmd = config["tools"][name]["executable"]
     return cmd + " " + toolArgs(name)
 
@@ -45,6 +51,10 @@ def tool(name):
 # Convenience function to access fields of sample sheet columns that
 # match the predicate.  The predicate may be a string.
 def lookup(column, predicate, fields=[]):
+    """
+    Convenience function to access fields of sample sheet columns that
+    match the predicate.  The predicate may be a string.
+    """
     if inspect.isfunction(predicate):
         records = [line for line in SAMPLE_SHEET if predicate(line[column])]
     else:
@@ -52,9 +62,12 @@ def lookup(column, predicate, fields=[]):
     return [record[field] for record in records for field in fields]
 
 
-
 # function to pass read files to trim/filter/qc improvement
 def trim_reads_input(args):
+    """
+    Get a list of all files related to a sample from the sample sheet. Helps in
+    working with both single and paired end data.
+    """
     sample = args[0]
     return [
         os.path.join(READS_DIR, f)
@@ -64,6 +77,10 @@ def trim_reads_input(args):
 
 
 def map_input(args):
+    """
+    Function to return the trimmed read files belonging to a sample, independent
+    of their end mode (single vs paired).
+    """
     sample = args[0]
     reads_files = [
         os.path.join(READS_DIR, f)
@@ -90,6 +107,10 @@ def map_input(args):
 # dynamically define the multiqc input files created by FastQC and fastp
 # TODO add kraken reports per sample
 def multiqc_input(args):
+    """
+    Dynamically define the multiqc input files created by FastQC and fastp for
+    each sample.
+    """
     sample = args[0]
     reads_files = [
         os.path.join(READS_DIR, f)
@@ -163,6 +184,10 @@ def multiqc_input(args):
 
 # WIP - until then use hack that create a single line in the lofreq output
 def vep_input(args):
+    """
+    Fucntion to skip all VEP rules for a sample in case no variants are found by
+    lofreq through creation of dummy VEP output files (?)
+    """
     sample = args[0]
     lofreq_output = (
         rules.lofreq.output.vcf
@@ -194,6 +219,10 @@ def vep_input(args):
 
 # WIP create a dummy entry if no variant is found - use this as long as the input-function solution doesn't work
 def no_variant_vep(sample, lofreq_output):
+    """
+    Work-around to create dummy entries in lofreq output to ensure smooth VEP
+    running in case no variants are found by lofreq (?)
+    """
     content = open(lofreq_output.format(sample=sample), "r").read()
     if re.findall("^NC", content, re.MULTILINE):  # regex ok or not?
         # trigger vep path
