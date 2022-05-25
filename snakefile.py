@@ -29,6 +29,109 @@ import re
 import inspect
 from pathlib import Path
 
+
+def toolArgs(name):
+    if 'args' in config['tools'][name]:
+        return config['tools'][name]['args']
+    else:
+        return ""
+
+def tool(name):
+    cmd = config['tools'][name]['executable']
+    return cmd + " " + toolArgs(name)
+
+# Convenience function to access fields of sample sheet columns that
+# match the predicate.  The predicate may be a string.
+def lookup(column, predicate, fields=[]):
+  if inspect.isfunction(predicate):
+    records = [line for line in SAMPLE_SHEET if predicate(line[column])]
+  else:
+    records = [line for line in SAMPLE_SHEET if line[column]==predicate]
+  return [record[field] for record in records for field in fields]
+
+
+# function to pass read files to trim/filter/qc improvement
+def trim_reads_input(args):
+  sample = args[0]
+  return [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
+
+def map_input(args):
+    sample = args[0]
+    reads_files = [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
+    if len(reads_files) > 1:
+        return [os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R1.fastq.gz".format(sample=sample)),
+                os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R2.fastq.gz".format(sample=sample))
+                ]
+    elif len(reads_files) == 1:
+        return [os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed.fastq.gz".format(sample=sample))
+                ]
+
+# dynamically define the multiqc input files created by FastQC and fastp
+# TODO add kraken reports per sample
+def multiqc_input(args):
+    sample = args[0]
+    reads_files = [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
+    # read_num is either ["_R1", "_R2"] or [""] depending on number of read files
+    read_num = ["_R" + str(f) if len(reads_files) > 1 else "" for f in range(1,len(reads_files)+1)]
+    se_or_pe = ["pe" if len(reads_files) > 1 else "se"]
+    files = [
+        # fastp on raw files
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_{end}_fastp.html'), sample = sample, end = se_or_pe),
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_{end}_fastp.json'), sample = sample, end = se_or_pe),
+        # fastqc on raw files
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}{read_num}_fastqc.html'), sample=sample, read_num=read_num),
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}{read_num}_fastqc.zip'), sample=sample, read_num=read_num),
+        # fastqc after trimming
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed{read_num}_fastqc.html'), sample=sample, read_num=read_num),
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed{read_num}_fastqc.zip'), sample=sample, read_num=read_num),
+        # fastqc after primer trimming
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample),
+        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip'), sample = sample)
+    ]
+    return (list(chain.from_iterable(files)))
+
+
+# WIP - until then use hack that create a single line in the lofreq output
+def vep_input(args):
+    sample = args[0]
+    lofreq_output = rules.lofreq.output.vcf # this requires the file to be there already - I have no idea how to make the decision about the further input when it requires a rule to run beforhand
+    logger.info(lofreq_output.format(sample=sample))
+    with open(lofreq_output.format(sample=sample), 'r') as vcf:
+        content = vcf.read()
+        if re.findall('^NC', content, re.MULTILINE): # regex ok or not?
+            # trigger vep path
+            return [os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2_parsed.txt".format(sample=sample)),
+                    os.path.join(VARIANTS_DIR, "{sample}_snv.csv".format(sample=sample))]
+        else:
+            # skipp execution of all vep related rules and directly have smth that the report can work with
+            empty_vep_txt = os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2_empty.txt".format(sample=sample))
+            Path( empty_vep_txt ).touch()
+            empty_snv_csv = os.path.join(VARIANTS_DIR, "{sample}_snv_empty.csv".format(sample=sample))
+            Path( empty_snv_csv ).touch()
+            return [empty_vep_txt, empty_snv_csv]
+
+# WIP create a dummy entry if no variant is found - use this as long as the input-function solution doesn't work
+def no_variant_vep(sample, lofreq_output):
+    content = open(lofreq_output.format(sample=sample), 'r').read()
+    if re.findall('^NC', content, re.MULTILINE):  # regex ok or not?
+        # trigger vep path
+        logger.info('File can be used for downstream processing')
+    else:
+        # write smth so that vep does not crash - deal with everything later in the variant_report
+        logger.info('adding dummy entry to vcf file, because no variants were found')
+        open(lofreq_output.format(sample=sample), 'a').write(
+            "NC_000000.0\t00\t.\tA\tA\t00\tPASS\tDP=0;AF=0;SB=0;DP4=0,0,0,0")
+
+# function to determine the extension of the input files
+def fastq_ext(fastq_file):
+    "Function to determine the fastq file extension"
+    root, ext = os.path.splitext(fastq_file)
+    if ext == ".gz":
+        root_root, root_ext = os.path.splitext(root)
+        ext = ''.join([root_ext,ext])
+    return ext
+
+
 SAMPLE_SHEET_CSV = config['locations']['sample-sheet']
 MUTATION_SHEET_CSV = config['locations']['mutation-sheet']
 READS_DIR        = config['locations']['reads-dir']
@@ -66,17 +169,6 @@ if os.getenv("PIGX_UNINSTALLED"):
 else:
     LOGO = os.path.join(config['locations']['pkgdatadir'], "Logo_PiGx.png")
 
-
-def toolArgs(name):
-    if 'args' in config['tools'][name]:
-        return config['tools'][name]['args']
-    else:
-        return ""
-
-def tool(name):
-    cmd = config['tools'][name]['executable']
-    return cmd + " " + toolArgs(name)
-
 BWA_EXEC             = tool("bwa")
 FASTP_EXEC           = tool("fastp")
 FASTQC_EXEC          = tool("fastqc")
@@ -97,15 +189,6 @@ with open(SAMPLE_SHEET_CSV, 'r') as fp:
   rows =  [row for row in csv.reader(fp, delimiter=',')]
   header = rows[0]; rows = rows[1:]
   SAMPLE_SHEET = [dict(zip(header, row)) for row in rows]
-
-# Convenience function to access fields of sample sheet columns that
-# match the predicate.  The predicate may be a string.
-def lookup(column, predicate, fields=[]):
-  if inspect.isfunction(predicate):
-    records = [line for line in SAMPLE_SHEET if predicate(line[column])]
-  else:
-    records = [line for line in SAMPLE_SHEET if line[column]==predicate]
-  return [record[field] for record in records for field in fields]
 
 SAMPLES = [line['name'] for line in SAMPLE_SHEET]
 
@@ -164,67 +247,7 @@ onsuccess:
         if generated:
             print("The following files have been generated:")
             for name in generated:
-                print("  - {}".format(name))
-
-# function to pass read files to trim/filter/qc improvement
-def trim_reads_input(args):
-  sample = args[0]
-  return [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
-
-def map_input(args):
-    sample = args[0]
-    reads_files = [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
-    if len(reads_files) > 1:
-        return [os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R1.fastq.gz".format(sample=sample)),
-                os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed_R2.fastq.gz".format(sample=sample))
-                ]
-    elif len(reads_files) == 1:
-        return [os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed.fastq.gz".format(sample=sample))
-                ]
-
-# dynamically define the multiqc input files created by FastQC and fastp
-# TODO add kraken reports per sample
-def multiqc_input(args):
-    sample = args[0]
-    reads_files = [os.path.join(READS_DIR, f) for f in lookup('name', sample, ['reads', 'reads2']) if f]
-    # read_num is either ["_R1", "_R2"] or [""] depending on number of read files
-    read_num = ["_R" + str(f) if len(reads_files) > 1 else "" for f in range(1,len(reads_files)+1)]
-    se_or_pe = ["pe" if len(reads_files) > 1 else "se"]
-    files = [
-        # fastp on raw files
-        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_{end}_fastp.html'), sample = sample, end = se_or_pe),
-        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_{end}_fastp.json'), sample = sample, end = se_or_pe),
-        # fastqc on raw files
-        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}{read_num}_fastqc.html'), sample=sample, read_num=read_num),
-        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}{read_num}_fastqc.zip'), sample=sample, read_num=read_num),
-        # fastqc after trimming
-        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed{read_num}_fastqc.html'), sample=sample, read_num=read_num),
-        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_trimmed{read_num}_fastqc.zip'), sample=sample, read_num=read_num),
-        # fastqc after primer trimming
-        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.html'), sample = sample),
-        expand(os.path.join(FASTQC_DIR, '{sample}', '{sample}_aligned_sorted_primer-trimmed_sorted_fastqc.zip'), sample = sample)
-    ]
-    return (list(chain.from_iterable(files)))
-
-
-# WIP - until then use hack that create a single line in the lofreq output
-def vep_input(args):
-    sample = args[0]
-    lofreq_output = rules.lofreq.output.vcf # this requires the file to be there already - I have no idea how to make the decision about the further input when it requires a rule to run beforhand
-    print(lofreq_output.format(sample=sample))
-    with open(lofreq_output.format(sample=sample), 'r') as vcf:
-        content = vcf.read()
-        if re.findall('^NC', content, re.MULTILINE): # regex ok or not?
-            # trigger vep path
-            return [os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2_parsed.txt".format(sample=sample)),
-                    os.path.join(VARIANTS_DIR, "{sample}_snv.csv".format(sample=sample))]
-        else:
-            # skipp execution of all vep related rules and directly have smth that the report can work with
-            empty_vep_txt = os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2_empty.txt".format(sample=sample))
-            Path( empty_vep_txt ).touch()
-            empty_snv_csv = os.path.join(VARIANTS_DIR, "{sample}_snv_empty.csv".format(sample=sample))
-            Path( empty_snv_csv ).touch()
-            return [empty_vep_txt, empty_snv_csv]
+                logger.info("  - {}".format(name))
 
 # Trimming in three steps: general by qual and cutoff, get remaining adapters out, get remaining primers out
 
@@ -337,17 +360,10 @@ rule samtools_index_postprimertrim:
     log: os.path.join(LOG_DIR, 'samtools_index_{sample}.log')
     shell: "{SAMTOOLS_EXEC} index {input} {output} >> {log} 2>&1"
 
-# function to determine the extension of the input files
-def fastq_ext(fastq_file):
-    "Function to determine the fastq file extension"
-    root, ext = os.path.splitext(fastq_file)
-    if ext == ".gz":
-        root_root, root_ext = os.path.splitext(root)
-        ext = ''.join([root_ext,ext])
-    return ext
 
-# fixme: single-end version needed
-# Note: fastqc does not process reads in pairs. files are processed as single units.
+# FIXME: single-end version needed
+# NOTE: fastqc does not process reads in pairs. files are processed as single units.
+# ANNOT: Do quality control on single end sample fastq read files.
 rule fastqc_raw_se:
     input: trim_reads_input
     output:
@@ -367,7 +383,10 @@ rule fastqc_raw_se:
                     mv {params.output_dir}/{tmp_zip} {output.zip}
                 fi """)
 
-# fixme: or discard completely and change multiqc to use fastp --> fastp rule would have to be adjusted to create reasonable outputs
+
+# FIXME: or discard completely and change multiqc to use fastp --> fastp rule would have to be adjusted to create reasonable outputs
+# ANNOT: Do quality control on paired end sample fastq read files.
+# FIXME: Should this rule be called `fastqc_raw_pe`?
 rule fastqc_raw:
     input: trim_reads_input
     output:
@@ -432,17 +451,6 @@ rule multiqc:
   log: os.path.join(LOG_DIR, 'multiqc_{sample}.log')
   shell: "{MULTIQC_EXEC} -f -o {params.output_dir} {input} >> {log} 2>&1"
 
-# WIP create a dummy entry if no variant is found - use this as long as the input-function solution doesn't work
-def no_variant_vep(sample, lofreq_output):
-    content = open(lofreq_output.format(sample=sample), 'r').read()
-    if re.findall('^NC', content, re.MULTILINE):  # regex ok or not?
-        # trigger vep path
-        print('File can be used for downstream processing')
-    else:
-        # write smth so that vep does not crash - deal with everything later in the variant_report
-        print('adding dummy entry to vcf file, because no variants were found')
-        open(lofreq_output.format(sample=sample), 'a').write(
-            "NC_000000.0\t00\t.\tA\tA\t00\tPASS\tDP=0;AF=0;SB=0;DP4=0,0,0,0")
 
 # TODO it should be possible to add customized parameter
 rule lofreq:
