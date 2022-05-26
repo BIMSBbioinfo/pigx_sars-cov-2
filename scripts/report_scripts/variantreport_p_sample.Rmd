@@ -33,7 +33,6 @@ library(DT)
 library(base64url)
 ```
 
-
 This lineage analysis report provides an overview over all mutations found in 
 the sample and the deconvoluted lineage abundances. The tables below display the
 summarized results from single-nucleotide-variant (SNV) calling and their 
@@ -45,6 +44,7 @@ mutations). For detailed method description please consult the
 *Note: Deconvolution results are biased by the number of reads and by the number
 of signature mutations that were found for this sample.  Check with the QC 
 report to be able to assess how trustworthy the results are.*
+
 
 # Mutation analysis
 
@@ -73,13 +73,16 @@ SignatureTable <- data.frame(
 ) # TODO: more clear title stating which coverage
 
 DT::datatable(SignatureTable,
-              extensions = c('FixedColumns', 'Scroller'),
-              options = list(fixedColumns = TRUE, 
-                         scrollY = 180,
-                         scrollX = TRUE,
-                         scroller = TRUE,
-                         dom = 'Bfrtip'),
-              filter = "bottom")
+  extensions = c("FixedColumns", "Scroller"),
+  options = list(
+    fixedColumns = TRUE,
+    scrollY = 180,
+    scrollX = TRUE,
+    scroller = TRUE,
+    dom = "Bfrtip"
+  ),
+  filter = "bottom"
+)
 ```
 
 ```{r nonsig_table, results = 'asis'}
@@ -100,18 +103,26 @@ NoSignatureTable <- data.frame(
 ) # TODO more clear title stating which coverage
 
 DT::datatable(NoSignatureTable,
-              extensions = c('FixedColumns', 'Scroller'),
-              options = list(fixedColumns = TRUE, 
-                         scrollY = 400,
-                         scrollX = TRUE,
-                         scroller = TRUE,
-                         dom = 'Bfrtip'),
-              filter = "bottom")
+  extensions = c("FixedColumns", "Scroller"),
+  options = list(
+    fixedColumns = TRUE,
+    scrollY = 400,
+    scrollX = TRUE,
+    scroller = TRUE,
+    dom = "Bfrtip"
+  ),
+  filter = "bottom"
+)
 ```
 
 # Lineage analysis
-Lineage proportion values are derived by deconvolution of the tracked signature mutations. Deconvolution is done by using a robust regression model. It aims to predict the individual contributions of the lineages to the observed mutation frequencies in the bulk wastewater sample. For detailed method description, please consult the [documentation](https://bioinformatics.mdc-berlin.de/pigx_docs/pigx-sars-cov-2.html#output-description)
 
+Lineage proportion values are derived by deconvolution of the tracked signature
+mutations. Deconvolution is done by using a robust regression model. It aims to
+predict the individual contributions of the lineages to the observed mutation
+frequencies in the bulk wastewater sample. For detailed method description,
+please consult the
+[documentation](https://bioinformatics.mdc-berlin.de/pigx_docs/pigx-sars-cov-2.html#output-description)
 
 ```{r echo = FALSE}
 # get  NT mutations only, input for the signature matrix
@@ -152,26 +163,36 @@ df <- read.csv(params$variants_file)
 
 font_family <- "DejaVu Sans"
 
-ggplot(data = df, aes(name,value, 
-                       fill = name)) +
-        geom_bar(stat="identity") +
-        labs(title = "Proportion of variants of concern inferred from deconvolution",
-             x = "Variants",
-             y = "Percentage") +
-        scale_x_discrete(limits = df$name) +
-        scale_y_continuous(limits = c(0,1), breaks = seq(0,1,0.1),
-                           labels = scales::percent_format(accuracy = 1)) +
-        scale_colour_manual(values=Variant_colors) + 
-        # geom_text ignores the theme's default font family, so we
-        # need to provide it here.
-        geom_text(aes(family = font_family,
-                      label = sprintf("%0.3f", round(value, digits = 3))),
-                      position=position_dodge(width=0.9), 
-                      vjust=-0.25) + 
-     scale_fill_discrete(name = "Variants",
-                         breaks = df$name,
-                         labels = df$name) +
-     theme_gray(base_family = font_family)
+ggplot(data = df, aes(variant, abundance,
+  fill = variant
+)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Proportion of variants of concern inferred from deconvolution",
+    x = "Variants",
+    y = "Percentage"
+  ) +
+  scale_x_discrete(limits = df$variant) +
+  scale_y_continuous(
+    limits = c(0, 1), breaks = seq(0, 1, 0.1),
+    labels = scales::percent_format(accuracy = 1)
+  ) +
+  scale_colour_manual(values = Variant_colors) +
+  # geom_text ignores the theme's default font family, so we
+  # need to provide it here.
+  geom_text(aes(
+    family = font_family,
+    label = sprintf("%0.3f", round(abundance, digits = 3))
+  ),
+  position = position_dodge(width = 0.9),
+  vjust = -0.25
+  ) +
+  scale_fill_discrete(
+    name = "Variants",
+    breaks = df$variant,
+    labels = df$variant
+  ) +
+  theme_gray(base_family = font_family)
 ```
 
 # Analysis Parameter
@@ -208,7 +229,6 @@ vep <- readLines(params$vep_file) %>%
   paste0(collapse = "\n") %>%
   base64_urlencode()
 ```
-
 
 
 Called SNVs:  

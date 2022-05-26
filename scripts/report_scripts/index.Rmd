@@ -121,8 +121,10 @@ quantifies the occurrence of lineages and single nucleotide (single-NT)
 mutations.
 
 The visualizations below provide an overview of the evolution of VOCs found
-in the analyzed samples across given time points and locations. The abundance values for the variants are derived 
-by deconvolution. For details please consult the [documentation](http://bioinformatics.mdc-berlin.de/pigx_docs/pigx-sars-cov-2.html#output-description))
+in the analyzed samples across given time points and locations. The abundance 
+values for the variants are derived by deconvolution. For details please 
+consult the 
+[documentation](http://bioinformatics.mdc-berlin.de/pigx_docs/pigx-sars-cov-2.html#output-description))
 
 This pipeline is part of
 [PiGx](https://bioinformatics.mdc-berlin.de/pigx), a collection of
@@ -434,7 +436,8 @@ if (length(unique(approved_var_plot$dates)) > 1) {
 
 The following plots provide an overview of detected single nucleotide
 mutations in different locations and how their relative frequency
-changes over time. Furthermore, mutations showing a significant frequency increase over time are highlighted.  
+changes over time. Furthermore, mutations showing a significant frequency 
+increase over time are highlighted.  
 
 ```{r mutation_notation, results='asis', eval=MUTATIONS_FOUND}
 cat(create_html_note(paste(
@@ -791,6 +794,7 @@ df_mut_download <- df_mut %>%
   dump_csv() %>%
   base64url::base64_urlencode()
 ```
+
 Frequencies per mutation per sample
 
 `r create_html_download_link(df_mut_download, filename = "mutation_frequencies.csv")`
@@ -824,28 +828,38 @@ The reports for each sample can be accessed here:
 ```{r generate overview}
 sample_sheet <- fread(params$sample_sheet)
 sample_names <- sample_sheet$name
-reports <- list(list("suffix" = ".variantreport_p_sample.html",
-                     "name"   = "variant report"),
-                list("suffix" = ".qc_report_per_sample.html",
-                     "name"   = "QC report"),
-                list("suffix" = ".taxonomic_classification.html",
-                     "name"   = "taxonomic classification"))
+reports <- list(
+  list(
+    "suffix" = ".variantreport_p_sample.html",
+    "name" = "variant report"
+  ),
+  list(
+    "suffix" = ".qc_report_per_sample.html",
+    "name" = "QC report"
+  ),
+  list(
+    "suffix" = ".taxonomic_classification.html",
+    "name" = "taxonomic classification"
+  )
+)
 
-df <- as.data.frame( dplyr::select(sample_sheet, name, location_name, date) )
+df <- as.data.frame(dplyr::select(sample_sheet, name, location_name, date))
 
-links <- lapply(sample_names, function (sample) {
-    as.vector(lapply(reports, function (report) {
-        paste0("<a href=", sample, report$suffix, ">", report$name, "</a>")
-    }))
+links <- lapply(sample_names, function(sample) {
+  as.vector(lapply(reports, function(report) {
+    paste0("<a href=", sample, report$suffix, ">", report$name, "</a>")
+  }))
 })
 
 df$reports <- links
 
-datatable(df, options = list( fixedColumns = TRUE, 
-                               scrollY = 180,
-                               scrollX = TRUE,
-                               scroller = TRUE,
-                               dom = 'Slfrtip'))
+datatable(df, options = list(
+  fixedColumns = TRUE,
+  scrollY = 180,
+  scrollX = TRUE,
+  scroller = TRUE,
+  dom = "Slfrtip"
+))
 ```
 
 # Discarded samples 
@@ -871,6 +885,6 @@ if (!(length(coverages.df) == 0)) {
   bad_samples_df <- bad_samples_df %>% slice_head(n = 20)
   create_dt(bad_samples_df)
 } else {
-    cat("\n No coverage values found.")
+  cat("\n No coverage values found.")
 }
 ```

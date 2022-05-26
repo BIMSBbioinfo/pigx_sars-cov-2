@@ -48,8 +48,7 @@ cat("\n\n")
 ## function loading
 source(params$deconvolution_functions)
 
-
-## ----print_input_settings, echo = FALSE---------------------------------------
+## ----printInputSettings, echo = FALSE-----------------------------------------
 sample_name         <- params$sample_name
 sample_sheet        <- data.table::fread(params$sample_sheet)
 mutation_sheet      <- params$mutation_sheet
@@ -172,8 +171,7 @@ write.csv(
 
 # Tables are displayed here in report
 
-
-## ----getting_unique_muts_bulk, include = FALSE--------------------------------
+## ----echo = FALSE-------------------------------------------------------------
 # get  NT mutations only, input for the signature matrix
 muations_vec <- match.df$gene_mut_collapsed
 
@@ -262,6 +260,7 @@ if (execute_deconvolution) {
   # applying weights on signature matrix
   # FIXME: there should be a way to do this vectorized
   msig_simple_unique_weighted <- msig_simple_unique
+
   for (lineage in deconv_lineages) {
     weight <- msig_simple_unique_weighted[lineage] / as.numeric(sigmut_proportion_weights[lineage])
     msig_simple_unique_weighted[lineage] <- as.numeric(ifelse(is.na(weight), 0, unlist(weight)))
@@ -282,7 +281,6 @@ if (execute_deconvolution) {
     Others_weight
   )
   msig_stable_unique <- msig_stable_all[[1]]
-
 
   ## ----deconvolution, include = FALSE-----------------------------------------
   # this hack is necessary because otherwise the deconvolution will throw:
@@ -324,6 +322,9 @@ if (execute_deconvolution) {
   }
 
   # case 2: in case "others" == 0, both variants can be split up again and being
+  # given the value 0 OR
+  # case 3: in case multiple vars can really not be distinguished from each
+  # other they will be distributed normaly
   while (any(str_detect(df$name, ","))) {
     grouped_rows <- which(str_detect(df$name, ","))
     # fixme: this loop might be unneccessary, since only the first row should
@@ -496,6 +497,8 @@ if (execute_deconvolution) {
       }
     }
   }
+
+
   colnames(output_mutation_frame) <- as.character(colnames(
     output_mutation_frame
   ))
