@@ -1,5 +1,4 @@
 ## ----setup, include = FALSE, warning = FALSE----------------------------------
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 library(knitr)
 library(dplyr)
@@ -55,7 +54,7 @@ sample_name         <- params$sample_name
 sample_sheet        <- data.table::fread(params$sample_sheet)
 mutation_sheet      <- params$mutation_sheet
 
-csv_output_dir      <- file.path(params$output_dir, "variants")
+variants_output_dir <- file.path(params$output_dir, "variants")
 mutation_output_dir <- file.path(params$output_dir, "mutations")
 
 
@@ -92,11 +91,11 @@ mutation_output_file <- file.path(
   )
 )
 
-variant_abundance_file <- file.path(
-  mutation_output_dir,
+variants_file <- file.path(
+  variants_output_dir,
   paste0(
     sample_name,
-    "_variant_abundance.csv"
+    "_variants.csv"
   )
 )
 
@@ -148,12 +147,15 @@ complete_df <- dplyr::left_join(lofreq.info, vep.info,
   rowwise() %>%
   mutate(gene_mut_collapsed = paste(genes, gene_mut, sep = ":"))
 
+# TODO: let the read coverage filter be set dynamically over the setting file
+complete_cov_filtered.df <- complete_df %>% filter(!(as.numeric(cov) < 100))
+
 # filter for mutations which are signature mutations
-match.df <- complete_df %>%
+match.df <- complete_cov_filtered.df %>%
   filter(!is.na(variant))
 
 # filter for everything that is not a signature mutation
-nomatch.df <- complete_df %>%
+nomatch.df <- complete_cov_filtered.df %>%
   filter(is.na(variant))
 
 cat("Writing signature mutation file to ", sigmut_output_file, "...\n")
@@ -238,10 +240,13 @@ if (execute_deconvolution) {
 
   # create list of proportion values that will be used as weigths
   sigmut_proportion_weights <- list()
-
-
   for (lineage in deconv_lineages) {
-    if (grepl(",", lineage)) {
+    if (lineage == "Others") {
+      # !! 17/02/2022 It's not yet tested how robust this behaves when one would
+      # mindlessly clutter the mutationsheet
+      # with lineages that are very unlikely to detect or not detected
+      value <- nrow(msig_simple_unique) / nrow(sigmuts_deduped)
+    } else if (grepl(",", lineage)) {
       group <- unlist(str_split(lineage, ","))
       avrg <- sum(sigmut_df$variant %in% group) / length(group)
       value <- sum(msig_simple_unique[lineage]) / avrg
@@ -303,49 +308,26 @@ if (execute_deconvolution) {
   variants <- colnames(msig_stable_unique[, -1])
   df <- data.frame(rbind(variant_abundance))
 
-  # TODO: Replace the long column name consisting of concatenated variant
-  # names with "others" and put the variant names in a label.
-  # TODO: This should be done much earlier when building the data frame.
-  condensed_variants_names <- unlist(
-    lapply(
-      variants,
-      function(x) {
-        if (str_detect(x, ".*,.*,.*")) {
-          "others"
-        } else {
-          x
-        }
-      }
-    )
-  )
-
-  colnames(df) <- condensed_variants_names
-
-  variants_labels <- unlist(
-    lapply(
-      variants,
-      function(x) str_replace_all(x, ",", "\n")
-    )
-  )
-
+  colnames(df) <- variants
   df <- df %>%
-    tidyr::pivot_longer(everything())
+    tidyr::pivot_longer(everything()) %>%
+    dplyr::select(variant = name, abundance = value)
 
   # Handling of ambiguous cases and grouped variants
 
   # case 1: add dropped variants again with value 0 in case all of the other
   # variants add up to 1
-  if (round(sum(df$value), 1) == 1) {
+  if (round(sum(df$abundance), 1) == 1) {
     for (variant in dropped_variants) {
       df <- rbind(df, c(variant, 0))
     }
   }
 
   # case 2: in case "others" == 0, both variants can be split up again and being
-  # given the value 0 OR case 3: in case multiple vars can really not be
-  # distinguished from each other they will be distributed normaly
-  if (any(str_detect(variants, ","))) {
-    grouped_rows <- which(str_detect(variants, ","))
+  while (any(str_detect(df$name, ","))) {
+    grouped_rows <- which(str_detect(df$name, ","))
+    # fixme: this loop might be unneccessary, since only the first row should
+    # been picked, everything else will be handled by the while loop
     for (row in grouped_rows) {
       if (df[row, "value"] == 0) {
         grouped_variants <- unlist(str_split(df[row, "variant"], ","))
@@ -353,11 +335,12 @@ if (execute_deconvolution) {
           # add new rows, one for each variant
           df <- rbind(df, c(variant, 0))
         }
-      } else if (df[row, "value"] != 0) {
+      } else if (df[row, "abundance"] != 0) {
         grouped_variants <- unlist(str_split(df[row, "variant"], ","))
         # normal distribution, devide deconv value by number of grouped variants
         distributed_freq_value <-
-          as.numeric(as.numeric(df[row, "value"]) / length(grouped_variants))
+          as.numeric(as.numeric(df[row, "abundance"]) /
+            length(grouped_variants))
         for (variant in grouped_variants) {
           # add new rows, one for each variant
           df <- rbind(df, c(variant, distributed_freq_value))
@@ -368,11 +351,11 @@ if (execute_deconvolution) {
     }
   }
 
-  df <- transform(df, value = as.numeric(value))
+  df <- transform(df, abundance = as.numeric(abundance))
 
 
-  cat("Writing variant abundance file to ", variant_abundance_file, "...\n")
-  write.csv(df, variant_abundance_file)
+  cat("Writing variant abundance file to ", variants_file, "...\n")
+  write.csv(df, variants_file)
 
   # plot comes here in report
 } else {
@@ -534,37 +517,6 @@ if (execute_deconvolution) {
     row.names = FALSE, quote = FALSE
   )
 } else {
-  # write dummy files
-
-  # TODO: create headers dynamically
-  variant_abundance_colnames <- c(
-    "gene_pos",
-    "gene_mut",
-    "freq",
-    "cov",
-    "gene_mut_loc.1",
-    "gene_mut_loc.2",
-    "gene_mut_loc.3",
-    "prot_mut_loc",
-    "AAs.1", "AAs.2",
-    "Conseq", "genes",
-    "AA_mut", "name",
-    "gene_mut_collapsed"
-  )
-
-  cat(
-    "Writing dummy variant abundance file to ",
-    variant_abundance_file,
-    "...\n"
-  )
-
-  write.csv(
-    setNames(
-      data.frame(matrix(nrow = 0, ncol = length(variant_abundance_colnames))),
-      variant_abundance_colnames
-    ),
-    variant_abundance_file
-  )
 
   cat("Writing dummy mutation file to ", mutation_output_file, "...\n")
 

@@ -1,7 +1,8 @@
 
 get_files <- function ( variants_dir){
   files <- list.files(path = variants_dir,
-                    pattern = "_variants.csv",
+                    # TODO: pass file names from args
+                    pattern = "_variants_with_meta.csv",
                     full.names = TRUE,
                     recursive = FALSE)
   return (files)

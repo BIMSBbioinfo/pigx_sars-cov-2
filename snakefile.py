@@ -584,8 +584,10 @@ rule run_deconvolution:
         sigmut_df=os.path.join(MUTATIONS_DIR, "{sample}_sigmuts.csv"),
         non_sigmut_df=os.path.join(MUTATIONS_DIR, "{sample}_non_sigmuts.csv"),
         variant_proportions=os.path.join(
-            MUTATIONS_DIR, "{sample}_variant_abundance.csv"
+            VARIANTS_DIR, "{sample}_variants.csv"
         ),
+        variants_with_meta=os.path.join(VARIANTS_DIR,
+         "{sample}_variants_with_meta.csv"),
         mutations=os.path.join(MUTATIONS_DIR, "{sample}_mutations.csv"),
     log:
         os.path.join(LOG_DIR, "reports", "{sample}_deconvolution.log"),
@@ -610,8 +612,8 @@ rule render_variant_report:
         header=os.path.join(REPORT_DIR, "_navbar.html"),
         sigmut_file=os.path.join(MUTATIONS_DIR, "{sample}_sigmuts.csv"),
         non_sigmut_file=os.path.join(MUTATIONS_DIR, "{sample}_non_sigmuts.csv"),
-        variant_abundance_file=os.path.join(
-            MUTATIONS_DIR, "{sample}_variant_abundance.csv"
+        variants_file=os.path.join(
+            VARIANTS_DIR, "{sample}_variants.csv"
         ),
         mutations=os.path.join(MUTATIONS_DIR, "{sample}_mutations.csv"),
         vep=os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2_parsed.txt"),
@@ -628,7 +630,7 @@ rule render_variant_report:
           "sample_name": "{wildcards.sample}", \
           "sigmut_file": "{input.sigmut_file}", \
           "non_sigmut_file": "{input.non_sigmut_file}", \
-          "variant_abundance_file": "{input.variant_abundance_file}", \
+          "variants_file": "{input.variants_file}", \
           "snv_file": "{input.snv}", \
           "vep_file": "{input.vep}", \
           "logo": "{LOGO}" \
@@ -661,7 +663,7 @@ rule render_qc_report:
 rule create_variants_summary:
     input:
         script = os.path.join(SCRIPTS_DIR, "creating_variants_summary_table.R"),
-        files = expand(os.path.join(VARIANTS_DIR, "{sample}_variants.csv"), sample = SAMPLES)
+        files = expand(os.path.join(VARIANTS_DIR, "{sample}_variants_with_meta.csv"), sample = SAMPLES)
     output: os.path.join(VARIANTS_DIR, 'data_variant_plot.csv')
     log: os.path.join(LOG_DIR, "create_variants_summary.log")
     shell: """
