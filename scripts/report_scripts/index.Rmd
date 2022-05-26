@@ -106,6 +106,9 @@ df_var <- read.table(params$variants_csv, sep = "\t", header = TRUE,
   check.names = FALSE)
 df_mut <- read.table(params$mutations_csv, sep = "\t", header = TRUE,
   check.names = FALSE)
+
+# NOTE: These separators need to be changed before file io can be done via csv
+mut_str_sep <- ":"
 ```
 
 ```{r format_threshold}
@@ -435,13 +438,13 @@ changes over time. Furthermore, mutations showing a significant frequency
 increase over time are highlighted.  
 
 ```{r mutation_notation, results='asis', eval=MUTATIONS_FOUND}
-cat(create_html_note(paste(
+cat(create_html_note(str_glue(
   "Mutations are noted in the pattern of:",
-  "\n _**gene :: protein-sequence mutation : NT-sequence mutation**_\n",
-  "Please note that this translation was done for single mutations.",
-  "Combinations of single-NT mutations that taken together may lead to ",
-  "a different amino acid are not yet taken into account.",
-  sep = "\n"
+  "\n _**gene {mut_str_sep} protein-sequence mutation ",
+  "{mut_str_sep}{mut_str_sep} NT-sequence",
+  "mutation**_\nPlease note that this translation was done for single",
+  "mutations. Combinations of single-NT mutations that taken together may lead",
+  "to a different amino acid are not yet taken into account."
 )))
 ```
 
@@ -468,7 +471,7 @@ mutation_sheet <- params$mutation_sheet
 sigmuts_df <- read.csv(mutation_sheet, header = TRUE) %>%
   na_if("") %>%
   # split gene name of for easier matching
-  mutate(across(everything(), ~ str_replace(.x, "^[^:]*:", "")))
+  mutate(across(everything(), ~str_replace(.x, str_glue('^[^{mut_str_sep}]*{mut_str_sep}'), '')))
 
 mutations_sig <- filter_lm_res_top20(mutations_sig_unfiltered, 0.05)
 
@@ -477,7 +480,7 @@ if (nrow(mutations_sig) > 0) {
   mutations_sig <- mutations_sig %>%
     rowwise() %>%
     mutate(sigflag = ifelse(any(
-      sigmuts_df == str_split(mutation, "::")[[1]][2]
+      sigmuts_df == str_split(mutation, str_glue("{mut_str_sep}{mut_str_sep}"))[[1]][2]
     ), "SigMut", ""))
 
   cat(
@@ -510,7 +513,7 @@ if (nrow(mutations_sig_unfiltered) > 0) {
   mutations_sig_unfiltered <- mutations_sig_unfiltered %>%
     rowwise() %>%
     mutate(sigflag = ifelse(any(
-      sigmuts_df == str_split(mutation, "::")[[1]][2]
+      sigmuts_df == str_split(mutation, str_glue("{mut_str_sep}{mut_str_sep}"))[[1]][2]
     ), "sigmut", ""))
 
   mutations_sig_unfiltered_download <- mutations_sig_unfiltered %>%
@@ -572,7 +575,9 @@ melted <- melted %>%
   # flag if mutation is signature mutation
   rowwise() %>%
   mutate(sigflag = ifelse(any(
-    sigmuts_df == str_split(variable, "::")[[1]][2]
+    sigmuts_df == str_split(variable, str_glue(
+      "{mut_str_sep}{mut_str_sep}"
+    ))[[1]][2]
   ), "SigMut", "")) %>%
   ungroup()
 
@@ -635,9 +640,14 @@ melted <- reshape2::melt(filtered_approved_mut_plot,
   )
 ) %>%
   rowwise() %>%
-  mutate(sigflag = ifelse(any(sigmuts_df == str_split(variable, "::")[[1]][2]),
-    "SigMut", NULL
-  ))
+  mutate(
+    sigflag = ifelse(
+      any(sigmuts_df == str_split(
+        variable, str_glue("{mut_str_sep}{mut_str_sep}")
+      )[[1]][2]),
+      "SigMut", NULL
+    )
+  )
 
 # sort by dates
 idx <- order(melted$dates)

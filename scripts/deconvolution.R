@@ -50,8 +50,20 @@ cat("\n\n")
 ## function loading
 source(params$deconvolution_functions)
 
+# set script wide separator used for variants that contain the same signature
+# muations
+var_sep <- ","
 
-## ----print_input_settings, echo = FALSE---------------------------------------
+# separator for same mutations
+mut_sep <- ","
+
+# separator for the string containing mutation infos
+mut_str_sep  <- ":"
+
+# character used for na entries in the mut info string
+mut_str_na_char <- "\\"
+
+## ----printInputSettings, echo = FALSE-----------------------------------------
 sample_name         <- params$sample_name
 sample_sheet        <- data.table::fread(params$sample_sheet)
 mutation_sheet      <- params$mutation_sheet
@@ -120,7 +132,7 @@ vep_output_df <- read.table(params$vep_file, sep = ",", header = TRUE) %>%
 
 sigmuts_deduped <- sigmut_df %>%
   group_by(mutation) %>%
-  summarise(variant = paste(variant, collapse = ","))
+  summarise(variant = paste(variant, collapse = var_sep))
 
 # remove mutation type info
 sigmuts_deduped_no_gene <- sigmuts_deduped %>%
@@ -147,7 +159,7 @@ complete_df <- dplyr::right_join(
   lofreq_info,
   by = c("mut_str" = "gene_mut"), copy = TRUE
 ) %>%
-  mutate(mut_str_collapsed = paste(gene_name, mut_str, sep = ":"))
+  mutate(mut_str_collapsed = paste(gene_name, mut_str, sep = mut_str_sep))
 
 complete_dep_filtered_df <- complete_df %>%
   filter(as.numeric(dep) > as.numeric(params$mutation_depth_threshold))
@@ -174,8 +186,7 @@ write.csv(
 
 # Tables are displayed here in report
 
-
-## ----getting_unique_muts_bulk, include = FALSE--------------------------------
+## ----echo = FALSE-------------------------------------------------------------
 # get  NT mutations only, input for the signature matrix
 mutations_vec <- match_df$mut_str_collapsed
 
@@ -225,7 +236,7 @@ if (execute_deconvolution) {
   }
 
   # concat dupe groups to form a new composite name for the now unique col
-  dupe_group_names <- lapply(dupe_group_list, paste, collapse = ",") %>%
+  dupe_group_names <- lapply(dupe_group_list, paste, collapse = var_sep) %>%
     unlist()
 
   # juggle names to get a named vector with names and values flipped
@@ -268,7 +279,7 @@ if (execute_deconvolution) {
   group_weights_vec <- lapply(
     deconv_lineages,
     function(group) {
-      group_vec <- str_split(group, ",") %>%
+      group_vec <- str_split(group, var_sep) %>%
         unlist()
 
       sel_vec <- names(n_found_vec) %in% group_vec
@@ -355,7 +366,7 @@ if (execute_deconvolution) {
     variant = deconv_lineages,
     abundance = variant_abundance
   ) %>%
-    separate_rows(variant, sep = ",")
+    separate_rows(variant, sep = var_sep)
 
   # go trough all groups and assign each group member the group abundance
   # divided by the number of group members
@@ -441,9 +452,11 @@ output_mutation_frame <- complete_df %>%
   group_by(aa_str) %>%
   summarise(
     freq = sum(as.numeric(freq)),
-    mut_str = paste(mut_str, collapse = ",")
+    mut_str = paste(mut_str, collapse = mut_sep)
   ) %>%
-  mutate(aa_str = replace(aa_str, is.na(aa_str), "\\:\\")) %>%
+  mutate(aa_str = replace(aa_str, is.na(aa_str), paste0(
+    mut_str_na_char, mut_str_sep, mut_str_na_char
+  ))) %>%
   # 211006 this exclusion is necessary because this mutation has a wrong entry
   # in VEP which gives two AA_muts instead of probably 1 deletion
   filter(!(mut_str %in% "G13477A")) %>%
@@ -453,7 +466,7 @@ output_mutation_frame <- complete_df %>%
   # easier to spot translation inconsitentcies that way
   mutate(nuc_aa_mut = paste(
     aa_str, mut_str,
-    sep = "::"
+    sep = str_glue("{mut_str_sep}{mut_str_sep}")
   )) %>%
   dplyr::select(nuc_aa_mut, freq) %>%
 
