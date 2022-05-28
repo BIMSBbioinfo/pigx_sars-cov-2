@@ -462,9 +462,6 @@ rule ivar_primer_trim:
     shell: """
         {IVAR_EXEC} trim -b {input.primers} -p {params.output} -i {input.aligned_bam} -q 15 -m 180 -s 4 >> {log} 2>&1 """
 
-# Vic_0825: I don't know if this double sorting and indexing is really necessary but seemed to be since ivar as
-# well as lofreq ask for sorted and indexed bam files
-
 rule samtools_sort_postprimertrim:
     input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed.bam')
     output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed_sorted.bam')
