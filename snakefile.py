@@ -674,14 +674,6 @@ rule render_index:
       variants = os.path.join(VARIANTS_DIR, 'data_variant_plot.csv'),
       mutations = os.path.join(VARIANTS_DIR, 'data_mutation_plot.csv'),
       overviewQC = os.path.join(OUTPUT_DIR, 'overview_QC.csv'),
-      # TODO: see comment below
-      side_effects=expand(os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.html"), sample = SAMPLES),
-      # This can only be done after all other reports have been built,
-      # because these reports are referenced in the overview section.
-      taxonomy=expand(os.path.join(REPORT_DIR, "{sample}.taxonomic_classification.html"), sample = SAMPLES),
-      krona=expand(os.path.join(REPORT_DIR, "{sample}.Krona_report.html"), sample = SAMPLES),
-      qc=expand(os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.html"), sample = SAMPLES),
-      variant=expand(os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.html"), sample = SAMPLES)
     params:
       fun_cvrg_scr = os.path.join(SCRIPTS_DIR, 'sample_coverage_score.R'),
       fun_lm = os.path.join(SCRIPTS_DIR, 'pred_mutation_increase.R'),
