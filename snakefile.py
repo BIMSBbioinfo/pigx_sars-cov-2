@@ -228,15 +228,6 @@ def vep_input(args):
 
 # Trimming in three steps: general by qual and cutoff, get remaining adapters out, get remaining primers out
 
-rule get_primer_seqs:
-    input:
-        ref = REFERENCE_FASTA,
-        bed = AMPLICONS_BED
-    output: os.path.join(INDEX_DIR, "primer_sequences.fa") # is it ok to put it there it should it have it's own directory?
-    log: os.path.join(LOG_DIR, "getfasta_primers.log")
-    shell: "{BEDTOOLS_EXEC} getfasta -fi  {input.ref}\
-            -bed {input.bed} -name > {output} 2>> {log} 3>&2"
-
 # TODO the output suffix should be dynamic depending on the input
 # TODO with the use of fastp the use of fastqc becomes partly reduntant, fastqc should be removed or adjusted
 rule fastp:
