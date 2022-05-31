@@ -337,7 +337,8 @@ targets = {
         )
     }
 }
-selected_targets = ['final_reports']
+
+selected_targets = config["control"]["targets"]
 OUTPUT_FILES = list(chain.from_iterable([targets[name]['files'] for name in selected_targets]))
 
 
