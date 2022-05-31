@@ -249,16 +249,16 @@ def no_variant_vep(sample, lofreq_output):
             "NC_000000.0\t00\t.\tA\tA\t00\tPASS\tDP=0;AF=0;SB=0;DP4=0,0,0,0")
 
 
-SAMPLE_SHEET_CSV = config['locations']['sample-sheet']
-MUTATION_SHEET_CSV = config['locations']['mutation-sheet']
-READS_DIR        = config['locations']['reads-dir']
-REFERENCE_FASTA  = config['locations']['reference-fasta']
-AMPLICONS_BED    = config['locations']['amplicons-bed']
-MUTATIONS_BED    = config['locations']['mutations-bed']
-KRAKEN_DB        = config['locations']['kraken-db-dir']
-KRONA_DB         = config['locations']['krona-db-dir']
-VEP_DB           = config['locations']['vep-db-dir']
-OUTPUT_DIR       = config['locations']['output-dir']
+SAMPLE_SHEET_CSV    = config["locations"]["sample-sheet"]
+MUTATION_SHEET_CSV  = config["locations"]["mutation-sheet"]
+READS_DIR           = config["locations"]["reads-dir"]
+REFERENCE_FASTA     = config["locations"]["reference-fasta"]
+AMPLICONS_BED       = config["locations"]["amplicons-bed"]
+MUTATIONS_BED       = config["locations"]["mutations-bed"]
+KRAKEN_DB           = config["locations"]["kraken-db-dir"]
+KRONA_DB            = config["locations"]["krona-db-dir"]
+VEP_DB              = config["locations"]["vep-db-dir"]
+OUTPUT_DIR          = config["locations"]["output-dir"]
 
 # TODO: get default read length from multiqc
 READ_LENGTH      = config['trimming']['read-length']
