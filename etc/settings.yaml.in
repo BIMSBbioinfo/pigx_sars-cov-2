@@ -22,6 +22,27 @@ reporting:
   mutation-coverage-threshold: 90
   mutation-depth-threshold: 100
 
+# The following settings control from which point the pipeline starts, which
+# path it follows (i.e. which rules are executed on the way) and where it stops.
+# TODO Update this once it is finished in the snakefile
+# TODO Add all the implications for the later control flow
+# start: Start points for the analysis
+#   * fastq.gz:     Raw reads in gzipped FASTQ format
+#   * bam:          Unfiltered alignments
+#   * bam_aligned:  Alignments filtered for aligned reads
+#   * ...
+# targets: Desired results of the analysis
+#   * (help:          Print all rules and their descriptions.)
+#   * final_reports:  Produce a comprehensive report. This is the default target.
+#   * lofreq:         Call variants and produce .vcf file and overview .csv file.
+#   * multiqc:        Create MultiQC reports for including raw and trimmed reads.
+#
+control:
+  start: fastq.gz
+  targets: 
+    - final_reports
+  run-ivar-primer-trimming: yes
+
 execution:
   submit-to-cluster: no
   jobs: 6
