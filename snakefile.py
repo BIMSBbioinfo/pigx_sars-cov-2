@@ -463,7 +463,7 @@ rule ivar_primer_trim:
     output:
         os.path.join(MAPPED_READS_DIR, "{sample}_aligned_sorted_primer-trimmed.bam"),
     params:
-        output=os.path.join(MAPPED_READS_DIR, "{sample}_aligned_sorted_primer-trimmed"),
+        output=lambda wildcards, output: os.path.splitext(f"{output}")[0],
     log:
         os.path.join(LOG_DIR, "ivar_{sample}.log"),
     # TODO number parameter should be accessible over settings file
