@@ -8,6 +8,9 @@ output <- args[2]
 header <- args[3]
 parameters <- fromJSON (args[4])
 
+# knitr 1.39 changed the default behavior.
+options(knitr.graphics.rel_path = FALSE)
+
 css <- tempfile (fileext="css")
 cat ("\
 #logo { position: relative; } \
