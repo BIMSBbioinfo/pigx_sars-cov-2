@@ -294,7 +294,7 @@ MUTATION_COVERAGE_THRESHOLD = config['reporting']['mutation-coverage-threshold']
 START_POINT = config["control"]["start"]
 TARGETS     = config["control"]["targets"]
 
-RUN_IVAR_PRIMER_TRIMING = config["control"]["run-ivar-primer-triming"]
+RUN_IVAR_PRIMER_TRIMING = config["control"]["run-ivar-primer-trimming"]
 
 INDEX_DIR         = os.path.join(OUTPUT_DIR, 'index')
 TRIMMED_READS_DIR = os.path.join(OUTPUT_DIR, 'trimmed_reads')
