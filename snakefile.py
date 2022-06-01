@@ -119,6 +119,30 @@ def map_input(args):
         ]
 
 
+def lofreq_input(wildcards):
+    sample = wildcards[0]
+
+    if (RUN_IVAR_PRIMER_TRIMING):
+        file_descript = "_aligned_sorted_primer-trimmed_sorted"
+
+    else:
+        file_descript = "_aligned_sorted"        
+
+    files = {
+        "aligned_bam": os.path.join(
+            MAPPED_READS_DIR,
+            f"{sample}{file_descript}.bam"),
+        "aligned_bai":  os.path.join(
+            MAPPED_READS_DIR,
+            f"{sample}{file_descript}.bai"),
+        "ref": os.path.join(
+            INDEX_DIR,
+            f"{os.path.basename(REFERENCE_FASTA)}"
+            )
+        }
+
+    return files
+
 # dynamically define the multiqc input files created by FastQC and fastp
 # TODO add kraken reports per sample
 def multiqc_input(args):
@@ -580,9 +604,7 @@ rule multiqc:
 # TODO it should be possible to add customized parameter
 rule lofreq:
     input:
-        aligned_bam = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed_sorted.bam'),
-        aligned_bai = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted_primer-trimmed_sorted.bai'),
-        ref = os.path.join(INDEX_DIR, "{}".format(os.path.basename(REFERENCE_FASTA)))
+        unpack(lofreq_input)
     output: vcf = os.path.join(VARIANTS_DIR, '{sample}_snv.vcf')
     log: os.path.join(LOG_DIR, 'lofreq_{sample}.log')
     run:
