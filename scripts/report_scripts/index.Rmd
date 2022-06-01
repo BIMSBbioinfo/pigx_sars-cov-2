@@ -4,19 +4,22 @@ nav: "Overview"
 author: "BIMSB Bioinformatics Platform"
 date: '`r format(as.POSIXct(if ("" != Sys.getenv("SOURCE_DATE_EPOCH")) { as.numeric(Sys.getenv("SOURCE_DATE_EPOCH")) } else { Sys.time() }, origin="1970-01-01"), "%Y-%m-%d %H:%M:%S")`'
 params:
-  variants_csv: ''
-  mutations_csv: ''
-  coverage_dir: ''
-  sample_sheet: ''
-  mutation_sheet: ''
-  mutation_coverage_threshold: '90'
-  logo: ''
-  fun_cvrg_scr: ''
-  fun_lm: ''
-  fun_tbls: ''
-  fun_pool: ''
-  overviewQC: ''
-  output_dir: ''
+  variants_csv: ""
+  mutations_csv: ""
+  sample_sheet: ""
+  mutation_sheet: ""
+  mutation_coverage_threshold: ""
+  logo: ""
+  fun_tbls: ""
+  coverage_dir: ""
+  output_dir: ""
+  overviewQC: ""
+  fun_lm: ""
+  fun_cvrg_scr: ""
+  fun_pool: ""
+  fun_index: ""
+  unfiltered_mutation_sig_file: ""
+  mut_count_file: ""
 ---
 
 <style>
@@ -55,21 +58,24 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 knitr::knit_hooks$set(
   error = function(x, options) {
     paste('\n\n<div class="alert alert-danger">',
-          gsub('^##', '\n', gsub('^##\ Error', '**Error**', x)),
-          '</div>',
-          sep = '\n')
+      gsub("^##", "\n", gsub("^##\ Error", "**Error**", x)),
+      "</div>",
+      sep = "\n"
+    )
   },
   warning = function(x, options) {
     paste('\n\n<div class="alert alert-warning">',
-          gsub('##', '\n', gsub('^##\ Warning:', '**Warning**', x)),
-          '</div>',
-          sep = '\n')
+      gsub("##", "\n", gsub("^##\ Warning:", "**Warning**", x)),
+      "</div>",
+      sep = "\n"
+    )
   },
   message = function(x, options) {
     paste('\n\n<div class="alert alert-info">',
-          gsub('##', '\n', x),
-          '</div>',
-          sep = '\n')
+      gsub("##", "\n", x),
+      "</div>",
+      sep = "\n"
+    )
   }
 )
 ```
@@ -87,72 +93,32 @@ library(dplyr)
 library(viridis)
 ```
 
-```{r input}
-df_var <- read.csv(params$variants_csv,  
+```{r load_data}
+mutations_sig_unfiltered <- read.csv(params$unfiltered_mutation_sig_file)
+
+df_var <- read.csv(params$variants_csv,
   header = TRUE,
   check.names = FALSE
 )
-
-df_mut <- read.csv(params$mutations_csv,  
+df_mut <- read.csv(params$mutations_csv,
   header = TRUE,
   check.names = FALSE
 )
+```
 
-mutation_coverage_threshold <- as.numeric(params$mutation_coverage_threshold) %>%
-# check if value is given as fraction [0,1] or percentage [0,100]
+```{r format_threshold}
+mutation_coverage_threshold <- params$mutation_coverage_threshold %>%
+  # check if value is given as fraction [0,1] or percentage [0,100]
   ifelse(. >= 0 & . <= 1,
-      . * 100,
-      .)
+    . * 100,
+    .
+  ) %>%
+  as.numeric()
 ```
 
-
-```{r functions}
-# function for downloadable tables
-create_dt <- function(x){
-  DT::datatable(x, options = list(fixedColumns = TRUE, 
-                               scrollY = 180,
-                               scrollX = TRUE,
-                               scroller = TRUE, 
-                               dom = 'Slfrtip'))
-}
-
-# function to dump data in csv formatted string
-dump_csv <- function(data, format = "csv", rownames = FALSE) {
-  if (format != "csv") stop("Data can only be dumped in CSV format.")
-  capture.output(write.csv(data, file = "", quote = FALSE, row.names = rownames)) %>%
-    paste0(collapse = "\n")
-}
-
-# function to create html link with named downloadable files
-create_html_download_link <- function(base64enc, filename, text = NULL) {
-  if(is.null(text)) text <- sprintf("Download %s",filename)
-  sprintf(paste0(
-    '<a download="%s" href="%s">%s</a>'),
-    filename,
-    sprintf('data:text/csv;base64,%s', base64enc),
-    text
-  )
-}
-# function to create html formatted notes in panel box with optional toggling
-# see https://about.gitlab.com/handbook/markdown-guide/#additional-information
-create_html_note <- function(x, toggle = FALSE) {
-  paste(
-    '\n\n<div class="panel panel-info">',
-    ifelse(toggle,
-           '<details>\n<summary>**Note**</summary>',
-           '&nbsp;**Note**'),
-    '<div class="panel-body">',
-    gsub('##', '\n', x),
-    '</div>',
-    ifelse(toggle,'','</details>'),
-    '</div>\n\n',
-    sep = '\n'
-  )
-}
-```
-
-This pipeline performs mutation analysis of SARS-CoV-2 and reports and quantifies the occurrence of
-lineages and single nucleotide (single-NT) mutations.
+This pipeline performs mutation analysis of SARS-CoV-2 and reports and 
+quantifies the occurrence of lineages and single nucleotide (single-NT)
+mutations.
 
 The visualizations below provide an overview of the evolution of VOCs found
 in the analyzed samples across given time points and locations. The abundance values for the variants are derived 
@@ -166,14 +132,20 @@ highly reproducible genomics pipelines
 platform](https://bioinformatics.mdc-berlin.de/) at the Berlin
 Institute of Medical System Biology (BIMSB).
 
-```{r sample_quality_score, warning=TRUE}
-source(params$fun_cvrg_scr) # TODO given as input? or only the scripts dir? similar variant_report
 
-coverages.df <-
-  merge(get_genome_cov(params$coverage_dir),
-    get_mutation_cov(params$coverage_dir),
-    by = "samplename"
-  ) %>%
+# Lineage abundance
+
+These plots provide an overview of the relative frequency dynamics of
+identified lineages at specific wastewater sampling locations over time. 
+
+```{r sample_quality_score}
+# TODO given as input? or only the scripts dir? similar variant_report
+source(params$fun_cvrg_scr)
+
+coverages.df <- merge(get_genome_cov(params$coverage_dir),
+  get_mutation_cov(params$coverage_dir),
+  by = "samplename"
+) %>%
   mutate(
     proport_muts_covered = round(
       (as.numeric(total_muts_cvrd) * 100) / as.numeric(total_num_muts), 1
@@ -181,67 +153,126 @@ coverages.df <-
   )
 
 if (!(length(coverages.df) == 0)) {
-  # take only the samples passing the mutation_coverage_threshold
-  # NOTE: think about interactive selection for  mutation_coverage_threshold visualization
-  good_samples.df <- filter(coverages.df, as.numeric(proport_muts_covered) >= mutation_coverage_threshold)
-  bad_samples.df <- filter(coverages.df, !(samplename %in% good_samples.df$samplename))
+  # take only the samples over the mutation coverage threshold
+  good_samples.df <- coverages.df %>%
+    filter(as.numeric(proport_muts_covered) >= mutation_coverage_threshold)
+
+  bad_samples_df <- coverages.df %>%
+    filter(!(samplename %in% good_samples.df$samplename))
 } else {
   warning("\n No coverage values found.")
 }
 ```
 
-# Lineage abundance
-
-These plots provide an overview of the relative frequency dynamics of
-identified lineages at specific wastewater sampling locations over time. 
-
 ```{r filter_plot_frames_samplescore, warning=TRUE}
-source(params$fun_pool)
-
 # only use good samples for processing and visualiztaion
-approved_var_plot <-
-  df_var %>% filter(samplename  %in% good_samples.df$samplename) %>% 
+approved_var_plot <- df_var %>%
+  filter(samplename %in% good_samples.df$samplename) %>%
   unique()
-approved_mut_plot <- df_mut %>% filter( samplename  %in% good_samples.df$samplename )
+approved_mut_plot <- df_mut %>%
+  filter(samplename %in% good_samples.df$samplename)
+
 # pool the samples per day, discard locations
 weights <- read.csv(params$overviewQC, header = TRUE, check.names = FALSE) %>%
-  dplyr::select( c(samplename, total_reads))
+  dplyr::select(c(samplename, total_reads))
 
-# check if filtered dataframe has actual values
+# check if filtered dataframe has actual values and get vars for conditional
+# execution
 VARIANTS_FOUND <- nrow(approved_var_plot) > 0
 MUTATIONS_FOUND <- nrow(approved_mut_plot) > 0
-# only run regression if at least two dates are left over
+
+# only run regression related chunks if at least two dates are left over
 RUN_MUTATION_REGRESSION <- if (MUTATIONS_FOUND) {
   length(unique(approved_mut_plot$dates)) > 1
 } else {
   FALSE
 }
-# predefine to reuse later
-APPROVED_MUTATIONS_FOUND <- RUN_MUTATION_REGRESSION
 
+# define here in case mutation regression was not executed, as that would lead
+# to an error otherwise
+APPROVED_MUTATIONS_FOUND <- RUN_MUTATION_REGRESSION
+```
+
+```{r plotting_variants_text, results='asis', fig.width=4, fig.height=4, eval=VARIANTS_FOUND}
+cat("## Lineage abundances stacked {.tabset .tabset-fade}\n\n",
+  "The summary plot shows the results pooled by day and across locations by ",
+  "weighted average using the read number as weights. Please use the tabs ",
+  "to access the not-pooled plots for each location.",
+  sep = ""
+)
+```
+
+```{r variants_pooled_plot_gen, eval=VARIANTS_FOUND}
+source(params$fun_pool)
 
 if (VARIANTS_FOUND) {
-  approved_var_plot_location_pooled <- pool_by_weighted_mean(approved_var_plot, weights, "day_location")
-} else {
-  warning(paste0("\nNot enough variants were found or passed the quality filters.",
-  "\nThe associated plots are skipped."))
-}
-```
-
-```{r text_plotting_variants, results='asis', fig.width=4, fig.height=4, eval=VARIANTS_FOUND}
-cat('## Lineage abundances stacked {.tabset .tabset-fade}
-
-The summary plot shows the results pooled by day and across locations by 
-weighted average using the read number as weights. Please use the tabs 
-to access the not-pooled plots for each location.')
-```
-
-```{r variants_pooled, eval=VARIANTS_FOUND}
-  # TODO change order or "variable" so that "WT" is always displayed on top
-  melted <- reshape2::melt(approved_var_plot_location_pooled,
-    id.vars = c("dates", "samplename")
+  approved_var_plot_location_pooled <- pool_by_weighted_mean(
+    approved_var_plot,
+    weights, "day_location"
   )
-  p_variant_pooled <- subset(melted) %>%
+} else {
+  warning(paste0(
+    "\nNot enough variants were found or passed the quality filters.",
+    "\nThe associated plots are skipped."
+  ))
+}
+
+# TODO change order or "variable" so that "WT" is always displayed on top
+melted <- reshape2::melt(approved_var_plot_location_pooled,
+  id.vars = c("dates", "samplename")
+)
+
+p_variant_pooled <- subset(melted) %>%
+  group_by(dates) %>%
+  arrange(variable) %>%
+  mutate(value = round(value, 4)) %>%
+  plot_ly(
+    type = "scatter",
+    mode = "lines+markers",
+    stackgroup = "one",
+    showlegend = TRUE,
+    name = ~variable,
+    x = ~dates,
+    y = ~value,
+    color = ~variable,
+    colors = viridis_pal(option = "D")(6)
+  ) %>%
+  layout(
+    title = "Summary over time",
+    showlegend = TRUE,
+    yaxis = list(title = "Frequency"),
+    xaxis = list(title = "Dates")
+  )
+```
+
+
+```{r variants_by_location_plot_gen, eval=VARIANTS_FOUND}
+# Get the current figure size in pixels:
+get_w <- function() {
+  with(
+    knitr::opts_current$get(c("fig.width", "dpi", "fig.retina")),
+    fig.width * dpi / fig.retina
+  )
+}
+
+get_h <- function() {
+  with(
+    knitr::opts_current$get(c("fig.height", "dpi", "fig.retina")),
+    fig.height * dpi / fig.retina
+  )
+}
+
+# TODO change order or "variable" so that "WT" is always displayed on top
+# plot variant frequencies by location, no pooling
+melted <- reshape2::melt(approved_var_plot,
+  id.vars = c(
+    "dates", "samplename", "location_name",
+    "coordinates_lat", "coordinates_long"
+  )
+)
+
+location_plot <- function(melted, location) {
+  subset(melted, location_name == location) %>%
     group_by(dates) %>%
     arrange(variable) %>%
     mutate(value = round(value, 4)) %>%
@@ -257,96 +288,75 @@ to access the not-pooled plots for each location.')
       colors = viridis_pal(option = "D")(6)
     ) %>%
     layout(
-      title = "Summary over time",
+      title = location,
       showlegend = TRUE,
-      yaxis = list(title = "Frequency"),
-      xaxis = list(title = "Dates")
+      yaxis = list(title = "Frequency")
     )
-```
-
-```{r tab_plotting_variants, eval=VARIANTS_FOUND}
-# Get the current figure size in pixels:
-get_w <- function() {
-  with(knitr::opts_current$get(c("fig.width", "dpi", "fig.retina")),
-       fig.width * dpi / fig.retina)
 }
 
-get_h <- function() {
-  with(knitr::opts_current$get(c("fig.height", "dpi", "fig.retina")),
-       fig.height * dpi / fig.retina)
-}
-
-# TODO change order or "variable" so that "WT" is always displayed on top
-# plot variant frequencies by location, no pooling
-melted <- reshape2::melt(approved_var_plot,
-                        id.vars = c("dates", "samplename", "location_name",
-                                    "coordinates_lat", "coordinates_long"))
 locations <- as.character(unique(melted$location_name))
-location_plot <- function (melted,location) {
-                  subset(melted, location_name == location) %>%
-                      group_by(dates) %>%
-                      arrange(variable) %>%
-                      mutate (value = round (value, 4)) %>%
-                      plot_ly (type = 'scatter',
-                                mode = 'lines+markers',
-                                stackgroup = 'one',
-                                showlegend = TRUE,
-                                name = ~variable,
-                                x = ~dates,
-                                y = ~value,
-                                color = ~variable,
-                                colors = viridis_pal(option = "D")(6)) %>%
-                      layout (title = location,
-                              showlegend = TRUE,
-                              yaxis = list(title = "Frequency"))
-}
 
-plot_list <- lapply(setNames(locations,
-                             locations),
-                    location_plot,
-                    melted = melted)
+plot_list <- lapply(setNames(
+  locations,
+  locations
+),
+location_plot,
+melted = melted
+)
 ```
 
-```{r print_tab_plotting_variants, warning=TRUE,results='asis', fig.width=4, fig.height=4, eval=VARIANTS_FOUND}
-
+```{r variants_pooled_and_by_location_print, warning=TRUE,results='asis', fig.width=4, fig.height=4, eval=VARIANTS_FOUND}
 if (length(plot_list) >= 1) {
-  cat("###", 'Summary over all locations', '{-}', '\n\n')
+  cat("###", "Summary over all locations", "{-}", "\n\n")
   suppressWarnings(print(htmltools::tagList(ggplotly(p_variant_pooled))))
-  cat('\n\n')
+  cat("\n\n")
+
   for (i in 1:length(locations)) {
-    cat("###", locations[i], '{-}', '\n\n')
-    suppressWarnings(print(htmltools::tagList(ggplotly (plot_list[[i]]))))
-    cat('\n\n')
+    cat("###", locations[i], "{-}", "\n\n")
+    suppressWarnings(print(htmltools::tagList(ggplotly(plot_list[[i]]))))
+    cat("\n\n")
   }
 } else {
   warning("Not enough data available to summarize and produce plots.")
 }
-
 ```
 
 
-```{r text_maps_for_variants, results='asis', eval=VARIANTS_FOUND}
-
-cat('## Lineage abundances geo-localized
-
-This plot visualizes proportions of identified lineage abundances at the provided sampling locations.')
-
-cat(create_html_note('Locations of wastewater processing plants have been generated arbitrarily and do not correspond to actual locations.'))
-
-cat('Click on a lineage in the legend to toggle its visibility in the map; 
-double-click to view only the selected lineage.',
-ifelse(length(unique(approved_var_plot$dates))>1,
-yes = 'Use the slider to select a specific date or hit the *Play* button to
-display all snapshots successively. ',no = '')
+```{r maps_for_variants_text, results='asis', eval=VARIANTS_FOUND}
+source(params$fun_index)
+cat("## Lineage abundances geo-localized\n\n",
+  "This plot visualizes proportions of identified lineage ",
+  "abundances at the provided sampling locations.",
+  sep = ""
 )
 
+cat(create_html_note(
+  paste(
+    "Locations of wastewater processing plants have been generated",
+    "arbitrarily and do not correspond to actual locations."
+  )
+))
+
+# TODO: Check formatting here
+cat(
+  "Click on a lineage in the legend to toggle its visibility in the map;\n",
+  "double-click to view only the selected lineage.",
+  ifelse(length(unique(approved_var_plot$dates)) > 1,
+    yes = paste(
+      "Use the slider to select a specific date or hit the",
+      "*Play* button to display all snapshots successively. "
+    ), no = ""
+  )
+)
 ```
 
-```{r maps_for_variants, out.width="900px", out.height="900px", eval=VARIANTS_FOUND}
+```{r variant_location_maps_plot, out.width="900px", out.height="900px", eval=VARIANTS_FOUND}
 # TODO: the note about arbitray locations should be enable to be turned on and off
 
-approved_var_plot_day_pooled  <-
-  pool_by_weighted_mean(approved_var_plot, weights, "day")
+approved_var_plot_day_pooled <- pool_by_weighted_mean(
+  approved_var_plot,
+  weights, "day"
+)
 
 melted <- reshape2::melt(
   approved_var_plot_day_pooled,
@@ -359,15 +369,15 @@ melted <- reshape2::melt(
   ),
   rm.NA = TRUE
 ) %>%
-  mutate(value = round (value, 4))
+  mutate(value = round(value, 4))
 
-locations <-
-  approved_var_plot_day_pooled %>% mutate(dates = as.character(strptime(dates, format = "%Y-%m-%d"))) %>%
+locations <- approved_var_plot_day_pooled %>%
+  mutate(dates = as.character(strptime(dates, format = "%Y-%m-%d"))) %>%
   reshape2::melt(id.vars = c("coordinates_lat", "coordinates_long"))
 
 p <- plot_ly(
-  type = 'scattermapbox',
-  mode = 'markers',
+  type = "scattermapbox",
+  mode = "markers",
   colors = viridis_pal(option = "D")(6),
   width = 900,
   height = 500
@@ -375,29 +385,29 @@ p <- plot_ly(
   add_trace(
     data = locations,
     size = 1,
-    lon = ~ coordinates_long,
-    lat = ~ coordinates_lat,
+    lon = ~coordinates_long,
+    lat = ~coordinates_lat,
     opacity = 0.1,
     showlegend = FALSE,
-    hoverinfo = 'none',
+    hoverinfo = "none",
     marker = list(
-      sizemode = 'diameter',
-      color = 'rgb(150, 150, 150)',
+      sizemode = "diameter",
+      color = "rgb(150, 150, 150)",
       opacity = 0
     )
   ) %>%
   add_trace(
     data = melted,
-    lat = ~ coordinates_lat,
-    lon = ~ coordinates_long,
-    legendgroup = ~ variable,
+    lat = ~coordinates_lat,
+    lon = ~coordinates_long,
+    legendgroup = ~variable,
     showlegend = TRUE,
     frame = ~ as.character(strptime(dates, format = "%Y-%m-%d")),
-    size = ~ value,
-    color = ~ variable,
-    hoverinfo = 'text+name',
+    size = ~value,
+    color = ~variable,
+    hoverinfo = "text+name",
     hovertext = ~ paste0("Frequency: ", value),
-    marker = list (sizemode = 'diameter')
+    marker = list(sizemode = "diameter")
   ) %>%
   layout(
     mapbox = list(
@@ -432,70 +442,40 @@ cat(create_html_note(paste(
   "\n _**gene :: protein-sequence mutation : NT-sequence mutation**_\n",
   "Please note that this translation was done for single mutations.",
   "Combinations of single-NT mutations that taken together may lead to ",
-  "a different amino acid are not yet taken into account.",sep = "\n")))
+  "a different amino acid are not yet taken into account.",
+  sep = "\n"
+)))
 ```
 
 
 ```{r title_lm_table, results = 'asis', warning=TRUE, eval=MUTATIONS_FOUND}
-  cat(
-"## Increasing mutations
+cat(
+  "## Increasing mutations\n\n",
+  "To show the dynamic of significantly changing mutations over time a linear ",
+  "regression model was applied to the mutationresults across all samples.",
+  sep = ""
+)
 
-To show the dynamic of significantly changing mutations over time a linear regression model was applied to the mutation
-results across all samples.
-"
-  )
-if(!RUN_MUTATION_REGRESSION) {
-  warning("No mutations or not enough mutations were found to perform a regression analysis.\nThe associated plots are skipped.\n")
+if (!RUN_MUTATION_REGRESSION) {
+  warning(paste(
+    "No mutations or not enough mutations were found to perform a",
+    "regression analysis.\nThe associated plots are skipped.\n"
+  ))
 }
-```
-
-```{r linear_regression, eval=RUN_MUTATION_REGRESSION}
-source(params$fun_lm)
-mutation_sheet <- params$mutation_sheet
-sigmuts.df <- read.csv(mutation_sheet, header = TRUE) %>%
-  na_if("") %>%
-  # split gene name of for easier matching
-  mutate_all(funs(str_replace(., '^[^:]*:', '')))
-
-
-changing_muts <- parsing_mutation_plot_data(approved_mut_plot)
-mutations_sig_unfiltered <- refined_lm_model(changing_muts)
-mutations_sig <-
-  filter_lm_res_top20(mutations_sig_unfiltered, 0.05)
-
-# filter good samples for only mutations with sig pvalues for plotting
-filtered_approved_mut_plot <-
-  dplyr::select(
-    approved_mut_plot,
-    c(
-      samplename,
-      dates,
-      location_name,
-      coordinates_lat,
-      coordinates_long,
-      mutations_sig$mutation
-    )
-  )
-
-# check if the filtered df has actual values besides meta data
-APPROVED_MUTATIONS_FOUND <-
-  (length(filtered_approved_mut_plot) > 5) && (nrow(filtered_approved_mut_plot) > 0)
-
-approved_mut_plot_location_pooled <-
-  pool_by_mean(filtered_approved_mut_plot,
-               na_handling = TRUE,
-               group_fun = "day_location")
 ```
 
 
 ```{r linear_regression_tables, warning=TRUE, results='asis', eval=RUN_MUTATION_REGRESSION}
+source(params$fun_lm)
+mutations_sig <- filter_lm_res_top20(mutations_sig_unfiltered, 0.05)
+
 if (nrow(mutations_sig) > 0) {
   # flag if mutation is signature mutation
   mutations_sig <- mutations_sig %>%
     rowwise() %>%
     mutate(sigflag = ifelse(any(
-     sigmuts.df == str_split(mutation, "::")[[1]][2]
-    ), "SigMut", ''))
+      sigmuts.df == str_split(mutation, "::")[[1]][2]
+    ), "SigMut", ""))
 
   cat(
     "The following table shows the mutations showing ",
@@ -510,13 +490,17 @@ if (nrow(mutations_sig) > 0) {
     dump_csv() %>%
     base64url::base64_urlencode()
   cat(
-    create_html_download_link(mutations_sig_download,
-                              "significant_mutations.csv"),
+    create_html_download_link(
+      mutations_sig_download,
+      "significant_mutations.csv"
+    ),
     "\n\n"
   )
 } else {
-  warning("No Mutation with significant increase in frequency over time found.",
-          "\nThe associated plots are skipped.\n")
+  warning(
+    "No Mutation with significant increase in frequency over time found.",
+    "\nThe associated plots are skipped.\n"
+  )
 }
 
 if (nrow(mutations_sig_unfiltered) > 0) {
@@ -524,10 +508,12 @@ if (nrow(mutations_sig_unfiltered) > 0) {
     rowwise() %>%
     mutate(sigflag = ifelse(any(
       sigmuts.df == str_split(mutation, "::")[[1]][2]
-    ), "sigmut", ''))
+    ), "sigmut", ""))
+
   mutations_sig_unfiltered_download <- mutations_sig_unfiltered %>%
     dump_csv() %>%
     base64url::base64_urlencode()
+
   cat(
     create_html_download_link(
       mutations_sig_unfiltered_download,
@@ -538,178 +524,246 @@ if (nrow(mutations_sig_unfiltered) > 0) {
 }
 ```
 
-```{r text_mutations_pooled, results='asis', eval=APPROVED_MUTATIONS_FOUND}
+```{r filter_pool_mutations, eval=RUN_MUTATION_REGRESSION}
+# filter good samples for only mutations with sig pvalues for plotting
+filtered_approved_mut_plot <- dplyr::select(
+  approved_mut_plot,
+  c(
+    samplename,
+    dates,
+    location_name,
+    coordinates_lat,
+    coordinates_long,
+    mutations_sig$mutation
+  )
+)
 
-cat('## Trending mutations over time {.tabset .tabset-fade}
+# check if the filtered df has actual values besides meta data
+APPROVED_MUTATIONS_FOUND <- (length(filtered_approved_mut_plot) > 5) &&
+  (nrow(filtered_approved_mut_plot) > 0)
 
-These plots show the relative frequency of detected mutations with strong increasing trends in samples at specific wastewater sampling locations and how the frequencies change over time. Please use the tabs to access the not-pooled plots for each location.')
+approved_mut_plot_location_pooled <- pool_by_mean(filtered_approved_mut_plot,
+  na_handling = TRUE,
+  group_fun = "day_location"
+)
+```
+
+```{r mutation_trends_pooled_text, results='asis', eval=APPROVED_MUTATIONS_FOUND}
+cat(
+  "## Trending mutations over time {.tabset .tabset-fade}\n\n",
+  "These plots show the relative frequency of detected mutations with strong ",
+  "increasing trends in samples at specific wastewater sampling locations and ",
+  "how the frequencies change over time. Please use the tabs to access the ",
+  "not-pooled plots for each location.",
+  sep = ""
+)
 ```
 
 
-
-
-
-```{r mutations_pooled, eval=APPROVED_MUTATIONS_FOUND}
-
+```{r mutation_trends_pooled_plot_gen, eval=APPROVED_MUTATIONS_FOUND}
 melted <- reshape2::melt(approved_mut_plot_location_pooled,
-                         id.vars = c("dates", "samplename"))
+  id.vars = c("dates", "samplename")
+)
+
 melted <- melted %>%
-# flag if mutation is signature mutation
+  # flag if mutation is signature mutation
   rowwise() %>%
-  mutate(sigflag = ifelse(any(sigmuts.df == str_split(variable, "::")[[1]][2]), "SigMut", '')) %>%
+  mutate(sigflag = ifelse(any(
+    sigmuts.df == str_split(variable, "::")[[1]][2]
+  ), "SigMut", "")) %>%
   ungroup()
+
 # sort by dates
 idx <- order(melted$dates)
-melted <- melted[idx,]
+melted <- melted[idx, ]
 melted$sigflag[is.na(melted$sigflag)] <- "nosigmut"
 
 p_mutations_pooled <- subset(melted) %>%
-       group_by(dates) %>%
-       arrange(variable) %>%
-       ungroup() %>%
-       plot_ly(type = 'scatter', 
-               mode = "lines+markes",
-               symbol = ~ sigflag,
-               symbols = c('circle','square'),
-               x = ~ dates,
-               y = ~ value,
-               name = ~variable,
-               connectgaps = TRUE, 
-               color = ~ variable,
-               colors = viridis_pal(option = "H")(20)
-       ) %>%
-       layout(title = summary,
-              yaxis = list(title = "Frequency"))
-
+  group_by(dates) %>%
+  arrange(variable) %>%
+  ungroup() %>%
+  plot_ly(
+    type = "scatter",
+    mode = "lines+markes",
+    symbol = ~sigflag,
+    symbols = c("circle", "square"),
+    x = ~dates,
+    y = ~value,
+    name = ~variable,
+    connectgaps = TRUE,
+    color = ~variable,
+    colors = viridis_pal(option = "H")(20)
+  ) %>%
+  layout(
+    title = summary,
+    yaxis = list(title = "Frequency")
+  )
 ```
 
 
-```{r tab_plotting_mutations, eval=APPROVED_MUTATIONS_FOUND}
-plot_muts <- function (melted,location) {
-                       subset(melted, location_name == location) %>%
-                           group_by(dates) %>%
-                           arrange(variable) %>%
-                           ungroup() %>%
-                       plot_ly(type = 'scatter', 
-                               mode = "lines+markers",
-                               symbol = ~sigflag,
-                               symbols = c('circle','hourglass'),
-                               x = ~dates,
-                               y = ~value,
-                               name = ~variable,
-                               color = ~ variable,
-                               colors = viridis_pal(option = "H")(20),
-                               connectgaps = TRUE
-                               ) %>%
-                           layout(title = location,
-                                  yaxis = list(title = "Frequency"))
+```{r mutation_trends_by_location_plot_gen, eval=APPROVED_MUTATIONS_FOUND}
+plot_muts <- function(melted, location) {
+  subset(melted, location_name == location) %>%
+    group_by(dates) %>%
+    arrange(variable) %>%
+    ungroup() %>%
+    plot_ly(
+      type = "scatter",
+      mode = "lines+markers",
+      symbol = ~sigflag,
+      symbols = c("circle", "hourglass"),
+      x = ~dates,
+      y = ~value,
+      name = ~variable,
+      color = ~variable,
+      colors = viridis_pal(option = "H")(20),
+      connectgaps = TRUE
+    ) %>%
+    layout(
+      title = location,
+      yaxis = list(title = "Frequency")
+    )
 }
 
 melted <- reshape2::melt(filtered_approved_mut_plot,
-               id.vars = c("dates", "samplename", "location_name",
-                           "coordinates_lat", "coordinates_long")) %>%
-         rowwise() %>%
-         mutate( sigflag = ifelse( any(sigmuts.df == str_split(variable, "::")[[1]][2]), "SigMut",NULL) )
+  id.vars = c(
+    "dates", "samplename", "location_name",
+    "coordinates_lat", "coordinates_long"
+  )
+) %>%
+  rowwise() %>%
+  mutate(sigflag = ifelse(any(sigmuts.df == str_split(variable, "::")[[1]][2]),
+    "SigMut", NULL
+  ))
+
 # sort by dates
 idx <- order(melted$dates)
 melted <- melted[idx, ]
 
 locations <- as.character(unique(melted$location_name))
 
-
-plot_list <- lapply(setNames(locations,
-                             locations),
-                    plot_muts,
-                    melted = melted)
+plot_list <- lapply(setNames(
+  locations,
+  locations
+),
+plot_muts,
+melted = melted
+)
 ```
 
 
-```{r plot_tab_plotting_mutations, results='asis', fig.width=4, fig.height=4, eval=APPROVED_MUTATIONS_FOUND}
-
-cat("###", 'Summary over all locations', '{-}', '\n\n')
+```{r mutation_trends_by_location_plot_print, results='asis', fig.width=4, fig.height=4, eval=APPROVED_MUTATIONS_FOUND}
+cat("###", "Summary over all locations", "{-}", "\n\n")
 print(htmltools::tagList(ggplotly(p_mutations_pooled)))
-cat('\n\n')
+cat("\n\n")
+
 for (i in 1:length(locations)) {
-  cat("###", locations[i], '{-}', '\n\n')
-  print(htmltools::tagList(ggplotly (plot_list[[i]])))
-  cat('\n\n')
+  cat("###", locations[i], "{-}", "\n\n")
+  print(htmltools::tagList(ggplotly(plot_list[[i]])))
+  cat("\n\n")
 }
 ```
 
 
 
-```{r text_mutations_for_locations_and_date, results='asis', eval=APPROVED_MUTATIONS_FOUND}
+```{r muts_by_loc_and_date_text, results='asis', eval=APPROVED_MUTATIONS_FOUND}
 
-
-cat('## Trending mutations geo-localized
-
-This plot visualizes proportions of identified single mutation dynamics
-at the provided sampling locations.'
+cat("## Trending mutations geo-localized\n\nThis plot visualizes proportions ",
+  "of identified single mutation dynamics at the provided sampling ",
+  "locations.",
+  sep = ""
 )
 
-cat(create_html_note('Locations of wastewater processing plants have been
-generated arbitrarily and do not correspond to actual locations.'
+cat(create_html_note("Locations of wastewater processing plants have been\n",
+  "generated arbitrarily and do not correspond to actual ",
+  "locations.",
+  sep = ""
 ))
 
-cat('Click on a lineage in the legend to toggle its visibility in the map;
-double-click to view only the selected lineage.',
-ifelse(
-  length(unique(approved_mut_plot$dates)) > 1,
-  yes = 'Use the slider to select a specific date or hit the *Play* button to
-display all snapshots successively. ',
-no = ''
-))
-
+cat(
+  "Click on a lineage in the legend to toggle its visibility in the map;\n",
+  "double-click to view only the selected lineage.",
+  ifelse(
+    length(unique(approved_mut_plot$dates)) > 1,
+    yes = paste(
+      "Use the slider to select a specific date or hit the *Play*",
+      "button to display all snapshots successively. "
+    ),
+    no = ""
+  )
+)
 ```
 
 
-```{r mutations_for_locations_and_date, out.width="900px", out.height="900px", eval=APPROVED_MUTATIONS_FOUND}
-# TODO: find a way to only show dynamic of one single mutation over the whole time
+```{r muts_by_loc_and_date_plot, out.width="900px", out.height="900px", eval=APPROVED_MUTATIONS_FOUND}
+# TODO: find a way to only show dynamic of one single mutation over the whole
+# time
 
-approved_mut_plot_day_pooled  <- pool_by_mean(filtered_approved_mut_plot, TRUE, "day")
+approved_mut_plot_day_pooled <- pool_by_mean(
+  filtered_approved_mut_plot,
+  TRUE, "day"
+)
 
 melted <- reshape2::melt(approved_mut_plot_day_pooled,
-           id.vars = c("dates", "samplename", "location_name",
-                       "coordinates_lat", "coordinates_long"),
-           rm.NA = TRUE)
+  id.vars = c(
+    "dates", "samplename", "location_name",
+    "coordinates_lat", "coordinates_long"
+  ),
+  rm.NA = TRUE
+)
 # check if there are actual values except the meta data
-melted <- melted %>% mutate (value = round (value, 4))
+melted <- melted %>% mutate(value = round(value, 4))
 
-locations <- approved_mut_plot_day_pooled %>% mutate( dates = as.character( strptime(dates, format = "%Y-%m-%d"))) %>%
-             reshape2::melt( id.vars = c("coordinates_lat", "coordinates_long"))
+locations <- approved_mut_plot_day_pooled %>%
+  mutate(dates = as.character(strptime(dates, format = "%Y-%m-%d"))) %>%
+  reshape2::melt(id.vars = c("coordinates_lat", "coordinates_long"))
 
-p <- plot_ly (type = 'scattermapbox',
-         colors = viridis_pal(option = "H")(20),
-         mode = 'markers',
-                           width = 900,
-                           height = 500) %>%
-    add_trace(size = 1,
-              data = locations,
-              lon = ~coordinates_long,
-              lat = ~coordinates_lat,
-              opacity = 0.1,
-              showlegend = FALSE,
-              hoverinfo = 'none',
-              marker = list(sizemode = 'diameter',
-                            color = 'rgb(150, 150, 150)',
-                            opacity = 0)) %>%
-    add_trace(data = melted,
-              lat = ~coordinates_lat,
-              lon = ~coordinates_long,
-              legendgroup = ~variable,
-              showlegend = TRUE,
-              frame = ~as.character(strptime(dates, format = "%Y-%m-%d")),
-              size = ~value,
-              color = ~variable,
-              hoverinfo = 'text+name',
-              hovertext = ~paste0("Frequency: ", value),
-              marker = list (sizemode = 'diameter')) %>%
-      layout (title = ~dates,
-            autosize = TRUE,
-            mapbox = list (zoom = 5.5,
-                           center = list(lat = ~median(coordinates_lat, na.rm=TRUE),
-                                         lon = ~median(coordinates_long, na.rm=TRUE)),
-                           style = 'open-street-map'))
+p <- plot_ly(
+  type = "scattermapbox",
+  colors = viridis_pal(option = "H")(20),
+  mode = "markers",
+  width = 900,
+  height = 500
+) %>%
+  add_trace(
+    size = 1,
+    data = locations,
+    lon = ~coordinates_long,
+    lat = ~coordinates_lat,
+    opacity = 0.1,
+    showlegend = FALSE,
+    hoverinfo = "none",
+    marker = list(
+      sizemode = "diameter",
+      color = "rgb(150, 150, 150)",
+      opacity = 0
+    )
+  ) %>%
+  add_trace(
+    data = melted,
+    lat = ~coordinates_lat,
+    lon = ~coordinates_long,
+    legendgroup = ~variable,
+    showlegend = TRUE,
+    frame = ~ as.character(strptime(dates, format = "%Y-%m-%d")),
+    size = ~value,
+    color = ~variable,
+    hoverinfo = "text+name",
+    hovertext = ~ paste0("Frequency: ", value),
+    marker = list(sizemode = "diameter")
+  ) %>%
+  layout(
+    title = ~dates,
+    autosize = TRUE,
+    mapbox = list(
+      zoom = 5.5,
+      center = list(
+        lat = ~ median(coordinates_lat, na.rm = TRUE),
+        lon = ~ median(coordinates_long, na.rm = TRUE)
+      ),
+      style = "open-street-map"
+    )
+  )
 
 if (length(unique(approved_mut_plot_day_pooled$dates)) > 1) {
   p %>% animation_slider(currentvalue = list(prefix = "Date: "))
@@ -727,7 +781,8 @@ df_var_download <- df_var %>%
   base64url::base64_urlencode()
 ```
 
-Frequencies per lineage per sample, derived by deconvolution, pooled by weighted mean by read number: 
+Frequencies per lineage per sample, derived by deconvolution, pooled by weighted
+mean by read number: 
 
 `r create_html_download_link(df_var_download,filename = "variant_frequencies.csv")`
 
@@ -740,33 +795,13 @@ Frequencies per mutation per sample
 
 `r create_html_download_link(df_mut_download, filename = "mutation_frequencies.csv")`
 
-
-
 ```{r mutation_counts}
-# get functions for counting and writing
-source(params$fun_tbls)
-output_dir <- params$output_dir
-# make the mutation count frame
-if (exists("mutations_sig")){
-  count_frame <- write_mutations_count(df_mut, sigmuts.df, mutations_sig)
-} else {
-    # write empty files
-    count_frame <- data.frame()
-    mutations_sig_unfiltered <- data.frame()
-}
-# write to file
-write.csv(count_frame, file.path(output_dir, "mutations_counts.csv"),
-  na = "NA", row.names = FALSE, quote = FALSE
-)
-write.csv(mutations_sig_unfiltered,
-  file.path(output_dir, "linear_regression_results.csv"),
-  na = "NA", row.names = FALSE, quote = FALSE
-)
+count_frame <- read.csv(params$mut_count_file)
+
 # show and make downloadable
 count_frame_download <- count_frame %>%
   dump_csv() %>%
   base64url::base64_urlencode()
-
 ```
 
 Counts of mutations found across all sample and per sample
@@ -787,7 +822,6 @@ For every sample three reports are generated:
 The reports for each sample can be accessed here:
 
 ```{r generate overview}
-
 sample_sheet <- fread(params$sample_sheet)
 sample_names <- sample_sheet$name
 reports <- list(list("suffix" = ".variantreport_p_sample.html",
@@ -804,6 +838,7 @@ links <- lapply(sample_names, function (sample) {
         paste0("<a href=", sample, report$suffix, ">", report$name, "</a>")
     }))
 })
+
 df$reports <- links
 
 datatable(df, options = list( fixedColumns = TRUE, 
@@ -815,20 +850,26 @@ datatable(df, options = list( fixedColumns = TRUE,
 
 # Discarded samples 
 
-Prior visualization and regression analysis each sample gets a quality score depending on proportion of covered reference 
-genome and proportion of covered signature mutation locations. Results from samples without sufficient coverage measures 
-(< `r mutation_coverage_threshold`%) are not included in the visualizations or the linear regression calculations. 
+Prior visualization and regression analysis each sample gets a quality score
+depending on proportion of covered reference genome and proportion of covered
+signature mutation locations. Results from samples without sufficient coverage
+measures (< `r mutation_coverage_threshold`%) are not included in the
+visualizations or the linear regression calculations. 
 
 ```{r title_quality_score, results = 'asis'}
-    # table displaying bad samples which are not further inlcuded 
-    cat("\n Table 1: Discarded samples not matching the provided sample quality scoring") # TODO refine this text
+# table displaying bad samples which are not further inlcuded
+# TODO refine this text
+cat(
+  "\n Table 1: Discarded samples not matching the provided sample",
+  "quality scoring"
+)
 ```
 
 ```{r table_ample_quality_score}
-if ( !(length(coverages.df) == 0)){
-    # TODO refine column names --> e.g "coverage in percent", 
-    bad_samples.df <- bad_samples.df %>% slice_head(n=20)
-    create_dt(bad_samples.df)
+if (!(length(coverages.df) == 0)) {
+  # TODO refine column names --> e.g "coverage in percent",
+  bad_samples_df <- bad_samples_df %>% slice_head(n = 20)
+  create_dt(bad_samples_df)
 } else {
     cat("\n No coverage values found.")
 }

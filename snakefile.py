@@ -687,38 +687,79 @@ rule create_overviewQC_table:
     shell: """
         {RSCRIPT_EXEC} {input.script} {SAMPLE_SHEET_CSV} {output} {READS_DIR} {TRIMMED_READS_DIR} {MAPPED_READS_DIR} {COVERAGE_DIR} > {log} 2>&1
     """
+    
+rule run_mutation_regression:
+    input:
+        script=os.path.join(SCRIPTS_DIR, "mutation_regression.R"),
+        mutations_csv=os.path.join(VARIANTS_DIR, "data_mutation_plot.csv"),
+        overviewQC=os.path.join(OUTPUT_DIR, "overview_QC.csv"),
+        fun_cvrg_scr=os.path.join(SCRIPTS_DIR, "sample_coverage_score.R"),
+        fun_lm=os.path.join(SCRIPTS_DIR, "pred_mutation_increase.R"),
+        fun_pool=os.path.join(SCRIPTS_DIR, "pooling.R"),
+    output:
+        mut_count_outfile=os.path.join(OUTPUT_DIR, "mutations_counts.csv"),
+        unfilt_mutation_sig_outfile=os.path.join(
+            OUTPUT_DIR, "unfiltered_mutations_sig.csv"
+        ),
+    log:
+        os.path.join(LOG_DIR, "reports", "mutation_regression.log"),
+    shell:
+        """
+        {RSCRIPT_EXEC} {input.script} \
+            {input.mutations_csv} \
+            {COVERAGE_DIR} \
+            {MUTATION_SHEET_CSV} \
+            {input.fun_cvrg_scr} \
+            {input.fun_lm} \
+            {input.fun_pool} \
+            {MUTATION_COVERAGE_THRESHOLD} \
+            {input.overviewQC} \
+            {output.mut_count_outfile} \
+            {output.unfilt_mutation_sig_outfile}
+            > {log} 2>&1
+        """
+
 
 rule render_index:
     input:
-      script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
-      report=os.path.join(SCRIPTS_DIR, "report_scripts", "index.Rmd"),
-      header=os.path.join(REPORT_DIR, "_navbar.html"),
-      variants = os.path.join(VARIANTS_DIR, 'data_variant_plot.csv'),
-      mutations = os.path.join(VARIANTS_DIR, 'data_mutation_plot.csv'),
-      overviewQC = os.path.join(OUTPUT_DIR, 'overview_QC.csv'),
+        script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
+        report=os.path.join(SCRIPTS_DIR, "report_scripts", "index.Rmd"),
+        header=os.path.join(REPORT_DIR, "_navbar.html"),
+        variants=os.path.join(VARIANTS_DIR, "data_variant_plot.csv"),
+        mutations=os.path.join(VARIANTS_DIR, "data_mutation_plot.csv"),
+        overviewQC=os.path.join(OUTPUT_DIR, "overview_QC.csv"),
+        mut_count_file=os.path.join(OUTPUT_DIR, "mutations_counts.csv"),
+        unfiltered_mutation_sig_file=os.path.join(
+            OUTPUT_DIR, "unfiltered_mutations_sig.csv"
+        ),
     params:
-      fun_cvrg_scr = os.path.join(SCRIPTS_DIR, 'sample_coverage_score.R'),
-      fun_lm = os.path.join(SCRIPTS_DIR, 'pred_mutation_increase.R'),
-      fun_tbls = os.path.join(SCRIPTS_DIR, 'table_extraction.R'),
-      fun_pool = os.path.join(SCRIPTS_DIR, 'pooling.R')
-    output: report = os.path.join(REPORT_DIR, "index.html"),
-            tbl_mut_count = os.path.join(OUTPUT_DIR, "mutations_counts.csv"),
-            tbl_lm_res = os.path.join(OUTPUT_DIR, "linear_regression_results.csv")
-    log: os.path.join(LOG_DIR, "reports", "index.log")
-    shell: """{RSCRIPT_EXEC} {input.script} \
-{input.report} {output.report} {input.header}   \
-'{{                                      \
-  "variants_csv": "{input.variants}",   \
-  "mutations_csv": "{input.mutations}", \
-  "coverage_dir": "{COVERAGE_DIR}",\
-  "sample_sheet": "{SAMPLE_SHEET_CSV}",  \
-  "mutation_sheet": "{MUTATION_SHEET_CSV}", \
-  "mutation_coverage_threshold": "{MUTATION_COVERAGE_THRESHOLD}", \
-  "logo": "{LOGO}", \
-  "fun_cvrg_scr": "{params.fun_cvrg_scr}", \
-  "fun_lm": "{params.fun_lm}", \
-  "fun_tbls": "{params.fun_tbls}", \
-  "fun_pool": "{params.fun_pool}", \
-  "overviewQC": "{input.overviewQC}", \
-  "output_dir": "{OUTPUT_DIR}" \
-}}' > {log} 2>&1"""
+        fun_cvrg_scr=os.path.join(SCRIPTS_DIR, "sample_coverage_score.R"),
+        fun_lm=os.path.join(SCRIPTS_DIR, "pred_mutation_increase.R"),
+        fun_tbls=os.path.join(SCRIPTS_DIR, "table_extraction.R"),
+        fun_pool=os.path.join(SCRIPTS_DIR, "pooling.R"),
+        fun_index=os.path.join(SCRIPTS_DIR, "fun_index.R"),
+    output:
+        report=os.path.join(REPORT_DIR, "index.html"),
+    log:
+        os.path.join(LOG_DIR, "reports", "index.log"),
+    shell:
+        """{RSCRIPT_EXEC} {input.script} \
+        {input.report} {output.report} {input.header}   \
+        '{{ \
+          "variants_csv": "{input.variants}", \
+          "mutations_csv": "{input.mutations}", \
+          "sample_sheet": "{SAMPLE_SHEET_CSV}", \
+          "mutation_sheet": "{MUTATION_SHEET_CSV}", \
+          "mutation_coverage_threshold": "{MUTATION_COVERAGE_THRESHOLD}", \
+          "mut_count_file": "{input.mut_count_file}", \
+          "unfiltered_mutation_sig_file": "{input.unfiltered_mutation_sig_file}", \
+          "logo": "{LOGO}", \
+          "fun_lm": "{params.fun_lm}", \
+          "fun_tbls": "{params.fun_tbls}", \
+          "fun_cvrg_scr": "{params.fun_cvrg_scr}", \
+          "fun_pool": "{params.fun_pool}", \
+          "fun_index": "{params.fun_index}", \
+          "overviewQC": "{input.overviewQC}", \
+          "coverage_dir": "{COVERAGE_DIR}", \
+          "output_dir": "{OUTPUT_DIR}" \
+        }}' > {log} 2>&1"""
