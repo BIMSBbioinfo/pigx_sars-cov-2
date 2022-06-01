@@ -1,5 +1,5 @@
 ;;; PiGx SARS-CoV-2 wastewater sequencing pipeline
-;;; Copyright © 2021 Ricardo Wurmus <rekado@elephly.net>
+;;; Copyright © 2021, 2022 Ricardo Wurmus <rekado@elephly.net>
 ;;;
 ;;; This file is part of PiGx SARS-CoV-2 wastewater sequencing pipeline
 ;;;
@@ -24,7 +24,7 @@
          (name 'guix)
          (url "https://git.savannah.gnu.org/git/guix.git")
          (commit
-          "848126d0086585768a14be13d286f938ebc6e460")
+          "b540e5e6bba6e0047864abcc3a6dfec46ff6cd32")
          (introduction
           (make-channel-introduction
            "9edb3f66fd807b096b48283debdcddccfea34bad"
