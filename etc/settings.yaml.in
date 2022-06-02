@@ -20,6 +20,7 @@ trimming:
 # the visualizations or the linear regression calculations.
 reporting:
   mutation-coverage-threshold: 90
+  mutation-depth-threshold: 100
 
 execution:
   submit-to-cluster: no

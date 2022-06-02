@@ -104,6 +104,8 @@ df_mut <- read.csv(params$mutations_csv,
   header = TRUE,
   check.names = FALSE
 )
+
+aa_sep <- "/"
 ```
 
 ```{r format_threshold}
@@ -472,13 +474,18 @@ if (!RUN_MUTATION_REGRESSION) {
 source(params$fun_lm)
 mutations_sig <- filter_lm_res_top20(mutations_sig_unfiltered, 0.05)
 
+sigmuts_df <- fread(mutation_sheet) %>%
+  na_if("") %>%
+  # split gene name of for easier matching
+  mutate_all(funs(str_replace(., str_glue('^[^{aa_sep}]*{aa_sep}', ''))))
+
 if (nrow(mutations_sig) > 0) {
   # flag if mutation is signature mutation
   mutations_sig <- mutations_sig %>%
     rowwise() %>%
     mutate(sigflag = ifelse(any(
-      sigmuts.df == str_split(mutation, "::")[[1]][2]
-    ), "SigMut", ""))
+      sigmuts_df == str_split(mutation, str_glue("{aa_sep}{aa_sep}")[[1]][2]
+    ), "SigMut", "")))
 
   cat(
     "The following table shows the mutations showing ",
@@ -510,7 +517,7 @@ if (nrow(mutations_sig_unfiltered) > 0) {
   mutations_sig_unfiltered <- mutations_sig_unfiltered %>%
     rowwise() %>%
     mutate(sigflag = ifelse(any(
-      sigmuts.df == str_split(mutation, "::")[[1]][2]
+      sigmuts_df == str_split(mutation, str_glue("{aa_sep}{aa_sep}"))[[1]][2]
     ), "sigmut", ""))
 
   mutations_sig_unfiltered_download <- mutations_sig_unfiltered %>%
@@ -572,7 +579,7 @@ melted <- melted %>%
   # flag if mutation is signature mutation
   rowwise() %>%
   mutate(sigflag = ifelse(any(
-    sigmuts.df == str_split(variable, "::")[[1]][2]
+    sigmuts_df == str_split(variable, str_glue("{aa_sep}{aa_sep}"))[[1]][2]
   ), "SigMut", "")) %>%
   ungroup()
 
@@ -635,9 +642,14 @@ melted <- reshape2::melt(filtered_approved_mut_plot,
   )
 ) %>%
   rowwise() %>%
-  mutate(sigflag = ifelse(any(sigmuts.df == str_split(variable, "::")[[1]][2]),
-    "SigMut", NULL
-  ))
+  mutate(
+    sigflag = ifelse(
+      any(sigmuts_df == str_split(
+        variable, str_glue("{aa_sep}{aa_sep}")
+      )[[1]][2]),
+      "SigMut", NULL
+    )
+  )
 
 # sort by dates
 idx <- order(melted$dates)

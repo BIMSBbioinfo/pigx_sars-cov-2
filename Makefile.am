@@ -24,8 +24,7 @@ dist_pkglibexec_scripts_SCRIPTS = \
   scripts/renderReport.R \
   scripts/sample_coverage_score.R \
   scripts/table_extraction.R \
-  scripts/vcfTocsv.py \
-  scripts/vep_rule.py
+  scripts/vcfTocsv.py
 
 pkglibexec_reportsdir = $(pkglibexecdir)/scripts/report_scripts/
 dist_pkglibexec_reports_SCRIPTS = \
