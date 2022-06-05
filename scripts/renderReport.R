@@ -54,7 +54,14 @@ settings <- html_document(includes=includes(before_body=header),
                           toc_float=TRUE,
                           number_sections=TRUE)
 
-print(parameters)
+# pretty print parameters for easier debugging
+cat("Script running with parameters:\n\n")
+par_vec <- c()
+for (i in seq_along(parameters)) {
+  par_vec[i] <- paste0(names(parameters)[i], " = \"", parameters[[i]], "\"")
+}
+cat(paste(par_vec, collapse = ",\n"))
+cat("\n\n")
 
 render(report,
        output_file=output,
