@@ -37,6 +37,11 @@ create_summary <- function ( files ){
 }
 
 args <- commandArgs (trailingOnly=TRUE)
+
+cat("\n\"")
+cat(paste(args, collapse = "\",\n\""))
+cat("\"\n\n")
+
 variants_dir <- args[1]
 output_file <- args[2]
 

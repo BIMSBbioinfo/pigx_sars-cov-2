@@ -31,6 +31,11 @@ create_summary <- function ( files, output_file ){
 }
 
 args <- commandArgs (trailingOnly=TRUE)
+
+cat("\n\"")
+cat(paste(args, collapse = "\",\n\""))
+cat("\"\n\n")
+
 mutations_dir <- args[1]
 output_file <- args[2]
 
