@@ -1,3 +1,4 @@
+library("data.table")
 
 get_files <- function ( mutations_dir){
   files <- list.files(path = mutations_dir,
@@ -12,11 +13,10 @@ create_summary <- function ( files, output_file ){
   cat( paste("Summarizing", length(files), "mutation files.") )
 
   # read files into list
-  mutations_list <- lapply(X = files,
-                          FUN = read.csv,                          
-                          header = TRUE,
-                          colClasses = "character",
-                          check.names = FALSE )
+  mutations_list <- lapply(
+    X = files,
+    FUN = fread
+  )
 
   # remove empty files from list
   mutations_list_has_rows <- sapply(mutations_list, nrow)

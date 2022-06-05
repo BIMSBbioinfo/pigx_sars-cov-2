@@ -1,4 +1,5 @@
 library(dplyr)
+library(data.table)
 
 concat_kraken_output <- function ( kraken_dir ){
     #' docstring missing
@@ -46,5 +47,5 @@ Kraken_summary <- concat_kraken_output( kraken_dir )
 summary_all <- Kraken_summary[[1]]
 summary_summed <- Kraken_summary[[2]]
 
-write.csv( summary_all, output, row.names = FALSE )
-write.csv( summary_summed, paste0( output, '_summed.csv' ), row.names = FALSE )
+fwrite( summary_all, output, row.names = FALSE )
+fwrite( summary_summed, paste0( output, '_summed.csv' ), row.names = FALSE )

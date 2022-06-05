@@ -94,13 +94,13 @@ library(viridis)
 ```
 
 ```{r load_data}
-mutations_sig_unfiltered <- read.csv(params$unfiltered_mutation_sig_file)
+mutations_sig_unfiltered <- fread(params$unfiltered_mutation_sig_file)
 
-df_var <- read.csv(params$variants_csv,
+df_var <- fread(params$variants_csv,
   header = TRUE,
   check.names = FALSE
 )
-df_mut <- read.csv(params$mutations_csv,
+df_mut <- fread(params$mutations_csv,
   header = TRUE,
   check.names = FALSE
 )

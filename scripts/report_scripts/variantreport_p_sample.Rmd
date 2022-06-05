@@ -31,6 +31,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 library(ggplot2)
 library(DT)
 library(base64url)
+library(data.table)
 ```
 
 This lineage analysis report provides an overview over all mutations found in 
@@ -59,7 +60,7 @@ cat("\n Table 1: SNVs from sample matching signature mutations")
 ```
 
 ```{r sig_table, results = 'asis'}
-match.df <- read.csv(params$sigmut_file)
+match.df <- fread(params$sigmut_file)
 
 # Display the filtered signature mutations and the variants accordingly in
 #  scrollable tables
@@ -90,7 +91,7 @@ cat("\n Table 2: SNVs from sample not matching any signature mutations")
 ```
 
 ```{r non_sig_table, results = 'asis'}
-nomatch.df <- read.csv(params$non_sigmut_file)
+nomatch.df <- fread(params$non_sigmut_file)
 
 # Display the filtered signature mutations and the variants accordingly in
 # scrollable tables
@@ -159,7 +160,7 @@ Variant_colors <- c(
 )
 # TODO this should be put into a separate color palette function in a separate file
 
-df <- read.csv(params$variants_file)
+df <- fread(params$variants_file)
 
 font_family <- "DejaVu Sans"
 

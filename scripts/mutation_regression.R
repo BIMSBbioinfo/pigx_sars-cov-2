@@ -1,4 +1,3 @@
-
 # argparsing -------------------------------------------------------------------
 args <- commandArgs(trailingOnly = TRUE)
 
@@ -35,9 +34,10 @@ params <- list(
 
 ## ----libraries----------------------------------------------------------------
 library(dplyr)
+library(data.table)
 
 ## ----input--------------------------------------------------------------------
-df_mut <- read.csv(params$mutations_csv,
+df_mut <- fread(params$mutations_csv,
   header = TRUE,
   check.names = FALSE
 )
@@ -61,7 +61,7 @@ approved_mut_plot <- df_mut %>%
   filter(samplename %in% good_samples_df$samplename)
 
 # pool the samples per day, discard locations
-weights <- read.csv(params$overviewQC, header = TRUE, check.names = FALSE) %>%
+weights <- fread(params$overviewQC, header = TRUE, check.names = FALSE) %>%
   dplyr::select(c(samplename, total_reads))
 
 
@@ -74,7 +74,7 @@ if (nrow(approved_mut_plot) > 0 &&
 
   mutation_sheet <- params$mutation_sheet
 
-  sigmuts_df <- read.csv(mutation_sheet, header = TRUE) %>%
+  sigmuts_df <- fread(mutation_sheet, header = TRUE) %>%
     na_if("") %>%
     # split gene name of for easier matching
     mutate_all(funs(str_replace(., "^[^:]*:", "")))
@@ -91,7 +91,7 @@ if (nrow(approved_mut_plot) > 0 &&
   count_frame <- write_mutations_count(df_mut, sigmuts_df, mutations_sig)
 
   # write to file
-  write.csv(count_frame,
+  fwrite(count_frame,
     file.path(
       params$mut_count_outfile
     ),
@@ -99,7 +99,7 @@ if (nrow(approved_mut_plot) > 0 &&
   )
 
   # mutations_sig
-  write.csv(mutations_sig_unfiltered,
+  fwrite(mutations_sig_unfiltered,
     file.path(
       params$unfilt_mutation_sig_outfile
     ),

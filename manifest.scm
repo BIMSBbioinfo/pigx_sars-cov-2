@@ -60,6 +60,7 @@
         "r-base64url"
         "r-dplyr"
         "r-dt"
+        "r-data-table"
         "r-ggplot2"
         "r-magrittr"
         "r-plotly"

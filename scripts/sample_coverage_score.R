@@ -1,3 +1,5 @@
+library(data.table)
+
 get_genome_cov <- function ( coverage_dir, samples_names ) {
 
   files <- list.files(path = coverage_dir,
@@ -73,7 +75,7 @@ get_mutation_cov <- function ( coverage_dir ) {
   )
 
   mutation_cov.dfs <- lapply( files, function (x){
-    rd_tbl <- read.csv(x, header = TRUE)
+    rd_tbl <- fread(x, header = TRUE)
     # check if file has the correct header format
     data <- if (all(names(rd_tbl) %in% mutation_cov_header)) {
       data.frame(

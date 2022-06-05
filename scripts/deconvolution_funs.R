@@ -1,12 +1,13 @@
 library("stringr")
 library("dplyr")
 library("tidyr")
+library("data.table")
 
 parse_snv_csv <- function(snvfile, ...) { # allele frequency from v-pipe vcf
   #' input: csv file derived from vpipe vcf when using LoFreq,
   #' parsing snv-csv file for coverage, frequency and genomic mutation information
 
-  snvtable <- read.csv(snvfile, sep = ",", header = TRUE)
+  snvtable <- fread(snvfile, sep = ",", header = TRUE)
 
   ref <- snvtable$Ref
   pos <- snvtable$Pos
@@ -34,7 +35,7 @@ get_protein_mut <- function(vepfile) {
   # you should include in the vep script to parse out the #
   # in the beginning of the line or include that step here.
   # TODO: include check about correct VEP file input format
-  vepfile_df <- read.csv(vepfile, sep = ",", header = TRUE)
+  vepfile_df <- fread(vepfile, sep = ",", header = TRUE)
   # parsing snv and protmut location
 
 
@@ -142,7 +143,7 @@ create_sig_matrix <- function(mutations_vector, mutation_sheet_file) {
   #' returns simple signature matrix as data.frame without frequency values
 
   # read in provided mutation sheet
-  mutations_df <- read.csv(mutation_sheet_file) %>%
+  mutations_df <- fread(mutation_sheet_file) %>%
 
     # remove source col if there. TODO What problems would this col cause?
     dplyr::select(-matches("source"))

@@ -119,13 +119,12 @@ fastqc-reports.
 # Download Stats csv
 
 ```{r data_download, include = FALSE}
-# not sure about the funct of the dataframe here, but it works so I leave it for now
-write.csv2(coverage.df, file.path(
+fwrite(coverage_df, file.path(
   dirname(params$coverage_file),
   "report_download_coverage.csv"
 ))
 
-coverage <- readLines(params$coverage_file) %>%
+coverage <- fread(params$coverage_file) %>%
   paste0(collapse = "\n") %>%
   base64_urlencode()
 ```

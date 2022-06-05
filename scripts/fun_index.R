@@ -1,4 +1,5 @@
 library("DT")
+library("data.table")
 
 ## ----functions--------------------------------------------------------------------
 # function for downloadable tables
@@ -15,7 +16,7 @@ create_dt <- function(x) {
 # function to dump data in csv formatted string
 dump_csv <- function(data, format = "csv", rownames = FALSE) {
   if (format != "csv") stop("Data can only be dumped in CSV format.")
-  capture.output(write.csv(data,
+  capture.output(fwrite(data,
     file = "",
     quote = FALSE, row.names = rownames
   )) %>%

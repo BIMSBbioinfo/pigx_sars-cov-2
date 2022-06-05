@@ -9,6 +9,7 @@ library(qpcR)
 library(stringr)
 library(magrittr)
 library(base64url)
+library(data.table)
 
 ## command line arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -123,7 +124,7 @@ sigmut_df <- fread(mutation_sheet, header = TRUE) %>%
   tidyr::pivot_longer(everything(), values_drop_na = TRUE) %>%
   dplyr::select(variant = name, mutation = value)
 
-vep_output_df <- read.csv(params$vep_file, sep = ",", header = TRUE) %>%
+vep_output_df <- fread(params$vep_file, sep = ",", header = TRUE) %>%
   dplyr::na_if("-")
 
 # group variants with the same muation and concat their names to preserve the
@@ -433,7 +434,7 @@ if (execute_deconvolution) {
 
   # 3. write to output file
   cat("Writing mutation file to ", mutation_output_file, "...\n")
-  write.csv(output_mutation_frame, mutation_output_file,
+  fwrite(output_mutation_frame, mutation_output_file,
     row.names = FALSE, quote = FALSE
   )
 } else {

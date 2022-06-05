@@ -1,3 +1,4 @@
+library("data.table")
 
 get_files <- function ( variants_dir){
   files <- list.files(path = variants_dir,
@@ -13,11 +14,10 @@ create_summary <- function ( files ){
   cat(paste("Summarizing", length(files), "variant files."))
 
   # read files into list
-  variants_list <- lapply(X = files,
-                          FUN = read.csv,
-                          header = TRUE,
-                          colClasses = "character",
-                          check.names = FALSE )
+  variants_list <- lapply(
+    X = files,
+    FUN = fread
+  )
 
   # remove empty files from list
   variants_list_has_rows <- sapply(variants_list, nrow)
@@ -35,11 +35,12 @@ create_summary <- function ( files ){
 
 }
 
-args <- commandArgs (trailingOnly=TRUE)
+args <- commandArgs(trailingOnly = TRUE)
+
 variants_dir <- args[1]
 output_file <- args[2]
 
 files <- get_files( variants_dir )
 output <- create_summary( files)
 # write to output file
-write.csv(output, output_file, row.names = FALSE, quote = FALSE)
+fwrite(output, output_file, row.names = FALSE, quote = FALSE)

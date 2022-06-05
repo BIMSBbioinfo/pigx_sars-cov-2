@@ -62,6 +62,7 @@ AC_ARG_ENABLE([r-packages-check],
 
 AX_R_PACKAGE([DT])
 AX_R_PACKAGE([base64url])
+AX_R_PACKAGE([data.table])
 AX_R_PACKAGE([dplyr])
 AX_R_PACKAGE([ggplot2])
 AX_R_PACKAGE([magrittr])

@@ -1,4 +1,5 @@
 library(dplyr)
+library(data.table)
 
 group_by_day_location <- function( df ){
   df_grouped <- df %>% 
@@ -46,7 +47,7 @@ apply_fun_get_read_num <- function (read, reads_dir) {
 
 get_num_raw_reads <- function (reads_dir, sample_sheet){
   
-  sample_sheet.df <- read.csv(sample_sheet, header = TRUE)
+  sample_sheet.df <- fread(sample_sheet, header = TRUE)
   # get read files matching samples
   cat("get samples and reads from sample_sheet...\n")
   read_counts <- read_files ( sample_sheet.df )

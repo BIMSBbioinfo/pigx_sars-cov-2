@@ -9,6 +9,7 @@ theme: darkly
 ```{r libraries, message = FALSE}
 library(GenomicRanges)
 library(tidyverse)
+library(data.table)
 ```
 ```{r read_primer}
 primer <- read.table ( "../../tests/sample_data/nCoV-2019_NCref.bed", header = FALSE) # TODO provide as input
@@ -33,8 +34,8 @@ amplicon_gr <- makeGRangesFromDataFrame ( amplicon, keep.extra.columns = TRUE )
 ```
 ```{r}
 # TODO: make the mutation sheet with nt position for ALL mutatation and loop through it
-# mut <- read.csv("../tests/mutation_sheet_detailed.csv", header = TRUE ) # TODO provide as input
-mut <- read.csv("../tests/sample_data/signature_mutations/B117_outbreakinfo_mutation_report_data_2021-03-06.tsv", header = TRUE)
+# mut <- fread("../tests/mutation_sheet_detailed.csv", header = TRUE ) # TODO provide as input
+mut <- fread("../tests/sample_data/signature_mutations/B117_outbreakinfo_mutation_report_data_2021-03-06.tsv", header = TRUE)
 #assigning chr name with "NC_045512.2"
 mut$chr <- primer$chr[1]
 mut$strand = "+"
