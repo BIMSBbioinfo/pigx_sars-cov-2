@@ -36,6 +36,14 @@ params <- list(
   deconvolution_functions = args[[7]]
 )
 
+# pretty print parameters for easier debugging
+cat("Script running with parameters:\n\n")
+par_vec <- c()
+for (i in seq_along(params)) {
+  par_vec[i] <- paste0(names(params)[i], " = \"", params[[i]], "\"")
+}
+cat(paste(par_vec, collapse = ",\n"))
+cat("\n\n")
 
 ## function loading
 source(params$deconvolution_functions)

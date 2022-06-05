@@ -134,6 +134,11 @@ parse_amplicon_coverage <- function(samples, coverage_dir) {
 }
 
 args <- commandArgs(trailingOnly = TRUE)
+
+cat("\n\"")
+cat(paste(args, collapse = "\",\n\""))
+cat("\"\n\n")
+
 sample_sheet <- args[1]
 output_file <- args[2]
 raw_reads_dir     <- args[3]
