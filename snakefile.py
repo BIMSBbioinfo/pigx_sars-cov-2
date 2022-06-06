@@ -667,8 +667,9 @@ rule create_variants_summary:
     output: os.path.join(VARIANTS_DIR, 'data_variant_plot.csv')
     log: os.path.join(LOG_DIR, "create_variants_summary.log")
     shell: """
-        {RSCRIPT_EXEC} {input.script} "{VARIANTS_DIR}" {output} > {log} 2>&1
+        {RSCRIPT_EXEC} {input.script} {output} {input.files} > {log} 2>&1
         """
+
 rule create_mutations_summary:
     input:
         script = os.path.join(SCRIPTS_DIR, "creating_mutation_summary_table.R"),
@@ -676,7 +677,7 @@ rule create_mutations_summary:
     output: os.path.join(MUTATIONS_DIR, 'data_mutation_plot.csv')
     log: os.path.join(LOG_DIR, "create_mutations_summary.log")
     shell: """
-        {RSCRIPT_EXEC} {input.script} "{MUTATIONS_DIR}" {output} > {log} 2>&1
+        {RSCRIPT_EXEC} {input.script} {output} {input.files} > {log} 2>&1
         """
 
 # TODO integrate the output of fastp.json to get the number of raw and trimmed reads
