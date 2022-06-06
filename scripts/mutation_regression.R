@@ -31,6 +31,15 @@ params <- list(
   unfilt_mutation_sig_outfile = args[[10]]
 )
 
+# pretty print parameters for easier debugging
+cat("Script running with parameters:\n\n")
+par_vec <- c()
+for (i in seq_along(params)) {
+  par_vec[i] <- paste0(names(params)[i], " = \"", params[[i]], "\"")
+}
+cat(paste(par_vec, collapse = ",\n"))
+cat("\n\n")
+
 
 ## ----libraries----------------------------------------------------------------
 library(dplyr)
@@ -106,7 +115,6 @@ if (nrow(approved_mut_plot) > 0 &&
     na = "NA", row.names = FALSE, quote = FALSE
   )
 } else {
-  # TODO: This will generate an error when read as csv
   # write empty files
   err_msg <- "No significantly increasing mutations found..."
   writeLines(err_msg, params$mut_count_outfile)

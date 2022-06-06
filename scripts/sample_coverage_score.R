@@ -82,7 +82,7 @@ get_mutation_cov <- function ( coverage_dir ) {
         samplename = strsplit(basename (x), "\\_merged_covs.csv")[[1]],
         total_num_muts = rd_tbl$`Total number of tracked mutations`,
         total_muts_cvrd = rd_tbl$`Total number of mutations covered`,
-        drop_out_muts = gsub(pattern = "\\[|\\]|\\s",
+        drop_out_muts = gsub(pattern = "\\[|\\]|\\s|\\'",
                              replacement = "",
                              x = rd_tbl$`Number of mutations not covered`)
       )

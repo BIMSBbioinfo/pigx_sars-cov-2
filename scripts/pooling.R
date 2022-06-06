@@ -61,34 +61,53 @@ get_num_raw_reads <- function (reads_dir, sample_sheet){
 
 pool_by_weighted_mean <- function(df, weights, group_fun = c("day_location", "day")) {
   #' docstring missing
-  #' weigths is a dataframe with minimum samplenames and total_reads as column 
-  #' total reads is the number of reads used for alignment of one sample, should be the sum of read1 and read2 with 
-  #' paired end data
+  #' weigths is a dataframe with minimum samplenames and total_reads as column
+  #' total reads is the number of reads used for alignment of one sample, should
+  #' be the sum of read1 and read2 with paired end data
 
-  weights <- weights  %>% 
-              # only take weights from approved samples
-              semi_join(df, by = "samplename")
-  # get variants from data frame, being every column after the metadata
-  variants <- names (
-              df[ ( which( names(df) %in% "coordinates_long")+1) : length( names( df ))]
+  weights <- weights %>%
+    # only take weights from approved samples
+    filter(samplename %in% df$samplename)
+
+  # get variants from data frame, all cols not known to be predefined metadata
+  # columns
+  meta_cols <- c(
+    "samplename",
+    "dates",
+    "location_name",
+    "coordinates_lat",
+    "coordinates_long"
   )
-  
-  if (group_fun == "day_location"){
-     df_grouped <- group_by_day_location(df)
-  } else if (group_fun == "day"){
+
+  variants <- names(df)[!grepl(paste(meta_cols, collapse = "|"), names(df))]
+
+  if (group_fun == "day_location") {
+    df_grouped <- group_by_day_location(df)
+  } else if (group_fun == "day") {
     df_grouped <- group_by_day(df)
   }
 
   df_pooled <- df_grouped %>%
-                left_join(weights, by = "samplename")  %>%
-                relocate(total_reads) %>%
-                # summarize by calc weighted mean, with the num of raw reads as weight
-                summarise_at(vars( all_of(variants) ), list(~ weighted.mean(., total_reads))) %>%
-                # rename samples to indicated that they were pooled
-                mutate(samplename = ifelse(group_fun == "day_location", paste0(dates, "_pooled"), paste0(dates, "_", location_name, "_pooled"))) %>%
-                # put names first again
-                relocate(samplename) %>%
-                ungroup()
+    left_join(weights, by = "samplename") %>%
+    relocate(total_reads) %>%
+
+    # summarize by calc weighted mean, with the num of raw reads as weight
+    summarise_at(
+      vars(all_of(variants)),
+      list(~ weighted.mean(., total_reads))
+    ) %>%
+
+    # rename samples to indicated that they were pooled
+    mutate(samplename = ifelse(
+      group_fun == "day_location",
+      paste0(dates, "_pooled"),
+      paste0(dates, "_", location_name, "_pooled")
+    )) %>%
+
+    # put names first again
+    relocate(samplename) %>%
+    ungroup()
+
   return(df_pooled)
 }
 

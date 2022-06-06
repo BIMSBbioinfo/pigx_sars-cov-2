@@ -94,6 +94,12 @@ library(viridis)
 ```
 
 ```{r load_data}
+# TODO given as input? or only the scripts dir? similar variant_report
+source(params$fun_cvrg_scr)
+source(params$fun_pool)
+source(params$fun_index)
+source(params$fun_lm)
+
 mutations_sig_unfiltered <- fread(params$unfiltered_mutation_sig_file)
 
 df_var <- fread(params$variants_csv,
@@ -143,9 +149,6 @@ These plots provide an overview of the relative frequency dynamics of
 identified lineages at specific wastewater sampling locations over time. 
 
 ```{r sample_quality_score}
-# TODO given as input? or only the scripts dir? similar variant_report
-source(params$fun_cvrg_scr)
-
 coverages.df <- merge(get_genome_cov(params$coverage_dir),
   get_mutation_cov(params$coverage_dir),
   by = "samplename"
@@ -195,6 +198,14 @@ RUN_MUTATION_REGRESSION <- if (MUTATIONS_FOUND) {
 # define here in case mutation regression was not executed, as that would lead
 # to an error otherwise
 APPROVED_MUTATIONS_FOUND <- RUN_MUTATION_REGRESSION
+
+
+if (! VARIANTS_FOUND) {
+  warning(paste0(
+    "\nNot enough variants were found or passed the quality filters.",
+    "\nThe associated plots are skipped."
+  ))
+}
 ```
 
 ```{r plotting_variants_text, results='asis', fig.width=4, fig.height=4, eval=VARIANTS_FOUND}
@@ -207,28 +218,18 @@ cat("## Lineage abundances stacked {.tabset .tabset-fade}\n\n",
 ```
 
 ```{r variants_pooled_plot_gen, eval=VARIANTS_FOUND}
-source(params$fun_pool)
+approved_var_plot_location_pooled <- pool_by_weighted_mean(
+  approved_var_plot,
+  weights, "day_location"
+)
 
-if (VARIANTS_FOUND) {
-  approved_var_plot_location_pooled <- pool_by_weighted_mean(
-    approved_var_plot,
-    weights, "day_location"
-  )
-} else {
-  warning(paste0(
-    "\nNot enough variants were found or passed the quality filters.",
-    "\nThe associated plots are skipped."
-  ))
-}
-
-# TODO change order or "variable" so that "WT" is always displayed on top
 melted <- reshape2::melt(approved_var_plot_location_pooled,
   id.vars = c("dates", "samplename")
 )
 
 p_variant_pooled <- subset(melted) %>%
   group_by(dates) %>%
-  arrange(variable) %>%
+  mutate(variable = give_priority_in_order(variable, "[Oo]thers")) %>%
   mutate(value = round(value, 4)) %>%
   plot_ly(
     type = "scatter",
@@ -273,8 +274,9 @@ melted <- reshape2::melt(approved_var_plot,
     "dates", "samplename", "location_name",
     "coordinates_lat", "coordinates_long"
   )
-)
-
+) %>%
+  mutate(variable = give_priority_in_order(variable, "[Oo]thers"))
+  
 location_plot <- function(melted, location) {
   subset(melted, location_name == location) %>%
     group_by(dates) %>%
@@ -327,7 +329,6 @@ if (length(plot_list) >= 1) {
 
 
 ```{r maps_for_variants_text, results='asis', eval=VARIANTS_FOUND}
-source(params$fun_index)
 cat("## Lineage abundances geo-localized\n\n",
   "This plot visualizes proportions of identified lineage ",
   "abundances at the provided sampling locations.",
@@ -373,6 +374,7 @@ melted <- reshape2::melt(
   ),
   rm.NA = TRUE
 ) %>%
+  mutate(variable = give_priority_in_order(variable, "[Oo]thers")) %>%
   mutate(value = round(value, 4))
 
 locations <- approved_var_plot_day_pooled %>%
@@ -471,7 +473,6 @@ if (!RUN_MUTATION_REGRESSION) {
 
 
 ```{r linear_regression_tables, warning=TRUE, results='asis', eval=RUN_MUTATION_REGRESSION}
-source(params$fun_lm)
 mutations_sig <- filter_lm_res_top20(mutations_sig_unfiltered, 0.05)
 
 sigmuts_df <- fread(mutation_sheet) %>%
