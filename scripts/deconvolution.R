@@ -361,7 +361,7 @@ if (execute_deconvolution) {
 
   write.csv(variant_abundance_df, params$variants_output_file)
 
-  ## ----csv_output_variant_plot, include = F-------------------------------------
+  ## ----csv_output_variant_plot, include = F-----------------------------------
   # prepare processed variant values to output them as a csv which will be
   # concatenated across samples and used for the plots in index.rmd.
 
@@ -386,6 +386,7 @@ if (execute_deconvolution) {
       "coordinates_lat",
       "coordinates_long"
     )), everything())
+
 
   write.table(output_variant_plot, params$variants_with_meta_output_file,
     sep = "\t",
@@ -430,13 +431,16 @@ if (execute_deconvolution) {
 # differences in the output for that case.
 output_mutation_frame <- complete_df %>%
   group_by(aa_str) %>%
+
   summarise(
     freq = sum(as.numeric(freq)),
     mut_str = paste(mut_str, collapse = mut_sep)
   ) %>%
+
   mutate(aa_str = replace(aa_str, is.na(aa_str), paste0(
     mut_str_na_char, mut_str_sep, mut_str_na_char
   ))) %>%
+
   # 211006 this exclusion is necessary because this mutation has a wrong entry
   # in VEP which gives two AA_muts instead of probably 1 deletion
   filter(!(mut_str %in% "G13477A")) %>%
@@ -448,14 +452,15 @@ output_mutation_frame <- complete_df %>%
     aa_str, mut_str,
     sep = str_glue("{mut_str_sep}{mut_str_sep}")
   )) %>%
+
   dplyr::select(nuc_aa_mut, freq) %>%
 
   # Filter aa muts that contain NA
   # TODO Why do some contain NA? I suspect this is not necessary, as all NAs
   # should be converted above.
   filter(!str_detect(nuc_aa_mut, "NA")) %>%
-  pivot_wider(names_from = nuc_aa_mut, values_from = freq) %>%
 
+  pivot_wider(names_from = nuc_aa_mut, values_from = freq) %>%
   mutate(
     samplename = sample_name,
     dates = date,
@@ -472,7 +477,6 @@ output_mutation_frame <- complete_df %>%
     "coordinates_lat",
     "coordinates_long"
   )), everything())
-
 
 # 3. write to output file
 cat("Writing mutation file to ", params$mutation_output_file, "...\n")
