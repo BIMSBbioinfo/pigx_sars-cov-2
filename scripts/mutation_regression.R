@@ -88,8 +88,25 @@ if (nrow(approved_mut_plot) > 0 &&
     # split gene name of for easier matching
     mutate_all(funs(str_replace(., "^[^:]*:", "")))
 
+  # create vecotr of metadata col names to be excluded
+  meta_cols_excl <- c(
+    "samplename",
+    "location_name",
+    "coordinates_lat",
+    "coordinates_long"
+  )
 
-  changing_muts <- parsing_mutation_plot_data(approved_mut_plot)
+  changing_muts <- approved_mut_plot %>%
+
+    # enforcing date type for column dates ...it will get rid of the time
+    mutate(dates = as.Date(dates)) %>%
+
+    select(- all_of(meta_cols_excl)) %>%
+
+    # remove mutations with NA for all rows and create a new dataframe
+    select(where(function(x) any(!is.na(x))))
+
+
   mutations_sig_unfiltered <- refined_lm_model(changing_muts)
   mutations_sig <- filter_lm_res_top20(mutations_sig_unfiltered, 0.05)
 
