@@ -3,7 +3,7 @@ library("dplyr")
 library("tidyr")
 library("data.table")
 
-parse_snv_csv <- function(snvfile, ...) { # allele frequency from v-pipe vcf
+parse_snv_csv <- function(snvfile) { # allele frequency from v-pipe vcf
   #' input: csv file derived from vpipe vcf when using LoFreq,
   #' parsing snv-csv file for coverage, frequency and genomic mutation information
 
