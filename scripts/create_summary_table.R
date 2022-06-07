@@ -1,20 +1,19 @@
 library("data.table")
 
 create_summary <- function(files) {
-  cat(paste("Summarizing", length(files), "variant files.\n"))
+  cat(paste("Summarizing", length(files), "files.\n"))
 
   # read files into list
-  variants_list <- lapply(
+  table_list <- lapply(
     X = files,
     FUN = fread
   )
 
   # remove empty files from list
-  variants_list_has_rows <- sapply(variants_list, nrow)
-  variants_list <- variants_list[variants_list_has_rows > 0]
+  table_list <- table_list[sapply(table_list, nrow) > 0]
 
-  # merge variant files in pairs
-  merged_variants <- Reduce(
+  # merge variant tables in pairs
+  merged_table <- Reduce(
     f = function(df1, df2) {
       merge(df1,
         df2,
@@ -23,10 +22,10 @@ create_summary <- function(files) {
         all.y = TRUE
       )
     },
-    x = variants_list
+    x = table_list
   )
 
-  return(merged_variants)
+  return(merged_table)
 }
 
 args <- commandArgs(trailingOnly = TRUE)
