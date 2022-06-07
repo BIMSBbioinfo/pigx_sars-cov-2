@@ -63,6 +63,7 @@
         "r-data-table"
         "r-ggplot2"
         "r-magrittr"
+        "r-mass"
         "r-plotly"
         "r-qpcr"
         "r-rmarkdown"
