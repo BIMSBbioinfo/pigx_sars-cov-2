@@ -1,5 +1,6 @@
 library("DT")
 library("data.table")
+library("dplyr")
 
 ## ----functions--------------------------------------------------------------------
 # function for downloadable tables

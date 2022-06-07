@@ -701,6 +701,7 @@ rule run_mutation_regression:
         fun_cvrg_scr=os.path.join(SCRIPTS_DIR, "sample_coverage_score.R"),
         fun_lm=os.path.join(SCRIPTS_DIR, "pred_mutation_increase.R"),
         fun_pool=os.path.join(SCRIPTS_DIR, "pooling.R"),
+        fun_tbls=os.path.join(SCRIPTS_DIR, "table_extraction.R")
     output:
         mut_count_outfile=os.path.join(OUTPUT_DIR, "mutations_counts.csv"),
         unfilt_mutation_sig_outfile=os.path.join(
@@ -717,6 +718,7 @@ rule run_mutation_regression:
             {input.fun_cvrg_scr} \
             {input.fun_lm} \
             {input.fun_pool} \
+            {input.fun_tbls} \
             {MUTATION_COVERAGE_THRESHOLD} \
             {input.overviewQC} \
             {output.mut_count_outfile} \

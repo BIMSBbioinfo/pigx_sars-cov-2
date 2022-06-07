@@ -111,7 +111,8 @@ df_mut <- fread(params$mutations_csv,
   check.names = FALSE
 )
 
-aa_sep <- "/"
+var_sep <- ":"
+aa_sep  <- "/"
 ```
 
 ```{r format_threshold}
@@ -149,7 +150,7 @@ These plots provide an overview of the relative frequency dynamics of
 identified lineages at specific wastewater sampling locations over time. 
 
 ```{r sample_quality_score}
-coverages.df <- merge(get_genome_cov(params$coverage_dir),
+coverages_df <- merge(get_genome_cov(params$coverage_dir),
   get_mutation_cov(params$coverage_dir),
   by = "samplename"
 ) %>%
@@ -159,13 +160,13 @@ coverages.df <- merge(get_genome_cov(params$coverage_dir),
     )
   )
 
-if (!(length(coverages.df) == 0)) {
+if (!(length(coverages_df) == 0)) {
   # take only the samples over the mutation coverage threshold
-  good_samples.df <- coverages.df %>%
+  good_samples_df <- coverages_df %>%
     filter(as.numeric(proport_muts_covered) >= mutation_coverage_threshold)
 
-  bad_samples_df <- coverages.df %>%
-    filter(!(samplename %in% good_samples.df$samplename))
+  bad_samples_df <- coverages_df %>%
+    filter(!(samplename %in% good_samples_df$samplename))
 } else {
   warning("\n No coverage values found.")
 }
@@ -174,10 +175,10 @@ if (!(length(coverages.df) == 0)) {
 ```{r filter_plot_frames_samplescore, warning=TRUE}
 # only use good samples for processing and visualiztaion
 approved_var_plot <- df_var %>%
-  filter(samplename %in% good_samples.df$samplename) %>%
+  filter(samplename %in% good_samples_df$samplename) %>%
   unique()
 approved_mut_plot <- df_mut %>%
-  filter(samplename %in% good_samples.df$samplename)
+  filter(samplename %in% good_samples_df$samplename)
 
 # pool the samples per day, discard locations
 weights <- read.csv(params$overviewQC, header = TRUE, check.names = FALSE) %>%
@@ -267,16 +268,20 @@ get_h <- function() {
   )
 }
 
-# TODO change order or "variable" so that "WT" is always displayed on top
 # plot variant frequencies by location, no pooling
 melted <- reshape2::melt(approved_var_plot,
   id.vars = c(
     "dates", "samplename", "location_name",
     "coordinates_lat", "coordinates_long"
+  )) %>%
+  mutate(
+    variable = give_priority_in_order(variable, "[Oo]thers"),
+
+    # conversion to character necessary, if it remains a date the plot will
+    # separate the dots on every date
+    dates = as.character(dates)
   )
-) %>%
-  mutate(variable = give_priority_in_order(variable, "[Oo]thers"))
-  
+
 location_plot <- function(melted, location) {
   subset(melted, location_name == location) %>%
     group_by(dates) %>%
@@ -356,7 +361,8 @@ cat(
 ```
 
 ```{r variant_location_maps_plot, out.width="900px", out.height="900px", eval=VARIANTS_FOUND}
-# TODO: the note about arbitray locations should be enable to be turned on and off
+# TODO: the note about arbitray locations should be enable to be turned on and
+# off
 
 approved_var_plot_day_pooled <- pool_by_weighted_mean(
   approved_var_plot,
@@ -444,13 +450,12 @@ changes over time. Furthermore, mutations showing a significant frequency
 increase over time are highlighted.  
 
 ```{r mutation_notation, results='asis', eval=MUTATIONS_FOUND}
-cat(create_html_note(paste(
+cat(create_html_note(str_glue(
   "Mutations are noted in the pattern of:",
-  "\n _**gene :: protein-sequence mutation : NT-sequence mutation**_\n",
-  "Please note that this translation was done for single mutations.",
-  "Combinations of single-NT mutations that taken together may lead to ",
-  "a different amino acid are not yet taken into account.",
-  sep = "\n"
+  "\n _**gene {aa_sep} protein-sequence mutation {aa_sep}{aa_sep} NT-sequence",
+  "mutation**_\nPlease note that this translation was done for single",
+  "mutations. Combinations of single-NT mutations that taken together may lead",
+  "to a different amino acid are not yet taken into account."
 )))
 ```
 
@@ -459,7 +464,7 @@ cat(create_html_note(paste(
 cat(
   "## Increasing mutations\n\n",
   "To show the dynamic of significantly changing mutations over time a linear ",
-  "regression model was applied to the mutationresults across all samples.",
+  "regression model was applied to the mutation results across all samples.",
   sep = ""
 )
 
@@ -475,18 +480,27 @@ if (!RUN_MUTATION_REGRESSION) {
 ```{r linear_regression_tables, warning=TRUE, results='asis', eval=RUN_MUTATION_REGRESSION}
 mutations_sig <- filter_lm_res_top20(mutations_sig_unfiltered, 0.05)
 
-sigmuts_df <- fread(mutation_sheet) %>%
+sigmuts_df <- fread(params$mutation_sheet) %>%
   na_if("") %>%
-  # split gene name of for easier matching
-  mutate_all(funs(str_replace(., str_glue('^[^{aa_sep}]*{aa_sep}', ''))))
+  # remove gene name of for easier matching
+  mutate(across(everything(),
+                ~ str_extract(
+                  .x, str_glue("(?<={var_sep})[[:alnum:]]+")
+                )))
 
 if (nrow(mutations_sig) > 0) {
   # flag if mutation is signature mutation
   mutations_sig <- mutations_sig %>%
-    rowwise() %>%
-    mutate(sigflag = ifelse(any(
-      sigmuts_df == str_split(mutation, str_glue("{aa_sep}{aa_sep}")[[1]][2]
-    ), "SigMut", "")))
+    mutate(mut_str = str_extract(
+          mutation,
+          str_glue("(?<={aa_sep}{aa_sep})[[:alnum:]]+"))) %>%
+    mutate(
+      sigflag = ifelse(
+         mut_str %in%  unlist(sigmuts_df),
+          "SigMut",
+          ""
+        )) %>%
+    dplyr::select(- mut_str)
 
   cat(
     "The following table shows the mutations showing ",
@@ -516,10 +530,16 @@ if (nrow(mutations_sig) > 0) {
 
 if (nrow(mutations_sig_unfiltered) > 0) {
   mutations_sig_unfiltered <- mutations_sig_unfiltered %>%
-    rowwise() %>%
-    mutate(sigflag = ifelse(any(
-      sigmuts_df == str_split(mutation, str_glue("{aa_sep}{aa_sep}"))[[1]][2]
-    ), "sigmut", ""))
+    mutate(mut_str = str_extract(
+          mutation,
+          str_glue("(?<={aa_sep}{aa_sep})[[:alnum:]]+"))) %>%
+    mutate(
+      sigflag = ifelse(
+         mut_str %in%  unlist(sigmuts_df),
+          "SigMut",
+          ""
+        )) %>%
+    dplyr::select(- mut_str)
 
   mutations_sig_unfiltered_download <- mutations_sig_unfiltered %>%
     dump_csv() %>%
@@ -577,17 +597,23 @@ melted <- reshape2::melt(approved_mut_plot_location_pooled,
 )
 
 melted <- melted %>%
-  # flag if mutation is signature mutation
-  rowwise() %>%
-  mutate(sigflag = ifelse(any(
-    sigmuts_df == str_split(variable, str_glue("{aa_sep}{aa_sep}"))[[1]][2]
-  ), "SigMut", "")) %>%
-  ungroup()
+    mutate(mut_str = str_extract(
+          variable,
+          str_glue("(?<={aa_sep}{aa_sep})[[:alnum:]]+"))) %>%
+    mutate(
+      sigflag = ifelse(
+         mut_str %in%  unlist(sigmuts_df),
+          "SigMut",
+          "NoSigMut"
+        )) %>%
+    dplyr::select(- mut_str) %>%
 
-# sort by dates
-idx <- order(melted$dates)
-melted <- melted[idx, ]
-melted$sigflag[is.na(melted$sigflag)] <- "nosigmut"
+    # sort by dates
+    arrange(dates) %>%
+
+    # coerce dates to string, same reason as in the variants plot
+    mutate(dates = as.character(dates))
+
 
 p_mutations_pooled <- subset(melted) %>%
   group_by(dates) %>%
@@ -636,25 +662,29 @@ plot_muts <- function(melted, location) {
     )
 }
 
+# TODO Unify the sigflag values across the report
 melted <- reshape2::melt(filtered_approved_mut_plot,
   id.vars = c(
     "dates", "samplename", "location_name",
     "coordinates_lat", "coordinates_long"
   )
-) %>%
-  rowwise() %>%
-  mutate(
-    sigflag = ifelse(
-      any(sigmuts_df == str_split(
-        variable, str_glue("{aa_sep}{aa_sep}")
-      )[[1]][2]),
-      "SigMut", NULL
-    )
-  )
+)  %>%
+    mutate(mut_str = str_extract(
+          variable,
+          str_glue("(?<={aa_sep}{aa_sep})[[:alnum:]]+"))) %>%
+    mutate(
+      sigflag = ifelse(
+         mut_str %in%  unlist(sigmuts_df),
+          "SigMut",
+          NA
+        )) %>%
+    dplyr::select(- mut_str) %>%
 
-# sort by dates
-idx <- order(melted$dates)
-melted <- melted[idx, ]
+    # sort by dates
+    arrange(dates) %>%
+
+    # coerce dates to string, same reason as in the variants plot
+    mutate(dates = as.character(dates))
 
 locations <- as.character(unique(melted$location_name))
 
@@ -690,11 +720,12 @@ cat("## Trending mutations geo-localized\n\nThis plot visualizes proportions ",
   sep = ""
 )
 
-cat(create_html_note("Locations of wastewater processing plants have been\n",
-  "generated arbitrarily and do not correspond to actual ",
-  "locations.",
-  sep = ""
-))
+cat(create_html_note(paste(
+    "Locations of wastewater processing plants have been\n",
+    "generated arbitrarily and do not correspond to actual ",
+    "locations.",
+    sep = ""
+)))
 
 cat(
   "Click on a lineage in the legend to toggle its visibility in the map;\n",
@@ -893,7 +924,7 @@ cat(
 ```
 
 ```{r table_ample_quality_score}
-if (!(length(coverages.df) == 0)) {
+if (!(length(coverages_df) == 0)) {
   # TODO refine column names --> e.g "coverage in percent",
   bad_samples_df <- bad_samples_df %>% slice_head(n = 20)
   create_dt(bad_samples_df)

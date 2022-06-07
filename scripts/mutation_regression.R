@@ -11,6 +11,7 @@ if (length(args) == 0) {
     fun_cvrg_scr = "",
     fun_lm = "",
     fun_pool = "",
+    fun_tbls = "",
     mutation_coverage_threshold = "",
     overviewQC = "",
     mut_count_outfile = "",
@@ -25,10 +26,11 @@ params <- list(
   fun_cvrg_scr = args[[4]],
   fun_lm = args[[5]],
   fun_pool = args[[6]],
-  mutation_coverage_threshold = args[[7]],
-  overviewQC = args[[8]],
-  mut_count_outfile = args[[9]],
-  unfilt_mutation_sig_outfile = args[[10]]
+  fun_tbls = args[[7]],
+  mutation_coverage_threshold = args[[8]],
+  overviewQC = args[[9]],
+  mut_count_outfile = args[[10]],
+  unfilt_mutation_sig_outfile = args[[11]]
 )
 
 # pretty print parameters for easier debugging
