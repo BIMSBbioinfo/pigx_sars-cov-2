@@ -578,9 +578,11 @@ rule render_kraken2_report:
 rule run_deconvolution:
     input:
         script=os.path.join(SCRIPTS_DIR, "deconvolution.R"),
+        deconvolution_functions=os.path.join(
+            SCRIPTS_DIR, "deconvolution_funs.R"
+        ),
         vep=os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2_parsed.txt"),
         snv=os.path.join(VARIANTS_DIR, "{sample}_snv.csv"),
-        deconvolution_functions=os.path.join(SCRIPTS_DIR, "deconvolution_funs.R"),
     output:
         sigmut_df=os.path.join(MUTATIONS_DIR, "{sample}_sigmuts.csv"),
         non_sigmut_df=os.path.join(MUTATIONS_DIR, "{sample}_non_sigmuts.csv"),
@@ -595,14 +597,18 @@ rule run_deconvolution:
     shell:
         """
         {RSCRIPT_EXEC} {input.script} \
+        "{input.deconvolution_functions}" \
         "{wildcards.sample}" \
-        "{OUTPUT_DIR}" \
+        "{MUTATION_SHEET_CSV}" \
+        "{SAMPLE_SHEET_CSV}" \
         "{input.vep}" \
         "{input.snv}" \
-        "{SAMPLE_SHEET_CSV}" \
-        "{MUTATION_SHEET_CSV}" \
-        "{input.deconvolution_functions}" \
         "{MUTATION_DEPTH_THRESHOLD}" \
+        "{output.sigmut_df}" \
+        "{output.non_sigmut_df}" \
+        "{output.variant_proportions}" \
+        "{output.variants_with_meta}" \
+        "{output.mutations}" \
         > {log} 2>&1
         """
 

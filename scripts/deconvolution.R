@@ -17,26 +17,34 @@ args <- commandArgs(trailingOnly = TRUE)
 # give default parameters
 if (length(args) == 0) {
   args <- c(
+    deconvolution_functions = "",
     sample_name = "",
-    output_dir = "",
+    mutation_sheet = "",
+    sample_sheet = "",
     vep_file = "",
     snv_file = "",
-    sample_sheet = "",
-    mutation_sheet = "",
-    deconvolution_functions = "",
-    mutation_depth_threshold = ""
+    mutation_depth_threshold = "",
+    sigmut_output_file = "",
+    non_sigmut_output_file = "",
+    variants_output_file = "",
+    variants_with_meta_output_file = "",
+    mutation_output_file = ""
   )
 }
 
 params <- list(
-  sample_name = args[[1]],
-  output_dir = args[[2]],
-  vep_file = args[[3]],
-  snv_file = args[[4]],
-  sample_sheet = args[[5]],
-  mutation_sheet = args[[6]],
-  deconvolution_functions = args[[7]],
-  mutation_depth_threshold = args[[8]]
+    deconvolution_functions = args[[1]],
+    sample_name = args[[2]],
+    mutation_sheet = args[[3]],
+    sample_sheet = args[[4]],
+    vep_file = args[[5]],
+    snv_file = args[[6]],
+    mutation_depth_threshold = args[[7]],
+    sigmut_output_file = args[[8]],
+    non_sigmut_output_file = args[[9]],
+    variants_output_file = args[[10]],
+    variants_with_meta_output_file = args[[11]],
+    mutation_output_file = args[[12]]
 )
 
 # pretty print parameters for easier debugging
@@ -61,10 +69,6 @@ sample_name         <- params$sample_name
 sample_sheet        <- data.table::fread(params$sample_sheet)
 mutation_sheet      <- params$mutation_sheet
 
-variants_output_dir <- file.path(params$output_dir, "variants")
-mutation_output_dir <- file.path(params$output_dir, "mutations")
-
-
 sample_entry <- sample_sheet %>%
   filter(name == sample_name)
 
@@ -72,44 +76,6 @@ date                <- as.character(sample_entry$date)
 location_name       <- as.character(sample_entry$location_name)
 coordinates_lat     <- as.character(sample_entry$coordinates_lat)
 coordinates_long    <- as.character(sample_entry$coordinates_long)
-
-
-sigmut_output_file <- file.path(
-  mutation_output_dir,
-  paste0(
-    sample_name,
-    "_sigmuts.csv"
-  )
-)
-
-non_sigmut_output_file <- file.path(
-  mutation_output_dir,
-  paste0(
-    sample_name,
-    "_non_sigmuts.csv"
-  )
-)
-
-mutation_output_file <- file.path(
-  mutation_output_dir,
-  paste0(
-    sample_name,
-    "_mutations.csv"
-  )
-)
-
-variants_file <- file.path(
-  variants_output_dir,
-  paste0(
-    sample_name,
-    "_variants.csv"
-  )
-)
-
-variants_with_meta_file <- file.path(
-  variants_output_dir,
-  paste0(sample_name, "_variants_with_meta.csv")
-)
 
 
 ## ----process_signature_mutations, include = FALSE-----------------------------
@@ -171,16 +137,26 @@ match_df <- complete_dep_filtered_df %>%
 nomatch_df <- complete_dep_filtered_df %>%
   filter(is.na(variant))
 
-cat("Writing signature mutation file to ", sigmut_output_file, "...\n")
+# write sigmuts to file
+cat(
+  "Writing signature mutation file to ",
+  params$sigmut_output_file,
+  "...\n")
+
 fwrite(
   match_df,
-  sigmut_output_file
+  params$sigmut_output_file
 )
 
-cat("Writing non signature mutation file to ", non_sigmut_output_file, "...\n")
+# write non sigmuts to file
+cat(
+  "Writing non signature mutation file to ",
+  params$non_sigmut_output_file,
+  "...\n")
+
 fwrite(
   nomatch_df,
-  non_sigmut_output_file
+  params$non_sigmut_output_file
 )
 
 # Tables are displayed here in report
@@ -358,8 +334,13 @@ if (execute_deconvolution) {
     variant_abundance_df$abundance[group_ind] <- group_abundance / length(group)
   }
 
-  cat("Writing variant abundance file to ", variants_file, "...\n")
-  fwrite(variant_abundance_df, variants_file)
+  cat(
+    "Writing variant abundance file to ",
+    params$variants_output_file,
+    "...\n"
+  )
+
+  fwrite(variant_abundance_df, params$variants_output_file)
 
   # plot comes here in report
 
@@ -385,7 +366,7 @@ if (execute_deconvolution) {
 
   fwrite(
     output_variant_plot,
-    variants_with_meta_file
+    params$variants_with_meta_output_file
   )
 
   ## ----csv_output_mutation_plot, include = FALSE------------------------------
@@ -436,34 +417,37 @@ if (execute_deconvolution) {
     )
 
   # 3. write to output file
-  cat("Writing mutation file to ", mutation_output_file, "...\n")
-  fwrite(output_mutation_frame, mutation_output_file,
+  cat("Writing mutation file to ", params$mutation_output_file, "...\n")
+  fwrite(output_mutation_frame, params$mutation_output_file,
     row.names = FALSE, quote = FALSE
   )
+
 } else {
-  cat("Writing dummy variants file to ", variants_file, "...\n")
 
   # write dummy variants file
+  cat("Writing dummy variants file to ", params$variants_output_file, "...\n")
   writeLines(
     "Deconvolution not run, this is a dummy file.",
-    variants_file
+    params$variants_output_file
   )
+  
+  # write dummy variants with meta file
   cat(
     "Writing dummy variants file with metadata to ",
-    variants_with_meta_file,
+    params$variants_with_meta_output_file,
     "...\n"
   )
 
-  # write dummy variants file
   writeLines(
     "Deconvolution not run, this is a dummy file.",
-    variants_with_meta_file
+    params$variants_with_meta_output_file
   )
 
-  cat("Writing dummy mutation file to ", mutation_output_file, "...\n")
+  # write dummy mutations file
+  cat("Writing dummy mutation file to ", params$mutation_output_file, "...\n")
 
   writeLines(
     "Deconvolution not run, this is a dummy file.",
-    mutation_output_file
+    params$mutation_output_file
   )
 }
