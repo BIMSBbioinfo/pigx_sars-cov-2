@@ -66,6 +66,7 @@
         "r-jsonlite"
         "r-knitr"
         "r-magrittr"
+        "r-mass"
         "r-plotly"
         "r-qpcr"
         "r-reshape2"

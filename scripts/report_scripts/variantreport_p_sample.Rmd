@@ -29,6 +29,7 @@ params:
 
 ```{r libs, include=FALSE, message = FALSE, warning = FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(MASS)
 library(knitr)
 library(dplyr)
 library(ggplot2)
