@@ -648,24 +648,30 @@ rule render_variant_report:
 
 rule render_qc_report:
     input:
-      script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
-      report=os.path.join(SCRIPTS_DIR, "report_scripts", "qc_report_per_sample.Rmd"),
-      header=os.path.join(REPORT_DIR, "_navbar.html"),
-      coverage=os.path.join(COVERAGE_DIR, "{sample}_merged_covs.csv"),
-      multiqc=os.path.join(MULTIQC_DIR, '{sample}', 'multiqc_report.html')
+        script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
+        report=os.path.join(SCRIPTS_DIR, "report_scripts", "qc_report_per_sample.Rmd"),
+        header=os.path.join(REPORT_DIR, "_navbar.html"),
+        coverage=os.path.join(COVERAGE_DIR, "{sample}_merged_covs.csv"),
+        multiqc=os.path.join(MULTIQC_DIR, "{sample}", "multiqc_report.html"),
     output:
-      os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.html")
+        html_report=os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.html"),
+        table_outfile=os.path.join(
+            COVERAGE_DIR, "{sample}_report_download_coverage.csv"
+        ),
     params:
-      multiqc_rel_path=lambda wildcards, input: input.multiqc[len(REPORT_DIR)+1:]
-    log: os.path.join(LOG_DIR, "reports", "{sample}_qc_report.log")
-    shell: """{RSCRIPT_EXEC} {input.script} \
-{input.report} {output} {input.header} \
-'{{\
-  "sample_name": "{wildcards.sample}",  \
-  "coverage_file": "{input.coverage}",   \
-  "multiqc_report": "{params.multiqc_rel_path}", \
-  "logo": "{LOGO}" \
-}}' > {log} 2>&1"""
+        multiqc_rel_path=lambda wildcards, input: input.multiqc[len(REPORT_DIR) + 1 :],
+    log:
+        os.path.join(LOG_DIR, "reports", "{sample}_qc_report.log"),
+    shell:
+        """{RSCRIPT_EXEC} {input.script} \
+        {input.report} {output.html_report} {input.header} \
+        '{{\
+          "sample_name": "{wildcards.sample}",  \
+          "coverage_file": "{input.coverage}",   \
+          "multiqc_report": "{params.multiqc_rel_path}", \
+          "logo": "{LOGO}", \
+          "coverage_table_outfile": "{output.table_outfile}" \
+        }}' > {log} 2>&1"""
 
 
 rule create_variants_summary:
