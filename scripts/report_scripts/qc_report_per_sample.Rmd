@@ -4,10 +4,11 @@ nav: "Quality control"
 author: "BIMSB Bioinformatics Platform"
 date: '`r format(as.POSIXct(if ("" != Sys.getenv("SOURCE_DATE_EPOCH")) { as.numeric(Sys.getenv("SOURCE_DATE_EPOCH")) } else { Sys.time() }, origin="1970-01-01"), "%Y-%m-%d %H:%M:%S")`'
 params:
-  sample_name: ''
-  coverage_file: ''
-  multiqc_report: ''
-  logo: ''
+  sample_name: ""
+  coverage_file: ""
+  multiqc_report: ""
+  logo: ""
+  coverage_table_outfile: ""
 ---
 
 <style>
@@ -34,6 +35,8 @@ library(dplyr)
 library(DT)
 library(magrittr)
 library(base64url)
+library(stringr)
+library(data.table)
 ```
 
 This report provides an overview over general quality control measures of the 
@@ -42,11 +45,13 @@ For detailed information about the methods please consult the
 [documentation](http://bioinformatics.mdc-berlin.de/pigx_docs/pigx-sars-cov-2.html#output-description).
 
 ```{r reading_data, include = FALSE}
-coverage.df <- read.table(params$coverage_file, sep = "\t", header = TRUE)
-coverage.df <- na_if(coverage.df, "[]")
-coverage.df <- gsub("\\[", "", coverage.df)
-coverage.df <- gsub("\\]", "", coverage.df)
-# FIXME: this can be sure done in a nicer and more compact way
+# FIXME Rename these col names sensibly upstream
+coverage_df <- fread(params$coverage_file) %>%
+  mutate(across(everything(), ~ na_if(.x, "[]"))) %>%
+  mutate(across(everything(), ~ gsub("\\[|\\]", "", .x))) %>%
+  mutate(`Number of mutations not covered` = str_replace_all(
+    `Number of mutations not covered`, "\\'", ""
+  ))
 ```
 
 # Coverage reports
@@ -65,14 +70,24 @@ total, how many of their locations are covered and which locations have no read
 coverage at all. 
  
 ```{r amplicon_coverage, echo = FALSE}
-mut_cov.df <- data.frame(
-  "Total number of tracked mutations" = coverage.df[1],
-  "Number of mutations covered" = coverage.df[2],
-  "Mutation locations (NT) not covered" = coverage.df[3],
-  check.names = FALSE
+mutation_coverage_cols <- c(
+  "Total number of tracked mutations",
+  "Total number of mutations covered",
+  "Number of mutations not covered"
 )
 
-datatable(t(mut_cov.df), options = list(searching = FALSE, paging = FALSE))
+mut_cov_df <- coverage_df %>%
+  select(all_of(mutation_coverage_cols)) %>%
+  rename(c(
+    "Total number of tracked mutations" = mutation_coverage_cols[1],
+    "Number of mutations covered" = mutation_coverage_cols[2],
+    "Mutation locations (NT) not covered" = mutation_coverage_cols[3]
+  ))
+  
+
+datatable(
+  t(mut_cov_df) %>% set_colnames("Value"),
+  options = list(searching = FALSE, paging = FALSE))
 ```
 
 ## Reference Genome
@@ -82,14 +97,29 @@ mean coverage depth and percentage of the reference genome covered by
 pre-processed reads.
 
 ```{r read_coverage, echo = FALSE}
-Coverage <- data.frame(
-  "Number of aligned reads" = coverage.df[4],
-  "Total ref. genome coverage" = paste(round(as.integer(coverage.df[5]), 1), "%"),
-  "Mean read depth" = round(as.integer(coverage.df[6])),
-  check.names = FALSE
-) # TODO more clear title stating which coverage
+read_coverage_cols <- c(
+  "Total number aligned reads",
+  "Percentage ref.genome covered",
+  "Mean depth ref.genome coverage"
+)
 
-datatable(t(Coverage), options = list(searching = FALSE, paging = FALSE))
+read_cov_df <- coverage_df %>%
+  select(all_of(read_coverage_cols)) %>%
+  mutate(
+    `Percentage ref.genome covered` = paste(round(as.integer(
+      `Percentage ref.genome covered`
+      ), 1), "%"),
+    `Mean depth ref.genome coverage` = round(as.integer(
+      `Mean depth ref.genome coverage`
+      ))
+    ) %>%
+  rename(c(
+    "Number of aligned reads" = read_coverage_cols[1],
+    "Total ref. genome coverage" = read_coverage_cols[2],
+    "Mean read depth" = read_coverage_cols[3])
+  )
+
+datatable(t(read_cov_df) %>% set_colnames("Value"))
 ```
 
 # Read processing
@@ -119,10 +149,7 @@ fastqc-reports.
 # Download Stats csv
 
 ```{r data_download, include = FALSE}
-fwrite(coverage_df, file.path(
-  dirname(params$coverage_file),
-  "report_download_coverage.csv"
-))
+fwrite(coverage_df, params$coverage_table_outfile)
 
 coverage <- fread(params$coverage_file) %>%
   paste0(collapse = "\n") %>%
