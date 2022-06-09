@@ -76,6 +76,22 @@ def fastq_ext(fastq_file):
 
 # Input functions
 
+def samtools_sort_preprimertrim_input(wildcards):
+    sample = wildcards[0]
+
+    # everything in if statement in case we don't know how to handle the
+    # start point given by the settings file
+    if START_POINT == "fastq.gz":
+        input_file = os.path.join(MAPPED_READS_DIR, "{sample}_aligned.bam")
+
+    if START_POINT == "bam":
+        # take bam files directly from the reads dir
+        input_file = os.path.join(READS_DIR, f"{sample}.bam")
+
+    else:
+        input_file = os.path.join(MAPPED_READS_DIR, f"{sample}_aligned.bam")
+
+    return input_file
 
 # function to pass read files to trim/filter/qc improvement
 def trim_reads_input(args):
@@ -468,7 +484,7 @@ rule samtools_filter_unaligned:
         "{SAMTOOLS_EXEC} view -bh -f 4 {input} > {output} 2>> {log} 3>&2"
 
 rule samtools_sort_preprimertrim:
-    input: os.path.join(MAPPED_READS_DIR, '{sample}_aligned.bam')
+    input: samtools_sort_preprimertrim_input
     output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted.bam')
     log: os.path.join(LOG_DIR, 'samtools_sort_{sample}.log')
     shell: "{SAMTOOLS_EXEC} sort -o {output} {input} >> {log} 2>&1"
