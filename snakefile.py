@@ -346,6 +346,25 @@ SAMTOOLS_EXEC        = tool("samtools")
 VEP_EXEC             = tool("vep")
 IVAR_EXEC            = tool("ivar")
 
+# start file types and the rules that will be skipped:
+#   fastq.gz: 
+#     None
+#   bam:
+#     * fastp
+#     * fastp_se
+#     * bwa_align
+#     * samtools_filter_aligned
+#     * samtools_filter_unaligned
+#     * ivar_primer_trim
+#     * samtools_sort_postprimertrim
+#     * samtools_index_postprimertrim
+#     * fastqc_raw_se
+#     * fastqc_raw
+#     * fastqc_trimmed_se
+#     * fastqc_trimmed_pe
+#     * fastqc_primer_trimmed
+# 
+
 ## Load sample sheet
 with open(SAMPLE_SHEET_CSV, 'r') as fp:
   rows =  [row for row in csv.reader(fp, delimiter=',')]
