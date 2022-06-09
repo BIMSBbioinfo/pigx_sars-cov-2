@@ -74,6 +74,24 @@ def fastq_ext(fastq_file):
     return ext
 
 
+# WIP create a dummy entry if no variant is found - use this as long as the input-function solution doesn't work
+def no_variant_vep(sample, lofreq_output):
+    """
+    Work-around to create dummy entries in lofreq output to ensure smooth VEP
+    running in case no variants are found by lofreq (?)
+    """
+    content = open(lofreq_output.format(sample=sample), "r").read()
+    if re.findall("^NC", content, re.MULTILINE):  # regex ok or not?
+        # trigger vep path
+        logger.info("File can be used for downstream processing")
+    else:
+        # write smth so that vep does not crash - deal with everything later in the variant_report
+        logger.info("adding dummy entry to vcf file, because no variants were found")
+        open(lofreq_output.format(sample=sample), "a").write(
+            "NC_000000.0\t00\t.\tA\tA\t00\tPASS\tDP=0;AF=0;SB=0;DP4=0,0,0,0"
+        )
+
+
 # Input functions
 
 def samtools_sort_preprimertrim_input(wildcards):
@@ -271,22 +289,6 @@ def vep_input(args):
             Path(empty_snv_csv).touch()
             return [empty_vep_txt, empty_snv_csv]
 
-
-# WIP create a dummy entry if no variant is found - use this as long as the input-function solution doesn't work
-def no_variant_vep(sample, lofreq_output):
-    """
-    Work-around to create dummy entries in lofreq output to ensure smooth VEP
-    running in case no variants are found by lofreq (?)
-    """
-    content = open(lofreq_output.format(sample=sample), "r").read()
-    if re.findall("^NC", content, re.MULTILINE):  # regex ok or not?
-        # trigger vep path
-        logger.info("File can be used for downstream processing")
-    else:
-        # write smth so that vep does not crash - deal with everything later in the variant_report
-        logger.info("adding dummy entry to vcf file, because no variants were found")
-        open(lofreq_output.format(sample=sample), "a").write(
-            "NC_000000.0\t00\t.\tA\tA\t00\tPASS\tDP=0;AF=0;SB=0;DP4=0,0,0,0")
 
 
 SAMPLE_SHEET_CSV    = config["locations"]["sample-sheet"]
