@@ -138,7 +138,7 @@ def map_input(args):
 def lofreq_input(wildcards):
     sample = wildcards[0]
 
-    if (RUN_IVAR_PRIMER_TRIMING):
+    if RUN_IVAR_PRIMER_TRIMING and not START_POINT == "bam":
         file_descript = "_aligned_sorted_primer-trimmed_sorted"
 
     else:
