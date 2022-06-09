@@ -608,8 +608,17 @@ rule lofreq:
     output: vcf = os.path.join(VARIANTS_DIR, '{sample}_snv.vcf')
     log: os.path.join(LOG_DIR, 'lofreq_{sample}.log')
     run:
-        shell("{LOFREQ_EXEC} call -f {input.ref} -o {output} --verbose {input.aligned_bam} >> {log} 2>&1")
-        # WIP create a dummy entry if no variant is found - use this as long as the input-function solution doesn't work
+        shell(
+            "{LOFREQ_EXEC} call "
+                "-f {input.ref} " 
+                "-o {output} "
+                "--verbose "
+                "{input.aligned_bam} "
+                ">> {log} 2>&1"
+            )
+
+        # WIP create a dummy entry if no variant is found - use this as long as
+        # the input-function solution doesn't work
         no_variant_vep(wildcards.sample, output.vcf)
 
 
