@@ -625,6 +625,9 @@ rule fastqc_primer_trimmed:
     shell: "{FASTQC_EXEC} -o {params.output_dir} {input} >> {log} 2>&1"
 
 # TODO think about adding a global version to include all samples
+# ANNOT: Generate overall QC report from all the per sample QC reports already
+# generated in previous rules. Generates a subdir per sample, with a static
+# structure determined by the multiqc executable.
 rule multiqc:
   input: multiqc_input
   output: os.path.join(MULTIQC_DIR, '{sample}', 'multiqc_report.html')
@@ -869,7 +872,9 @@ rule render_variant_report:
         }}' > {log} 2>&1
         """
 
-
+# ANNOT: Render quality control report, summarizing coverage, and linking to the
+# per sample fastq reports for the different stages of processing (see rule 
+# multiqc)
 rule render_qc_report:
     input:
         script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
