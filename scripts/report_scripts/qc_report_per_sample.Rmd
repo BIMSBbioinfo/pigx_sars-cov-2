@@ -6,9 +6,10 @@ date: '`r format(as.POSIXct(if ("" != Sys.getenv("SOURCE_DATE_EPOCH")) { as.nume
 params:
   sample_name: ""
   coverage_file: ""
-  multiqc_report: ""
   logo: ""
   coverage_table_outfile: ""
+  multiqc_ran: false
+  multiqc_rel_path: ""
 ---
 
 <style>
@@ -31,12 +32,24 @@ knitr::opts_chunk$set(
   warning = FALSE
 )
 
+knitr::knit_hooks$set(
+  warning = function(x, options) {
+    paste('\n\n<div class="alert alert-warning">',
+      gsub("##", "\n", gsub("^##\ Warning:", "**Warning**", x)),
+      "</div>",
+      sep = "\n"
+    )
+  }
+)
+
 library(dplyr)
 library(DT)
 library(magrittr)
 library(base64url)
 library(stringr)
 library(data.table)
+
+multiqc_ran <- as.logical(params$multiqc_ran)
 ```
 
 This report provides an overview over general quality control measures of the 
@@ -78,7 +91,7 @@ mut_cov_df <- coverage_df %>%
     "Number of mutations covered" = mutation_coverage_cols[2],
     "Mutation locations (NT) not covered" = mutation_coverage_cols[3]
   ))
-  
+
 
 datatable(
   t(mut_cov_df) %>% set_colnames("Value"),
@@ -127,11 +140,29 @@ consult the
 
 ## MultiQC 
 
-In order to be able to assess and compare the read quality after each step
-multiple quality reports are generated which are presented below in a 
-summarized format:
+``` {r multiqc_warning, echo = FALSE, warning = TRUE}
+if (!multiqc_ran) {
+  warning(
+    paste("No MultiQC reports were generated for this run, this is most ",
+          "likely due to the provided input files not being fastq files.",
+          sep = ""
+    )
+  )
+}
+```
 
-Download: [MultiQC report of raw and processed data](`r params$multiqc_report`)
+
+```{r multiqc_text, echo = FALSE, results='asis'}
+if (multiqc_ran) {
+  cat(paste(
+    "In order to be able to assess and compare the read quality after each",
+    "step multiple quality reports are generated which are presented below in",
+    "a summarized format:\n\n",
+    "Download:\n",
+    "[MultiQC report of raw and processed data](", params$multiqc_rel_path, ")"
+  ))
+}
+```
 
 ## Trimming
 

@@ -286,6 +286,35 @@ def vep_input(args):
             return [empty_vep_txt, empty_snv_csv]
 
 
+def render_qc_report_input(wildcards):
+    sample = wildcards[0]
+
+    input = {
+        "script": os.path.join(SCRIPTS_DIR, "renderReport.R"),
+        "report": os.path.join(SCRIPTS_DIR, "report_scripts", "qc_report_per_sample.Rmd"),
+        "header": os.path.join(REPORT_DIR, "_navbar.html"),
+        "coverage": os.path.join(COVERAGE_DIR, "{sample}_quality.csv"),
+        "logo": LOGO
+    }
+
+    if START_POINT != "bam":
+        input["multiqc"] = os.path.join(MULTIQC_DIR, "{sample}", "multiqc_report.html")
+
+    return input
+
+
+def render_qc_report_params(wildcards, input, output = None, threads = None, resources = None):
+    params = {"rscript_exec": RSCRIPT_EXEC}
+
+    if "multiqc" in input.keys():
+        params["multiqc_ran"]      = True
+        params["multiqc_rel_path"] = input.multiqc[len(REPORT_DIR) + 1 :]
+
+    else:
+        params["multiqc_ran"]      = False
+
+    return params
+
 
 SAMPLE_SHEET_CSV    = config["locations"]["sample-sheet"]
 MUTATION_SHEET_CSV  = config["locations"]["mutation-sheet"]
@@ -872,35 +901,24 @@ rule render_variant_report:
         }}' > {log} 2>&1
         """
 
+
 # ANNOT: Render quality control report, summarizing coverage, and linking to the
 # per sample fastq reports for the different stages of processing (see rule 
 # multiqc)
 rule render_qc_report:
     input:
-        script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
-        report=os.path.join(SCRIPTS_DIR, "report_scripts", "qc_report_per_sample.Rmd"),
-        header=os.path.join(REPORT_DIR, "_navbar.html"),
-        coverage=os.path.join(COVERAGE_DIR, "{sample}_quality.csv"),
-        multiqc=os.path.join(MULTIQC_DIR, "{sample}", "multiqc_report.html"),
+        unpack(render_qc_report_input)
     output:
         html_report=os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.html"),
         table_outfile=os.path.join(
             COVERAGE_DIR, "{sample}_report_download_coverage.csv"
         ),
     params:
-        multiqc_rel_path=lambda wildcards, input: input.multiqc[len(REPORT_DIR) + 1 :],
+        render_qc_report_params,
     log:
         os.path.join(LOG_DIR, "reports", "{sample}_qc_report.log"),
-    shell:
-        """{RSCRIPT_EXEC} {input.script} \
-        {input.report} {output.html_report} {input.header} \
-        '{{\
-          "sample_name": "{wildcards.sample}",  \
-          "coverage_file": "{input.coverage}",   \
-          "multiqc_report": "{params.multiqc_rel_path}", \
-          "logo": "{LOGO}", \
-          "coverage_table_outfile": "{output.table_outfile}" \
-        }}' > {log} 2>&1"""
+    script:
+        "snakefile_scripts/rule_render_qc_report.py"
 
 
 rule create_variants_summary:
