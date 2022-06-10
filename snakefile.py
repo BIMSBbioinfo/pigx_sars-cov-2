@@ -162,9 +162,9 @@ onsuccess:
             if name not in expected_files or os.path.getmtime(name) != expected_files[name]:
                 generated.append(name)
         if generated:
-            print("The following files have been generated:")
+            logger.info("The following files have been generated:")
             for name in generated:
-                print("  - {}".format(name))
+                logger.info("  - {}".format(name))
 
 # function to pass read files to trim/filter/qc improvement
 def trim_reads_input(args):
@@ -211,7 +211,7 @@ def multiqc_input(args):
 def vep_input(args):
     sample = args[0]
     lofreq_output = rules.lofreq.output.vcf # this requires the file to be there already - I have no idea how to make the decision about the further input when it requires a rule to run beforhand
-    print(lofreq_output.format(sample=sample))
+    logger.info(lofreq_output.format(sample=sample))
     with open(lofreq_output.format(sample=sample), 'r') as vcf:
         content = vcf.read()
         if re.findall('^NC', content, re.MULTILINE): # regex ok or not?
@@ -437,10 +437,10 @@ def no_variant_vep(sample, lofreq_output):
     content = open(lofreq_output.format(sample=sample), 'r').read()
     if re.findall('^NC', content, re.MULTILINE):  # regex ok or not?
         # trigger vep path
-        print('File can be used for downstream processing')
+        logger.info('File can be used for downstream processing')
     else:
         # write smth so that vep does not crash - deal with everything later in the variant_report
-        print('adding dummy entry to vcf file, because no variants were found')
+        logger.info('adding dummy entry to vcf file, because no variants were found')
         open(lofreq_output.format(sample=sample), 'a').write(
             "NC_000000.0\t00\t.\tA\tA\t00\tPASS\tDP=0;AF=0;SB=0;DP4=0,0,0,0")
 
