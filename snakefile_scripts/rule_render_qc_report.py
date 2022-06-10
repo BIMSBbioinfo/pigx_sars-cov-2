@@ -1,6 +1,7 @@
 import json
 import sys
 import subprocess
+from snakemake.logging import logger
 
 with open(snakemake.log[0], "w") as log_file:
     sys.stdout = log_file
@@ -25,7 +26,7 @@ with open(snakemake.log[0], "w") as log_file:
         json.dumps(rmd_params)
     ]
 
-    print(call)
+    logger.info(call)
     subprocess.run(
         call,
         stdout = log_file,
