@@ -432,6 +432,13 @@ targets = {
 selected_targets = config["control"]["targets"]
 OUTPUT_FILES = list(chain.from_iterable([targets[name]['files'] for name in selected_targets]))
 
+run_params_info = (
+    f"Run parameters:\n"
+    f"\tStart point: {START_POINT}\n"
+    f"\tTargets: {TARGETS}\n"
+)
+
+logger.info(run_params_info)
 
 rule all:
     input: OUTPUT_FILES
