@@ -1,4 +1,4 @@
-ACLOCAL_AMFLAGS = -I m4
+ACLOCAL_AMFLAGS = -I pigx-common/common/m4
 
 nodist_bin_SCRIPTS = \
   pigx-sars-cov-2
