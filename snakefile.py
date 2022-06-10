@@ -400,6 +400,20 @@ with open(SAMPLE_SHEET_CSV, 'r') as fp:
 
 SAMPLES = [line['name'] for line in SAMPLE_SHEET]
 
+# predefine files for targets
+final_report_files = (
+    expand(os.path.join(REPORT_DIR, '{sample}.qc_report_per_sample.html'), sample=SAMPLES) +
+    expand(os.path.join(REPORT_DIR, '{sample}.variantreport_p_sample.html'), sample=SAMPLES) +
+    [os.path.join(REPORT_DIR, 'index.html')]
+)
+
+if START_POINT != "bam":
+    final_report_files = (
+        final_report_files +
+        expand(os.path.join(REPORT_DIR, '{sample}.taxonomic_classification.html'), sample=SAMPLES) +
+        expand(os.path.join(REPORT_DIR, '{sample}.Krona_report.html'), sample=SAMPLES)
+    )
+
 targets = {
     'help': {
         'description': "Print all rules and their descriptions.",
@@ -407,13 +421,7 @@ targets = {
     },
     'final_reports': {
         'description': "Produce a comprehensive report. This is the default target.",
-        'files': (
-            expand(os.path.join(REPORT_DIR, '{sample}.qc_report_per_sample.html'), sample=SAMPLES) +
-            expand(os.path.join(REPORT_DIR, '{sample}.variantreport_p_sample.html'), sample=SAMPLES) +
-            expand(os.path.join(REPORT_DIR, '{sample}.taxonomic_classification.html'), sample=SAMPLES) +
-            expand(os.path.join(REPORT_DIR, '{sample}.Krona_report.html'), sample=SAMPLES) +
-            [os.path.join(REPORT_DIR, 'index.html')]
-        )
+        'files': final_report_files
     },
     'lofreq': {
         'description': "Call variants and produce .vcf file and overview .csv file.",
