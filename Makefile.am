@@ -25,6 +25,10 @@ dist_pkglibexec_scripts_SCRIPTS = \
   scripts/vcfTocsv.py \
   scripts/vep_rule.py
 
+pkglibexec_snakefilescriptsdir = $(pkglibexecdir)/snakefile_scripts
+dist_pkglibexec_snakefilescripts_SCRIPTS = \
+  snakefile_scripts/rule_render_qc_report.py
+
 pkglibexec_reportsdir = $(pkglibexecdir)/scripts/report_scripts/
 dist_pkglibexec_reports_SCRIPTS = \
   scripts/report_scripts/index.Rmd \
