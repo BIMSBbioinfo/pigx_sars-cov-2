@@ -337,6 +337,9 @@ IVAR_WINDOW_WIDTH   = parameters["ivar_trimming"]["window-width"]
 MUTATION_DEPTH_THRESHOLD    = parameters["reporting"]["mutation-depth-threshold"]
 MUTATION_COVERAGE_THRESHOLD = parameters['reporting']['mutation-coverage-threshold']
 
+# deconvolution parameters
+DECONVOLUTION_METHOD = config["deconvolution"]["method"]
+
 START_POINT = config["control"]["start"].lower()
 TARGETS     = config["control"]["targets"]
 
@@ -951,6 +954,7 @@ rule run_deconvolution:
         "{output.variant_proportions}" \
         "{output.variants_with_meta}" \
         "{output.mutations}" \
+        "{DECONVOLUTION_METHOD}" \
         > {log} 2>&1
         """
 
