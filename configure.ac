@@ -60,20 +60,23 @@ AC_ARG_ENABLE([r-packages-check],
   [AC_MSG_NOTICE([Skipping R packages check.  Be careful!])],
   [dnl
 
-AX_R_PACKAGE([DT])
 AX_R_PACKAGE([base64url])
 AX_R_PACKAGE([data.table])
 AX_R_PACKAGE([dplyr])
+AX_R_PACKAGE([DT])
 AX_R_PACKAGE([ggplot2])
+AX_R_PACKAGE([htmltools])
+AX_R_PACKAGE([jsonlite])
+AX_R_PACKAGE([knitr])
 AX_R_PACKAGE([magrittr])
 AX_R_PACKAGE([MASS])
 AX_R_PACKAGE([plotly])
 AX_R_PACKAGE([qpcR])
+AX_R_PACKAGE([reshape2])
 AX_R_PACKAGE([rmarkdown])
+AX_R_PACKAGE([R.utils])
 AX_R_PACKAGE([stringr])
 AX_R_PACKAGE([tidyr])
-AX_R_PACKAGE([reshape2])
-AX_R_PACKAGE([R.utils])
 AX_R_PACKAGE([viridis])
   ])
 

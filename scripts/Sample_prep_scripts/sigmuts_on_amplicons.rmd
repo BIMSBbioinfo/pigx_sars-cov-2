@@ -8,7 +8,8 @@ theme: darkly
  
 ```{r libraries, message = FALSE}
 library(GenomicRanges)
-library(tidyverse)
+library(stringr)
+library(dplyr)
 library(data.table)
 ```
 ```{r read_primer}
