@@ -8,7 +8,9 @@ theme: darkly
  
 ```{r libraries, message = FALSE}
 library(GenomicRanges)
-library(tidyverse)
+library(stringr)
+library(dplyr)
+library(data.table)
 ```
 ```{r read_primer}
 primer <- read.table ( "../../tests/sample_data/nCoV-2019_NCref.bed", header = FALSE) # TODO provide as input
