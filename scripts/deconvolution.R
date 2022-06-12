@@ -11,6 +11,8 @@ library(magrittr)
 library(base64url)
 library(data.table)
 
+library(deconvR)
+
 ## command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 
@@ -319,7 +321,12 @@ if (execute_deconvolution) {
   others_prop_wt <- sigmut_proportion_weights[others_select_vec]
 
   # generate vector with all mutation frequencies: dummy and real
-  bulk_all <- c(others_freq_vec, bulk_freq_vec)
+  bulk_all_df <- data.frame(sample = c(others_freq_vec, bulk_freq_vec)) %>%
+
+    # Add IDs col and put it at position 1. Both name and posistion are required
+    # by the deconvolute function.
+    mutate(IDs = seq_len(nrow(.))) %>%
+    dplyr::select(IDs, everything())
 
   # make matrix with Others mutations and inverse the values and wild type
   # freqs
@@ -334,18 +341,23 @@ if (execute_deconvolution) {
 
 
   # generate combined signature matrix for variants, dummy and real
-  msig_all <- rbind(msig_inverse, msig_deduped_df_weighted) %>%
-    as.matrix()
+  msig_all_df <- rbind(msig_inverse, msig_deduped_df_weighted) %>%
 
+    # Add IDs col and put it at position 1. Both name and posistion are required
+    # by the deconvolute function.
+    mutate(IDs = seq_len(nrow(.))) %>%
+    dplyr::select(IDs, everything())
 
-  ## central deconvolution step ------------------------------------------------
-  variant_abundance <- deconv(bulk_all, msig_all)
-
+  # central deconvolution step
+  deconvolution_output <- deconvolute(
+    bulk = bulk_all_df,
+    reference = as.data.frame(msig_all_df)
+    )
 
   ## ----plot, echo = FALSE-----------------------------------------------------
   variant_abundance_df <- data.frame(
     variant = deconv_lineages,
-    abundance = variant_abundance
+    abundance = unlist(deconvolution_output[["proportions"]])
   ) %>%
     separate_rows(variant, sep = var_sep)
 
