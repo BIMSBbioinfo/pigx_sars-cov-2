@@ -83,6 +83,17 @@ mut_str_na_char <- "\\"
 # determine if signature mutation matrix needs to be weighted
 do_weighting <- str_detect(params$deconvolution_method, "weighted")
 
+# and which deconvolution model to use
+# this is a little bit more complicated than it strictly needs to be, but
+# should not care whether weighted is in front of, or behind the deconv model
+deconv_model <- str_extract_all(
+  params$deconvolution_method,
+  "[^(weighted)_]*"
+) %>%
+  lapply(paste0, collapse = "") %>%
+  unlist() 
+
+
 ## ----printInputSettings, echo = FALSE-----------------------------------------
 sample_name         <- params$sample_name
 sample_sheet        <- data.table::fread(params$sample_sheet)
@@ -367,7 +378,8 @@ if (execute_deconvolution) {
   # central deconvolution step
   deconvolution_output <- deconvolute(
     bulk = bulk_all_df,
-    reference = as.data.frame(msig_all_df)
+    reference = as.data.frame(msig_all_df),
+    model = deconv_model
     )
 
   ## ----plot, echo = FALSE-----------------------------------------------------
