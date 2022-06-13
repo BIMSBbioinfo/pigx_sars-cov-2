@@ -23,8 +23,9 @@
   (list (channel
           (name 'guix)
           (url "https://git.savannah.gnu.org/git/guix.git")
+          (branch "master")
           (commit
-            "b540e5e6bba6e0047864abcc3a6dfec46ff6cd32")
+            "e3ed1d09f9d490eff6becd6e9cb85a4d36c48e85")
           (introduction
             (make-channel-introduction
               "9edb3f66fd807b096b48283debdcddccfea34bad"
