@@ -60,6 +60,7 @@
         "r-minimal"
         "r-base64url"
         "r-data-table"
+        "r-deconvr"
         "r-dplyr"
         "r-dt"
         "r-ggplot2"
