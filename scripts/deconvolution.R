@@ -238,7 +238,8 @@ if (execute_deconvolution) {
   # generate deduped signature matrix
   # is a col was duplicated this contains only the first col of each dupe group
   msig_deduped_df <- msig_simple_df[, !is_dupe] %>%
-    rename(!!dupe_group_names)
+    rename(!!dupe_group_names) %>%
+    replace(is.na(.), 0)
 
   ## ----calculate_sigmat_weigths, include = FALSE------------------------------
   # FIXME Rename this to something like deconv_groups
@@ -300,8 +301,7 @@ if (execute_deconvolution) {
     msig_deduped_df_weighted <- msig_deduped_df %>%
       mutate(across(
         everything(), ~ .x / group_weights_vec[[cur_column()]]
-      )) %>%
-      replace(is.na(.), 0)
+      ))
 
     # TODO For downstream compatability only, remove once no longer needed
     sigmut_proportion_weights <- group_weights_vec
