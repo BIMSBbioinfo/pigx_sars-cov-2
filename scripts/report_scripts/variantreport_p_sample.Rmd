@@ -130,10 +130,12 @@ please consult the
 
 ```{r echo = FALSE}
 # get  NT mutations only, input for the signature matrix
-mutations.vector <- match.df$mut_str_collapsed
+mutations.vector <- match.df$gene_mut_collapsed
+
+df <- fread(params$variants_file)
 
 # only execute the deconvolution when at least one signature mutation was found
-executeDeconvolution <- length(mutations.vector) > 0
+executeDeconvolution <- nrow(df) > 0
 ```
 
 ```{asis, echo=executeDeconvolution}
@@ -168,8 +170,6 @@ Variant_colors <- c(
   "#67a04e"
 )
 # TODO this should be put into a separate color palette function in a separate file
-
-df <- fread(params$variant_abundance_file)
 
 font_family <- "DejaVu Sans"
 
