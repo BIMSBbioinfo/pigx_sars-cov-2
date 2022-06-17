@@ -132,7 +132,7 @@ please consult the
 # get  NT mutations only, input for the signature matrix
 mutations.vector <- match.df$gene_mut_collapsed
 
-df <- fread(params$variants_file)
+df <- fread(params$variant_abundance_file)
 
 # only execute the deconvolution when at least one signature mutation was found
 executeDeconvolution <- nrow(df) > 0
