@@ -256,14 +256,6 @@ if (run_pre_deconv) {
   # FIXME Rename this to something like deconv_groups
   deconv_lineages <- colnames(msig_deduped_df)
 
-  # special case: svr can't run on two or less variants, so we need to break
-  # early if that is the case
-  if (length(deconv_lineages) <= 2 && deconv_model == "svr") {
-    no_svr_exception <- FALSE
-  } else {
-    no_svr_exception <- TRUE
-  }
-
   if (do_weighting) {
     # calculate each variants weighting value
     n_found_vec <- lapply(
@@ -384,9 +376,16 @@ if (run_pre_deconv) {
       dplyr::select(IDs, everything())
 }
 
-# if sigmat dedupe did not run no_svr_exception cannot be known
 if (run_pre_deconv) {
-  run_deconvolution <- no_svr_exception
+  if (deconv_model == "svr") {
+    # To make svr model work with less than 10 cases, one would need to adjust
+    # the crossvalidation sample size in the underlying e1071::tune function,
+    # which is currently not supported by the deconvolute function.
+    # This would probably also lead to inaccurate results.
+    run_deconvolution <- nrow(msig_all_df) >= 10
+  } else {
+    run_deconvolution <- TRUE
+  }
 } else {
   run_deconvolution <- FALSE
 }
