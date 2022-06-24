@@ -40,5 +40,17 @@ files <- args[2:length(args)]
 
 output <- create_summary(files)
 
-# write to output file
-fwrite(output, output_file)
+if (is.null(output)) {
+  cat(
+    "Successfully completed summary table creation, but all files were empty,",
+    "writing dummy file."
+  )
+
+  writeLines(
+    "All summary input files were empty, this is a dummy file.",
+    output_file
+  )
+} else {
+  # write to output file
+  fwrite(output, output_file)
+}
