@@ -335,6 +335,11 @@ VEP_BUFFER_SIZE         = parameters["vep"]["buffer-size"]
 SPECIES                 = parameters["vep"]["species"]
 VEP_TRANSCRIPT_DISTANCE = parameters["vep"]["transcript-distance"]
 
+# ivar parameters
+IVAR_QUALITY_CUTOFF = parameters["ivar_trimming"]["quality-cutoff"]
+IVAR_LENGTH_CUTOFF  = parameters["ivar_trimming"]["length-cutoff"]
+IVAR_WINDOW_WIDTH   = parameters["ivar_trimming"]["window-width"]
+
 # mutation regression parameters
 MUTATION_DEPTH_THRESHOLD    = parameters["reporting"]["mutation-depth-threshold"]
 MUTATION_COVERAGE_THRESHOLD = parameters['reporting']['mutation-coverage-threshold']
@@ -570,18 +575,20 @@ rule ivar_primer_trim:
         os.path.join(MAPPED_READS_DIR, "{sample}_aligned_sorted_primer-trimmed.bam"),
     params:
         output=lambda wildcards, output: os.path.splitext(f"{output}")[0],
+        quality_cutoff=IVAR_QUALITY_CUTOFF,
+        length_cutoff=IVAR_LENGTH_CUTOFF,
+        window_width=IVAR_WINDOW_WIDTH
     log:
         os.path.join(LOG_DIR, "ivar_{sample}.log"),
-    # TODO number parameter should be accessible over settings file
     shell:
         """
         {IVAR_EXEC} trim \
         -b {input.primers} \
         -p {params.output} \
         -i {input.aligned_bam} \
-        -q 15 \
-        -m 180 \
-        -s 4 \
+        -q {params.quality_cutoff} \
+        -m {params.length_cutoff} \
+        -s {params.window_width} \
         -e \
         >> {log} 2>&1
         """
