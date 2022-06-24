@@ -712,17 +712,34 @@ rule vcf2csv:
     shell: "{PYTHON_EXEC} {params.script} {input} >> {log} 2>&1"
 
 rule vep:
-    input: os.path.join(VARIANTS_DIR, '{sample}_snv.vcf')
-    output: os.path.join(VARIANTS_DIR, '{sample}_vep_sarscov2.txt')
+    input:
+        os.path.join(VARIANTS_DIR, "{sample}_snv.vcf"),
+    output:
+        os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2.txt"),
     params:
-        species = "sars_cov_2"
-    log: os.path.join(LOG_DIR, 'vep_{sample}.log')
+        species="sars_cov_2",
+    log:
+        os.path.join(LOG_DIR, "vep_{sample}.log"),
     shell:
-      """
-      {VEP_EXEC} --verbose --offline --dir_cache {VEP_DB} --DB_VERSION 101 --appris --biotype --buffer_size 5000 --check_existing\
-      --distance 5000 --mane --protein --species {params.species} --symbol --transcript_version --tsl\
-      --input_file {input} --output_file {output} >> {log} 2>&1
-      """
+        """
+        {VEP_EXEC} --verbose --offline \
+        --dir_cache {VEP_DB} \
+        --DB_VERSION 101 \
+        --appris \
+        --mane \
+        --biotype \
+        --buffer_size 5000 \
+        --check_existing \
+        --distance 5000 \
+        --protein \
+        --symbol \
+        --transcript_version \
+        --tsl \
+        --species {params.species} \
+        --input_file {input} \
+        --output_file {output} \
+        >> {log} 2>&1
+        """
 
 rule parse_vep:
     input: os.path.join(VARIANTS_DIR, '{sample}_vep_sarscov2.txt')
