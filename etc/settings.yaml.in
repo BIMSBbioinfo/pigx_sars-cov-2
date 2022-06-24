@@ -20,13 +20,6 @@ parameters:
     buffer-size: 5000
     transcript-distance: 5000
 
-  # These parameters are used to filter raw reads when trimming. Reads
-  # that are shorter than the product of read-length( the lengths in
-  # basepairs) and the cut-off factor are removed.
-  trimming:
-    read-length: 150
-    cut-off: 0.8
-
   # These paramerters are used to set quality control filters for the reports.
   # Results from samples without sufficient coverage measures are not included in
   # the visualizations or the linear regression calculations.
