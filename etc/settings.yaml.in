@@ -20,6 +20,17 @@ parameters:
     buffer-size: 5000
     transcript-distance: 5000
 
+  # Parameters for rule ivar_primer_trim. See documentation about arguments
+  # -q
+  # -m
+  # -s
+  # respectively in the iVar documentation at
+  # https://andersen-lab.github.io/ivar/html/manualpage.html
+  ivar_trimming:
+    quality-cutoff: 15
+    length-cutoff: 30
+    window-width: 4    
+
   # These paramerters are used to set quality control filters for the reports.
   # Results from samples without sufficient coverage measures are not included in
   # the visualizations or the linear regression calculations.
