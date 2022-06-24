@@ -330,10 +330,6 @@ OUTPUT_DIR          = config["locations"]["output-dir"]
 # TODO: get default read length from multiqc
 parameters = config["parameters"]
 
-# trimming parameters
-READ_LENGTH      = parameters['trimming']['read-length']
-CUT_OFF          = parameters['trimming']['cut-off']
-
 # vep parameters
 VEP_BUFFER_SIZE         = parameters["vep"]["buffer-size"]
 SPECIES                 = parameters["vep"]["species"]
