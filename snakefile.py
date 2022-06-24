@@ -725,8 +725,6 @@ rule vep:
         {VEP_EXEC} --verbose --offline \
         --dir_cache {VEP_DB} \
         --DB_VERSION 101 \
-        --appris \
-        --mane \
         --biotype \
         --buffer_size 5000 \
         --check_existing \
@@ -734,7 +732,6 @@ rule vep:
         --protein \
         --symbol \
         --transcript_version \
-        --tsl \
         --species {params.species} \
         --input_file {input} \
         --output_file {output} \
