@@ -729,14 +729,14 @@ rule vep:
         {VEP_EXEC} --verbose --offline \
         --dir_cache {VEP_DB} \
         --DB_VERSION 101 \
-        --biotype \
         --buffer_size 5000 \
+        --species {params.species} \
         --check_existing \
         --distance 5000 \
+        --biotype \
         --protein \
         --symbol \
         --transcript_version \
-        --species {params.species} \
         --input_file {input} \
         --output_file {output} \
         >> {log} 2>&1
