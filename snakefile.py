@@ -330,9 +330,14 @@ OUTPUT_DIR          = config["locations"]["output-dir"]
 # TODO: get default read length from multiqc
 parameters = config["parameters"]
 
+# trimming parameters
 READ_LENGTH      = parameters['trimming']['read-length']
 CUT_OFF          = parameters['trimming']['cut-off']
 
+# vep parameters
+VEP_BUFFER_SIZE         = parameters["vep"]["buffer-size"]
+SPECIES                 = parameters["vep"]["species"]
+VEP_TRANSCRIPT_DISTANCE = parameters["vep"]["transcript-distance"]
 
 # mutation regression parameters
 MUTATION_DEPTH_THRESHOLD    = parameters["reporting"]["mutation-depth-threshold"]
@@ -721,7 +726,9 @@ rule vep:
     output:
         os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2.txt"),
     params:
-        species="sars_cov_2",
+        buffer_size=VEP_BUFFER_SIZE,
+        species=SPECIES,
+        transcript_distance=VEP_TRANSCRIPT_DISTANCE
     log:
         os.path.join(LOG_DIR, "vep_{sample}.log"),
     shell:
@@ -729,10 +736,10 @@ rule vep:
         {VEP_EXEC} --verbose --offline \
         --dir_cache {VEP_DB} \
         --DB_VERSION 101 \
-        --buffer_size 5000 \
+        --buffer_size {params.buffer_size} \
         --species {params.species} \
         --check_existing \
-        --distance 5000 \
+        --distance {params.transcript_distance} \
         --biotype \
         --protein \
         --symbol \
