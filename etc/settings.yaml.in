@@ -8,19 +8,20 @@ locations:
   vep-db-dir: databases/vep
   mutation-sheet: databases/mutation_sheet.csv
 
-# These settings are used to filter raw reads when trimming. Reads
-# that are shorter than the product of read-length( the lengths in
-# basepairs) and the cut-off factor are removed.
-trimming:
-  read-length: 150
-  cut-off: 0.8
+parameters:
+  # These parameters are used to filter raw reads when trimming. Reads
+  # that are shorter than the product of read-length( the lengths in
+  # basepairs) and the cut-off factor are removed.
+  trimming:
+    read-length: 150
+    cut-off: 0.8
 
-# These settings are used to set quality control filters for the reports.
-# Results from samples without sufficient coverage measures are not included in
-# the visualizations or the linear regression calculations.
-reporting:
-  mutation-coverage-threshold: 90
-  mutation-depth-threshold: 100
+  # These paramerters are used to set quality control filters for the reports.
+  # Results from samples without sufficient coverage measures are not included in
+  # the visualizations or the linear regression calculations.
+  reporting:
+    mutation-coverage-threshold: 90
+    mutation-depth-threshold: 100
 
 # The following settings control from which point the pipeline starts, which
 # path it follows (i.e. which rules are executed on the way) and where it stops.

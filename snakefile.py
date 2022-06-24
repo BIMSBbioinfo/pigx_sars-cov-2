@@ -328,11 +328,15 @@ VEP_DB              = config["locations"]["vep-db-dir"]
 OUTPUT_DIR          = config["locations"]["output-dir"]
 
 # TODO: get default read length from multiqc
-READ_LENGTH      = config['trimming']['read-length']
-CUT_OFF          = config['trimming']['cut-off']
+parameters = config["parameters"]
 
-MUTATION_DEPTH_THRESHOLD    = config["reporting"]["mutation-depth-threshold"]
-MUTATION_COVERAGE_THRESHOLD = config['reporting']['mutation-coverage-threshold']
+READ_LENGTH      = parameters['trimming']['read-length']
+CUT_OFF          = parameters['trimming']['cut-off']
+
+
+# mutation regression parameters
+MUTATION_DEPTH_THRESHOLD    = parameters["reporting"]["mutation-depth-threshold"]
+MUTATION_COVERAGE_THRESHOLD = parameters['reporting']['mutation-coverage-threshold']
 
 START_POINT = config["control"]["start"]
 TARGETS     = config["control"]["targets"]
