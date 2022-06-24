@@ -586,6 +586,7 @@ rule ivar_primer_trim:
         -q 15 \
         -m 180 \
         -s 4 \
+        -e \
         >> {log} 2>&1
         """
 
