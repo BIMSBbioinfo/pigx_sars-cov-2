@@ -579,7 +579,14 @@ rule ivar_primer_trim:
     # TODO number parameter should be accessible over settings file
     shell:
         """
-        {IVAR_EXEC} trim -b {input.primers} -p {params.output} -i {input.aligned_bam} -q 15 -m 180 -s 4 >> {log} 2>&1
+        {IVAR_EXEC} trim \
+        -b {input.primers} \
+        -p {params.output} \
+        -i {input.aligned_bam} \
+        -q 15 \
+        -m 180 \
+        -s 4 \
+        >> {log} 2>&1
         """
 
 
