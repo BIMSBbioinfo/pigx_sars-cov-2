@@ -9,6 +9,17 @@ locations:
   mutation-sheet: databases/mutation_sheet.csv
 
 parameters:
+  # Parameters for rule vep. See documentation about arguments
+  # --species
+  # --buffer_size
+  # --distance
+  # respectively in the vep documentation at
+  # https://grch37.ensembl.org/info/docs/tools/vep/script/vep_options.html
+  vep:
+    species: sars_cov_2
+    buffer-size: 5000
+    transcript-distance: 5000
+
   # These parameters are used to filter raw reads when trimming. Reads
   # that are shorter than the product of read-length( the lengths in
   # basepairs) and the cut-off factor are removed.
