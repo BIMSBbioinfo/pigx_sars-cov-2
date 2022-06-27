@@ -931,10 +931,14 @@ rule render_variant_report:
             VARIANTS_DIR, "{sample}_variant_abundance.csv"
         ),
         mutations=os.path.join(MUTATIONS_DIR, "{sample}_mutations.csv"),
+        vep_raw=os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2.txt"),
         vep=os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2_parsed.txt"),
         snv=os.path.join(VARIANTS_DIR, "{sample}_snv.csv"),
     output:
         varreport=os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.html"),
+    params:
+        vep_transcript_distance=VEP_TRANSCRIPT_DISTANCE,
+        vep_species=SPECIES
     log:
         os.path.join(LOG_DIR, "reports", "{sample}_variant_report.log"),
     shell:
@@ -948,6 +952,9 @@ rule render_variant_report:
           "variant_abundance_file": "{input.variant_abundance_file}", \
           "snv_file": "{input.snv}", \
           "vep_file": "{input.vep}", \
+          "vep_file_raw": "{input.vep_raw}", \
+          "vep_transcript_distance": "{params.vep_transcript_distance}", \
+          "vep_species": "{params.vep_species}", \
           "logo": "{LOGO}" \
         }}' > {log} 2>&1
         """
