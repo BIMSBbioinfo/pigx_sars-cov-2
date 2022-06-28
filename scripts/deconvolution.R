@@ -203,58 +203,13 @@ if (run_pre_deconv) {
   msig_simple <- create_sig_matrix(mutations_vec, mutation_sheet)
 
   # deduplicate matrix
-
-  variant_names <- colnames(msig_simple)
-
-  is_dupe <- duplicated(msig_simple, MARGIN = 2)
-  dupe_variants <- variant_names[is_dupe]
-
-  # coerce back to dataframe for easier processing
-  msig_simple_df <- as.data.frame(msig_simple)
-
-  # find out of which variant a dupe variant is a dupe of, generate groups
-  # of variants which are duplicates of each other
-  dupe_group_list <- list()
-
-  for (dupe_var in dupe_variants) {
-    if (!dupe_var %in% unique(unlist(dupe_group_list))) {
-      dupe_var_col <- msig_simple_df[[dupe_var]]
-
-      dupe_group_logi <- apply(
-        msig_simple,
-        2,
-        function(col, dupe_col) {
-          all(col == dupe_col)
-        }, dupe_var_col
-      )
-
-      dupe_group_vec <- variant_names[dupe_group_logi]
-
-      dupe_group_list[[dupe_group_vec[1]]] <- dupe_group_vec
-    }
-  }
-
-  # concat dupe groups to form a new composite name for the now unique col
-  dupe_group_names <- lapply(dupe_group_list, paste, collapse = var_sep) %>%
-    unlist()
-
-  # juggle names to get a named vector with names and values flipped
-  # needed by dplyr::rename()
-  old_names <- names(dupe_group_names)
-  new_names <- dupe_group_names
-
-  dupe_group_names <- old_names %>%
-    set_names(new_names)
-
-  # generate deduped signature matrix
-  # is a col was duplicated this contains only the first col of each dupe group
-  msig_deduped_df <- msig_simple_df[, !is_dupe] %>%
-    rename(!!dupe_group_names) %>%
-    replace(is.na(.), 0)
+  msig_deduped_df <- dedupe_sigmut_mat(msig_simple, var_sep)
 
   ## ----calculate_sigmat_weigths, include = FALSE------------------------------
   # FIXME Rename this to something like deconv_groups
   deconv_lineages <- colnames(msig_deduped_df)
+
+  variant_names <- colnames(msig_simple)
 
   if (do_weighting) {
     # calculate each variants weighting value
@@ -262,9 +217,10 @@ if (run_pre_deconv) {
       variant_names,
       function(variant) {
         if (variant == "Others") {
-          n_mut_found <- nrow(msig_simple_df)
+          n_mut_found <- nrow(msig_simple)
         } else {
-          n_mut_found <- sum(msig_simple_df[variant])
+          var_col_idx <- which(colnames(msig_simple) == variant)
+          n_mut_found <- sum(msig_simple[, var_col_idx])
         }
         names(n_mut_found) <- variant
 
@@ -406,9 +362,12 @@ if (run_deconvolution) {
   ) %>%
     separate_rows(variant, sep = var_sep)
 
-  # go trough all groups and assign each group member the group abundance
-  # divided by the number of group members
-  for (group in dupe_group_list) {
+  # average group abundances
+  # Groups containing only one variable will be assigned just that variables
+  # abundance.
+  # FIXME: This should be possible to put in a mutate in the previous block
+  #   before the separate rows.
+  for (group in str_split(deconv_lineages, var_sep)) {
     group_ind <- variant_abundance_df$variant %in% group
     group_abundance <- variant_abundance_df$abundance[group_ind][1]
 
