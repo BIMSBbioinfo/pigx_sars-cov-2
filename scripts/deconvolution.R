@@ -37,19 +37,19 @@ if (length(args) == 0) {
 
 # names must match order in snakefile and defaults
 arg_names <- c(
-    "deconvolution_functions",
-    "sample_name",
-    "mutation_sheet",
-    "sample_sheet",
-    "vep_file",
-    "snv_file",
-    "mutation_depth_threshold",
-    "sigmut_output_file",
-    "non_sigmut_output_file",
-    "variants_output_file",
-    "variants_with_meta_output_file",
-    "mutation_output_file",
-    "deconvolution_method"
+  "deconvolution_functions",
+  "sample_name",
+  "mutation_sheet",
+  "sample_sheet",
+  "vep_file",
+  "snv_file",
+  "mutation_depth_threshold",
+  "sigmut_output_file",
+  "non_sigmut_output_file",
+  "variants_output_file",
+  "variants_with_meta_output_file",
+  "mutation_output_file",
+  "deconvolution_method"
 )
 
 params <- lapply(args, function(x) x)
@@ -91,7 +91,7 @@ deconv_model <- str_extract_all(
   "[^(weighted)_]*"
 ) %>%
   lapply(paste0, collapse = "") %>%
-  unlist() 
+  unlist()
 
 
 ## ----printInputSettings, echo = FALSE-----------------------------------------
@@ -286,19 +286,19 @@ if (run_pre_deconv) {
         sel_vec <- names(n_found_vec) %in% group_vec
         mean_n_found <- sum(n_found_vec[sel_vec]) / length(group_vec)
 
-      # Special case: Group consists contains "Others". This implies no
-      # signature mutations were found for all variants in the group, and we
-      # can treat the group just like "Others" by itself.
-      if (str_detect(group, "Others")) {
-        # Note: When the mutation sheet contains a large number of variants
-        # that are not being detected, the "Others" dummy variant will be
-        # strongly biased towards lower abundances and by contrast variants
-        # not grouped with "Others" will be biased towards higher proportions.
-        mean_n_total <- nrow(sigmuts_deduped)
-      } else {
-        mean_n_total <- sum(sigmut_df$variant %in% group_vec) /
-         length(group_vec)
-      }
+        # Special case: Group consists contains "Others". This implies no
+        # signature mutations were found for all variants in the group, and we
+        # can treat the group just like "Others" by itself.
+        if (str_detect(group, "Others")) {
+          # Note: When the mutation sheet contains a large number of variants
+          # that are not being detected, the "Others" dummy variant will be
+          # strongly biased towards lower abundances and by contrast variants
+          # not grouped with "Others" will be biased towards higher proportions.
+          mean_n_total <- nrow(sigmuts_deduped)
+        } else {
+          mean_n_total <- sum(sigmut_df$variant %in% group_vec) /
+            length(group_vec)
+        }
 
         weight <- mean_n_found / mean_n_total
         names(weight) <- group
@@ -316,7 +316,7 @@ if (run_pre_deconv) {
 
     # TODO For downstream compatability only, remove once no longer needed
     sigmut_proportion_weights <- group_weights_vec
-}
+  }
 
   ## ----simulating_WT_mutations, include = FALSE-------------------------------
   # construct additional WT mutations that are not weighted
@@ -353,7 +353,7 @@ if (run_pre_deconv) {
     mutate(across(everything(), ~ as.numeric(!as.logical(.x))))
 
   if (do_weighting) {
-     msig_inverse <- msig_inverse %>%
+    msig_inverse <- msig_inverse %>%
 
       # apply weights
       mutate(across(
@@ -370,10 +370,10 @@ if (run_pre_deconv) {
 
   msig_all_df <- msig_all_df %>%
 
-      # Add IDs col and put it at position 1. Both name and posistion are
-      # required by the deconvolute function.
-      mutate(IDs = seq_len(nrow(.))) %>%
-      dplyr::select(IDs, everything())
+    # Add IDs col and put it at position 1. Both name and posistion are
+    # required by the deconvolute function.
+    mutate(IDs = seq_len(nrow(.))) %>%
+    dplyr::select(IDs, everything())
 }
 
 if (run_pre_deconv) {
@@ -397,7 +397,7 @@ if (run_deconvolution) {
     bulk = bulk_all_df,
     reference = as.data.frame(msig_all_df),
     model = deconv_model
-    )
+  )
 
   ## ----plot, echo = FALSE-----------------------------------------------------
   variant_abundance_df <- data.frame(
