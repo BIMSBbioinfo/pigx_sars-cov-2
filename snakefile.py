@@ -334,10 +334,10 @@ IVAR_LENGTH_CUTOFF  = parameters["ivar_trimming"]["length-cutoff"]
 IVAR_WINDOW_WIDTH   = parameters["ivar_trimming"]["window-width"]
 
 # mutation regression parameters
-MUTATION_DEPTH_THRESHOLD    = parameters["reporting"]["mutation-depth-threshold"]
 MUTATION_COVERAGE_THRESHOLD = parameters['reporting']['mutation-coverage-threshold']
 
 # deconvolution parameters
+MUTATION_DEPTH_THRESHOLD    = parameters["reporting"]["mutation-depth-threshold"]
 DECONVOLUTION_METHOD = config["deconvolution"]["method"]
 
 START_POINT = config["control"]["start"].lower()
