@@ -251,41 +251,6 @@ def multiqc_input(args):
     return list(chain.from_iterable(files))
 
 
-# WIP - until then use hack that create a single line in the lofreq output
-def vep_input(args):
-    """
-    Fucntion to skip all VEP rules for a sample in case no variants are found by
-    lofreq through creation of dummy VEP output files (?)
-    """
-    sample = args[0]
-    lofreq_output = (
-        rules.lofreq.output.vcf
-    )  # this requires the file to be there already - I have no idea how to make the decision about the further input when it requires a rule to run beforhand
-    logger.info(lofreq_output.format(sample=sample))
-    with open(lofreq_output.format(sample=sample), "r") as vcf:
-        content = vcf.read()
-        if re.findall("^NC", content, re.MULTILINE):  # regex ok or not?
-            # trigger vep path
-            return [
-                os.path.join(
-                    VARIANTS_DIR,
-                    "{sample}_vep_sarscov2_parsed.txt".format(sample=sample),
-                ),
-                os.path.join(VARIANTS_DIR, "{sample}_snv.csv".format(sample=sample)),
-            ]
-        else:
-            # skipp execution of all vep related rules and directly have smth that the report can work with
-            empty_vep_txt = os.path.join(
-                VARIANTS_DIR, "{sample}_vep_sarscov2_empty.txt".format(sample=sample)
-            )
-            Path(empty_vep_txt).touch()
-            empty_snv_csv = os.path.join(
-                VARIANTS_DIR, "{sample}_snv_empty.csv".format(sample=sample)
-            )
-            Path(empty_snv_csv).touch()
-            return [empty_vep_txt, empty_snv_csv]
-
-
 def render_qc_report_input(wildcards):
     sample = wildcards[0]
 
