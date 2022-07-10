@@ -173,6 +173,33 @@ def lofreq_input(wildcards):
 
     return files
 
+
+def vcf2csv_input(wildcards):
+    sample = wildcards[0]
+
+    if START_POINT == "vcf":
+        # take vcf files directly from the reads dir
+        input_file = os.path.join(READS_DIR, f"{sample}.vcf")
+
+    else:
+        input_file = os.path.join(VARIANTS_DIR, f"{sample}_snv.vcf")
+
+    return input_file
+
+
+def vep_input(wildcards):
+    sample = wildcards[0]
+
+    if START_POINT == "vcf":
+        # take vcf files directly from the reads dir
+        input_file = os.path.join(READS_DIR, f"{sample}.vcf")
+
+    else:
+        input_file = os.path.join(VARIANTS_DIR, f"{sample}_snv.vcf")
+
+    return input_file
+
+
 # dynamically define the multiqc input files created by FastQC and fastp
 # TODO add kraken reports per sample
 def multiqc_input(args):
@@ -377,12 +404,17 @@ SAMPLES = [line['name'] for line in SAMPLE_SHEET]
 
 # predefine files for targets
 final_report_files = (
-    expand(os.path.join(REPORT_DIR, '{sample}.qc_report_per_sample.html'), sample=SAMPLES) +
-    expand(os.path.join(REPORT_DIR, '{sample}.variantreport_p_sample.html'), sample=SAMPLES) +
-    [os.path.join(REPORT_DIR, 'index.html')]
+    expand(os.path.join(REPORT_DIR, '{sample}.variantreport_p_sample.html'), sample=SAMPLES)
 )
 
-if START_POINT != "bam":
+if START_POINT != "vcf":
+    final_report_files = (
+        final_report_files +
+        expand(os.path.join(REPORT_DIR, '{sample}.qc_report_per_sample.html'), sample=SAMPLES) +    
+        [os.path.join(REPORT_DIR, 'index.html')]
+    )
+
+if START_POINT not in ["bam", "vcf"]:
     final_report_files = (
         final_report_files +
         expand(os.path.join(REPORT_DIR, '{sample}.taxonomic_classification.html'), sample=SAMPLES) +
@@ -689,7 +721,7 @@ rule lofreq:
 
 
 rule vcf2csv:
-    input: os.path.join(VARIANTS_DIR, '{sample}_snv.vcf')
+    input: vcf2csv_input
     output: os.path.join(VARIANTS_DIR, '{sample}_snv.csv')
     params:
         script = os.path.join(SCRIPTS_DIR, 'vcfTocsv.py')
@@ -698,7 +730,7 @@ rule vcf2csv:
 
 rule vep:
     input:
-        os.path.join(VARIANTS_DIR, "{sample}_snv.vcf"),
+        vep_input,
     output:
         os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2.txt"),
     params:
