@@ -726,7 +726,7 @@ rule vcf2csv:
     params:
         script = os.path.join(SCRIPTS_DIR, 'vcfTocsv.py')
     log: os.path.join(LOG_DIR, 'vcf2csv_{sample}.log')
-    shell: "{PYTHON_EXEC} {params.script} {input} >> {log} 2>&1"
+    shell: "{PYTHON_EXEC} {params.script} {input} {output} >> {log} 2>&1"
 
 rule vep:
     input:
