@@ -392,7 +392,39 @@ IVAR_EXEC            = tool("ivar")
 #     * fastqc_trimmed_se
 #     * fastqc_trimmed_pe
 #     * fastqc_primer_trimmed
-# 
+#   vcf:
+#     * bam2fastq
+#     * bwa_align
+#     * bwa_index
+#     * create_mutations_summary
+#     * create_overviewQC_table
+#     * create_variants_summary
+#     * fastp
+#     * fastp_se
+#     * fastqc_primer_trimmed
+#     * fastqc_raw
+#     * fastqc_raw_se
+#     * fastqc_trimmed_pe
+#     * fastqc_trimmed_se
+#     * get_qc_table
+#     * ivar_primer_trim
+#     * kraken
+#     * krona_report
+#     * lofreq
+#     * multiqc
+#     * render_index
+#     * render_kraken2_report
+#     * render_qc_report
+#     * run_mutation_regression
+#     * samtools_bedcov
+#     * samtools_coverage
+#     * samtools_filter_aligned
+#     * samtools_filter_unaligned
+#     * samtools_index_postprimertrim
+#     * samtools_index_preprimertrim
+#     * samtools_sort_postprimertrim
+#     * samtools_sort_preprimertrim
+
 
 ## Load sample sheet
 with open(SAMPLE_SHEET_CSV, 'r') as fp:
