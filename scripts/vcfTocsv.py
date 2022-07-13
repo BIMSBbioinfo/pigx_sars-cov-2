@@ -7,6 +7,7 @@ import os
 import re
 import csv
 import sys
+from warnings import warn
 
 
 def vcfTocsv(vcffile, csvfile):
@@ -41,6 +42,7 @@ def vcfTocsv(vcffile, csvfile):
                     Var = snv_info1[4]
 
                     snv_info2 = re.split(r';', snv_info1[7])
+                    DP = AF = SB = DP4 = ""
                     for element in snv_info2:
                         if re.search(r'DP=', element):
                             # can this be concat. to fewer lines?
@@ -52,6 +54,12 @@ def vcfTocsv(vcffile, csvfile):
                             SB = element.split("=")[1]
                         if re.search(r'DP4=', element):
                             DP4 = element.split("=")[1]
+
+                    if any([DP, AF, SB, DP4]):
+                        warn(
+                            "At least one of \"DP\", \"AF\", \"SB\", \"DP4\" "
+                            "could not be found in the current line, writing "
+                            "\"\"...")
 
                     writer.writerow({'Chromosome': Chrom,
                                      'Pos': Pos,
