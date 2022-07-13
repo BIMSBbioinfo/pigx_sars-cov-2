@@ -326,6 +326,7 @@ parameters = config["parameters"]
 VEP_BUFFER_SIZE         = parameters["vep"]["buffer-size"]
 SPECIES                 = parameters["vep"]["species"]
 VEP_TRANSCRIPT_DISTANCE = parameters["vep"]["transcript-distance"]
+VEP_DB_VERSION          = parameters["vep"]["db-version"]
 
 # ivar parameters
 IVAR_QUALITY_CUTOFF = parameters["ivar_trimming"]["quality-cutoff"]
@@ -768,14 +769,15 @@ rule vep:
     params:
         buffer_size=VEP_BUFFER_SIZE,
         species=SPECIES,
-        transcript_distance=VEP_TRANSCRIPT_DISTANCE
+        transcript_distance=VEP_TRANSCRIPT_DISTANCE,
+        db_version=VEP_DB_VERSION
     log:
         os.path.join(LOG_DIR, "vep_{sample}.log"),
     shell:
         """
         {VEP_EXEC} --verbose --offline \
         --dir_cache {VEP_DB} \
-        --DB_VERSION 101 \
+        --DB_VERSION {params.db_version} \
         --buffer_size {params.buffer_size} \
         --species {params.species} \
         --check_existing \

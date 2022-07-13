@@ -19,6 +19,7 @@ parameters:
     species: sars_cov_2
     buffer-size: 5000
     transcript-distance: 5000
+    db-version: 101
 
   # Parameters for rule ivar_primer_trim. See documentation about arguments
   # -q
