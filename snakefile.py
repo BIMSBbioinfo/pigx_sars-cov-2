@@ -597,6 +597,10 @@ rule samtools_index_preprimertrim:
     shell: "{SAMTOOLS_EXEC} index {input} {output} >> {log} 2>&1"
 
 rule ivar_primer_trim:
+    # FIXME Currently this rule may be skipped by giving an extra option.
+    # I am wondering whether you could also just set the parameters so that
+    # the rule leaves everything as is. But that might be more trouble than it
+    # is worth.
     input:
         primers=AMPLICONS_BED,
         aligned_bam=os.path.join(MAPPED_READS_DIR, "{sample}_aligned_sorted.bam"),
