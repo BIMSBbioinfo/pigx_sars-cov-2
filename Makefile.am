@@ -1,4 +1,4 @@
-ACLOCAL_AMFLAGS = -I m4
+ACLOCAL_AMFLAGS = -I pigx-common/common/m4
 
 nodist_bin_SCRIPTS = \
   pigx-sars-cov-2
@@ -8,12 +8,14 @@ dist_pkglibexec_SCRIPTS = \
 
 pkglibexec_scriptsdir = $(pkglibexecdir)/scripts
 dist_pkglibexec_scripts_SCRIPTS = \
-  scripts/creating_mutation_summary_table.R \
-  scripts/creating_variants_summary_table.R \
+  scripts/create_summary_table.R \
   scripts/deconvolution.R \
+  scripts/deconvolution_funs.R \
   scripts/download_databases.sh \
+  scripts/fun_index.R \
   scripts/generateNavigation.R \
   scripts/get_qc_table.py \
+  scripts/mutation_regression.R \
   scripts/overview_QC_table.R \
   scripts/parse_vep.py \
   scripts/pooling.R \
@@ -21,8 +23,7 @@ dist_pkglibexec_scripts_SCRIPTS = \
   scripts/renderReport.R \
   scripts/sample_coverage_score.R \
   scripts/table_extraction.R \
-  scripts/vcfTocsv.py \
-  scripts/vep_rule.py
+  scripts/vcfTocsv.py
 
 pkglibexec_reportsdir = $(pkglibexecdir)/scripts/report_scripts/
 dist_pkglibexec_reports_SCRIPTS = \

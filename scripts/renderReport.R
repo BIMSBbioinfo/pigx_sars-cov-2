@@ -48,11 +48,21 @@ settings <- html_document(includes=includes(before_body=header),
                           css=css,
                           theme="lumen",
                           highlight="monochrome",
-                          code_folding="hide",
+                          code_folding="none",
                           depth="3",
                           toc=TRUE,
                           toc_float=TRUE,
                           number_sections=TRUE)
+
+# pretty print parameters for easier debugging
+cat("Script running with parameters:\n\n")
+par_vec <- c()
+for (i in seq_along(parameters)) {
+  par_vec[i] <- paste0(names(parameters)[i], " = \"", parameters[[i]], "\"")
+}
+cat(paste(par_vec, collapse = ",\n"))
+cat("\n\n")
+
 render(report,
        output_file=output,
        output_format=settings,

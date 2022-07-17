@@ -37,7 +37,6 @@ AMPLICONS_BED    = config['locations']['amplicons-bed']
 MUTATIONS_BED    = config['locations']['mutations-bed']
 KRAKEN_DB        = config['locations']['kraken-db-dir']
 KRONA_DB         = config['locations']['krona-db-dir']
-SIGMUT_DB        = config['locations']['sigmut-db-dir']
 VEP_DB           = config['locations']['vep-db-dir']
 OUTPUT_DIR       = config['locations']['output-dir']
 
@@ -45,6 +44,7 @@ OUTPUT_DIR       = config['locations']['output-dir']
 READ_LENGTH      = config['trimming']['read-length']
 CUT_OFF          = config['trimming']['cut-off']
 
+MUTATION_DEPTH_THRESHOLD    = config["reporting"]["mutation-depth-threshold"]
 MUTATION_COVERAGE_THRESHOLD = config['reporting']['mutation-coverage-threshold']
 
 INDEX_DIR         = os.path.join(OUTPUT_DIR, 'index')
@@ -162,9 +162,9 @@ onsuccess:
             if name not in expected_files or os.path.getmtime(name) != expected_files[name]:
                 generated.append(name)
         if generated:
-            print("The following files have been generated:")
+            logger.info("The following files have been generated:")
             for name in generated:
-                print("  - {}".format(name))
+                logger.info("  - {}".format(name))
 
 # function to pass read files to trim/filter/qc improvement
 def trim_reads_input(args):
@@ -211,7 +211,7 @@ def multiqc_input(args):
 def vep_input(args):
     sample = args[0]
     lofreq_output = rules.lofreq.output.vcf # this requires the file to be there already - I have no idea how to make the decision about the further input when it requires a rule to run beforhand
-    print(lofreq_output.format(sample=sample))
+    logger.info(lofreq_output.format(sample=sample))
     with open(lofreq_output.format(sample=sample), 'r') as vcf:
         content = vcf.read()
         if re.findall('^NC', content, re.MULTILINE): # regex ok or not?
@@ -437,10 +437,10 @@ def no_variant_vep(sample, lofreq_output):
     content = open(lofreq_output.format(sample=sample), 'r').read()
     if re.findall('^NC', content, re.MULTILINE):  # regex ok or not?
         # trigger vep path
-        print('File can be used for downstream processing')
+        logger.info('File can be used for downstream processing')
     else:
         # write smth so that vep does not crash - deal with everything later in the variant_report
-        print('adding dummy entry to vcf file, because no variants were found')
+        logger.info('adding dummy entry to vcf file, because no variants were found')
         open(lofreq_output.format(sample=sample), 'a').write(
             "NC_000000.0\t00\t.\tA\tA\t00\tPASS\tDP=0;AF=0;SB=0;DP4=0,0,0,0")
 
@@ -575,75 +575,135 @@ rule render_kraken2_report:
 }}' > {log} 2>&1"""
 
 
+rule run_deconvolution:
+    input:
+        script=os.path.join(SCRIPTS_DIR, "deconvolution.R"),
+        deconvolution_functions=os.path.join(
+            SCRIPTS_DIR, "deconvolution_funs.R"
+        ),
+        vep=os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2_parsed.txt"),
+        snv=os.path.join(VARIANTS_DIR, "{sample}_snv.csv"),
+    output:
+        sigmut_df=os.path.join(MUTATIONS_DIR, "{sample}_sigmuts.csv"),
+        non_sigmut_df=os.path.join(MUTATIONS_DIR, "{sample}_non_sigmuts.csv"),
+        variant_proportions=os.path.join(
+            VARIANTS_DIR, "{sample}_variants.csv"
+        ),
+        variants_with_meta=os.path.join(VARIANTS_DIR,
+         "{sample}_variants_with_meta.csv"),
+        mutations=os.path.join(MUTATIONS_DIR, "{sample}_mutations.csv"),
+    log:
+        os.path.join(LOG_DIR, "reports", "{sample}_deconvolution.log"),
+    shell:
+        """
+        {RSCRIPT_EXEC} {input.script} \
+        "{input.deconvolution_functions}" \
+        "{wildcards.sample}" \
+        "{MUTATION_SHEET_CSV}" \
+        "{SAMPLE_SHEET_CSV}" \
+        "{input.vep}" \
+        "{input.snv}" \
+        "{MUTATION_DEPTH_THRESHOLD}" \
+        "{output.sigmut_df}" \
+        "{output.non_sigmut_df}" \
+        "{output.variant_proportions}" \
+        "{output.variants_with_meta}" \
+        "{output.mutations}" \
+        > {log} 2>&1
+        """
+
+
 rule render_variant_report:
     input:
-      vep = os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2_parsed.txt"),
-      snv = os.path.join(VARIANTS_DIR, "{sample}_snv.csv"),
-      deconvolution_functions = os.path.join( SCRIPTS_DIR, "deconvolution.R" ),
-      script = os.path.join( SCRIPTS_DIR, "renderReport.R" ),
-      report = os.path.join( SCRIPTS_DIR,"report_scripts", "variantreport_p_sample.Rmd" ),
-      header = os.path.join( REPORT_DIR, "_navbar.html" )
+        script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
+        report=os.path.join(SCRIPTS_DIR, "report_scripts", "variantreport_p_sample.Rmd"),
+        header=os.path.join(REPORT_DIR, "_navbar.html"),
+        sigmut_file=os.path.join(MUTATIONS_DIR, "{sample}_sigmuts.csv"),
+        non_sigmut_file=os.path.join(MUTATIONS_DIR, "{sample}_non_sigmuts.csv"),
+        variants_file=os.path.join(
+            VARIANTS_DIR, "{sample}_variants.csv"
+        ),
+        mutations=os.path.join(MUTATIONS_DIR, "{sample}_mutations.csv"),
+        vep=os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2_parsed.txt"),
+        snv=os.path.join(VARIANTS_DIR, "{sample}_snv.csv"),
     output:
-      varreport = os.path.join( REPORT_DIR, "{sample}.variantreport_p_sample.html" ),
-      mutations = os.path.join( MUTATIONS_DIR, "{sample}_mutations.csv"),
-      variants = os.path.join( VARIANTS_DIR, "{sample}_variants.csv")
-    log: os.path.join( LOG_DIR, "reports", "{sample}_variant_report.log" )
-    shell: """
-            {RSCRIPT_EXEC} {input.script} \
-            {input.report} {output.varreport} {input.header} \
-            '{{\
-              "sample_name":  "{wildcards.sample}",  \
-              "sigmut_db":    "{SIGMUT_DB}",         \
-              "output_dir": "{OUTPUT_DIR}",      \
-              "vep_file":     "{input.vep}",         \
-              "snv_file":     "{input.snv}",         \
-              "sample_sheet": "{SAMPLE_SHEET_CSV}",  \
-              "mutation_sheet": "{MUTATION_SHEET_CSV}", \
-              "deconvolution_functions": "{input.deconvolution_functions}", \
-              "logo": "{LOGO}" \
-            }}' > {log} 2>&1
-           """
+        varreport=os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.html"),
+    log:
+        os.path.join(LOG_DIR, "reports", "{sample}_variant_report.log"),
+    shell:
+        """
+        {RSCRIPT_EXEC} {input.script} \
+        {input.report} {output.varreport} {input.header} \
+        '{{ \
+          "sample_name": "{wildcards.sample}", \
+          "sigmut_file": "{input.sigmut_file}", \
+          "non_sigmut_file": "{input.non_sigmut_file}", \
+          "variants_file": "{input.variants_file}", \
+          "snv_file": "{input.snv}", \
+          "vep_file": "{input.vep}", \
+          "logo": "{LOGO}" \
+        }}' > {log} 2>&1
+        """
 
 
 rule render_qc_report:
     input:
-      script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
-      report=os.path.join(SCRIPTS_DIR, "report_scripts", "qc_report_per_sample.Rmd"),
-      header=os.path.join(REPORT_DIR, "_navbar.html"),
-      coverage=os.path.join(COVERAGE_DIR, "{sample}_merged_covs.csv"),
-      multiqc=os.path.join(MULTIQC_DIR, '{sample}', 'multiqc_report.html')
+        script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
+        report=os.path.join(SCRIPTS_DIR, "report_scripts", "qc_report_per_sample.Rmd"),
+        header=os.path.join(REPORT_DIR, "_navbar.html"),
+        coverage=os.path.join(COVERAGE_DIR, "{sample}_merged_covs.csv"),
+        multiqc=os.path.join(MULTIQC_DIR, "{sample}", "multiqc_report.html"),
     output:
-      os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.html")
+        html_report=os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.html"),
+        table_outfile=os.path.join(
+            COVERAGE_DIR, "{sample}_report_download_coverage.csv"
+        ),
     params:
-      multiqc_rel_path=lambda wildcards, input: input.multiqc[len(REPORT_DIR)+1:]
-    log: os.path.join(LOG_DIR, "reports", "{sample}_qc_report.log")
-    shell: """{RSCRIPT_EXEC} {input.script} \
-{input.report} {output} {input.header} \
-'{{\
-  "sample_name": "{wildcards.sample}",  \
-  "coverage_file": "{input.coverage}",   \
-  "multiqc_report": "{params.multiqc_rel_path}", \
-  "logo": "{LOGO}" \
-}}' > {log} 2>&1"""
+        multiqc_rel_path=lambda wildcards, input: input.multiqc[len(REPORT_DIR) + 1 :],
+    log:
+        os.path.join(LOG_DIR, "reports", "{sample}_qc_report.log"),
+    shell:
+        """{RSCRIPT_EXEC} {input.script} \
+        {input.report} {output.html_report} {input.header} \
+        '{{\
+          "sample_name": "{wildcards.sample}",  \
+          "coverage_file": "{input.coverage}",   \
+          "multiqc_report": "{params.multiqc_rel_path}", \
+          "logo": "{LOGO}", \
+          "coverage_table_outfile": "{output.table_outfile}" \
+        }}' > {log} 2>&1"""
 
 
 rule create_variants_summary:
     input:
-        script = os.path.join(SCRIPTS_DIR, "creating_variants_summary_table.R"),
-        files = expand(os.path.join(VARIANTS_DIR, "{sample}_variants.csv"), sample = SAMPLES)
-    output: os.path.join(VARIANTS_DIR, 'data_variant_plot.csv')
-    log: os.path.join(LOG_DIR, "create_variants_summary.log")
-    shell: """
-        {RSCRIPT_EXEC} {input.script} "{VARIANTS_DIR}" {output} > {log} 2>&1
+        script=os.path.join(SCRIPTS_DIR, "create_summary_table.R"),
+        files=expand(
+            os.path.join(VARIANTS_DIR, "{sample}_variants_with_meta.csv"),
+            sample=SAMPLES,
+        ),
+    output:
+        os.path.join(VARIANTS_DIR, "data_variant_plot.csv"),
+    log:
+        os.path.join(LOG_DIR, "create_variants_summary.log"),
+    shell:
         """
+        {RSCRIPT_EXEC} {input.script} {output} {input.files} > {log} 2>&1
+        """
+
+
 rule create_mutations_summary:
     input:
-        script = os.path.join(SCRIPTS_DIR, "creating_mutation_summary_table.R"),
-        files = expand(os.path.join(MUTATIONS_DIR, "{sample}_mutations.csv"), sample = SAMPLES)
-    output: os.path.join(VARIANTS_DIR, 'data_mutation_plot.csv')
-    log: os.path.join(LOG_DIR, "create_mutations_summary.log")
-    shell: """
-        {RSCRIPT_EXEC} {input.script} "{MUTATIONS_DIR}" {output} > {log} 2>&1
+        script=os.path.join(SCRIPTS_DIR, "create_summary_table.R"),
+        files=expand(
+            os.path.join(MUTATIONS_DIR, "{sample}_mutations.csv"), sample=SAMPLES
+        ),
+    output:
+        os.path.join(MUTATIONS_DIR, "data_mutation_plot.csv"),
+    log:
+        os.path.join(LOG_DIR, "create_mutations_summary.log"),
+    shell:
+        """
+        {RSCRIPT_EXEC} {input.script} {output} {input.files} > {log} 2>&1
         """
 
 # TODO integrate the output of fastp.json to get the number of raw and trimmed reads
@@ -656,38 +716,81 @@ rule create_overviewQC_table:
     shell: """
         {RSCRIPT_EXEC} {input.script} {SAMPLE_SHEET_CSV} {output} {READS_DIR} {TRIMMED_READS_DIR} {MAPPED_READS_DIR} {COVERAGE_DIR} > {log} 2>&1
     """
+    
+rule run_mutation_regression:
+    input:
+        script=os.path.join(SCRIPTS_DIR, "mutation_regression.R"),
+        mutations_csv=os.path.join(MUTATIONS_DIR, "data_mutation_plot.csv"),
+        overviewQC=os.path.join(OUTPUT_DIR, "overview_QC.csv"),
+        fun_cvrg_scr=os.path.join(SCRIPTS_DIR, "sample_coverage_score.R"),
+        fun_lm=os.path.join(SCRIPTS_DIR, "pred_mutation_increase.R"),
+        fun_pool=os.path.join(SCRIPTS_DIR, "pooling.R"),
+        fun_tbls=os.path.join(SCRIPTS_DIR, "table_extraction.R")
+    output:
+        mut_count_outfile=os.path.join(OUTPUT_DIR, "mutations_counts.csv"),
+        unfilt_mutation_sig_outfile=os.path.join(
+            OUTPUT_DIR, "unfiltered_mutations_sig.csv"
+        ),
+    log:
+        os.path.join(LOG_DIR, "reports", "mutation_regression.log"),
+    shell:
+        """
+        {RSCRIPT_EXEC} {input.script} \
+            {input.mutations_csv} \
+            {COVERAGE_DIR} \
+            {MUTATION_SHEET_CSV} \
+            {input.fun_cvrg_scr} \
+            {input.fun_lm} \
+            {input.fun_pool} \
+            {input.fun_tbls} \
+            {MUTATION_COVERAGE_THRESHOLD} \
+            {input.overviewQC} \
+            {output.mut_count_outfile} \
+            {output.unfilt_mutation_sig_outfile} \
+            > {log} 2>&1
+        """
+
 
 rule render_index:
     input:
-      script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
-      report=os.path.join(SCRIPTS_DIR, "report_scripts", "index.Rmd"),
-      header=os.path.join(REPORT_DIR, "_navbar.html"),
-      variants = os.path.join(VARIANTS_DIR, 'data_variant_plot.csv'),
-      mutations = os.path.join(VARIANTS_DIR, 'data_mutation_plot.csv'),
-      overviewQC = os.path.join(OUTPUT_DIR, 'overview_QC.csv'),
+        script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
+        report=os.path.join(SCRIPTS_DIR, "report_scripts", "index.Rmd"),
+        header=os.path.join(REPORT_DIR, "_navbar.html"),
+        variants=os.path.join(VARIANTS_DIR, "data_variant_plot.csv"),
+        mutations=os.path.join(MUTATIONS_DIR, "data_mutation_plot.csv"),
+        overviewQC=os.path.join(OUTPUT_DIR, "overview_QC.csv"),
+        mut_count_file=os.path.join(OUTPUT_DIR, "mutations_counts.csv"),
+        unfiltered_mutation_sig_file=os.path.join(
+            OUTPUT_DIR, "unfiltered_mutations_sig.csv"
+        ),
     params:
-      fun_cvrg_scr = os.path.join(SCRIPTS_DIR, 'sample_coverage_score.R'),
-      fun_lm = os.path.join(SCRIPTS_DIR, 'pred_mutation_increase.R'),
-      fun_tbls = os.path.join(SCRIPTS_DIR, 'table_extraction.R'),
-      fun_pool = os.path.join(SCRIPTS_DIR, 'pooling.R')
-    output: report = os.path.join(REPORT_DIR, "index.html"),
-            tbl_mut_count = os.path.join(OUTPUT_DIR, "mutations_counts.csv"),
-            tbl_lm_res = os.path.join(OUTPUT_DIR, "linear_regression_results.csv")
-    log: os.path.join(LOG_DIR, "reports", "index.log")
-    shell: """{RSCRIPT_EXEC} {input.script} \
-{input.report} {output.report} {input.header}   \
-'{{                                      \
-  "variants_csv": "{input.variants}",   \
-  "mutations_csv": "{input.mutations}", \
-  "coverage_dir": "{COVERAGE_DIR}",\
-  "sample_sheet": "{SAMPLE_SHEET_CSV}",  \
-  "mutation_sheet": "{MUTATION_SHEET_CSV}", \
-  "mutation_coverage_threshold": "{MUTATION_COVERAGE_THRESHOLD}", \
-  "logo": "{LOGO}", \
-  "fun_cvrg_scr": "{params.fun_cvrg_scr}", \
-  "fun_lm": "{params.fun_lm}", \
-  "fun_tbls": "{params.fun_tbls}", \
-  "fun_pool": "{params.fun_pool}", \
-  "overviewQC": "{input.overviewQC}", \
-  "output_dir": "{OUTPUT_DIR}" \
-}}' > {log} 2>&1"""
+        fun_cvrg_scr=os.path.join(SCRIPTS_DIR, "sample_coverage_score.R"),
+        fun_lm=os.path.join(SCRIPTS_DIR, "pred_mutation_increase.R"),
+        fun_tbls=os.path.join(SCRIPTS_DIR, "table_extraction.R"),
+        fun_pool=os.path.join(SCRIPTS_DIR, "pooling.R"),
+        fun_index=os.path.join(SCRIPTS_DIR, "fun_index.R"),
+    output:
+        report=os.path.join(REPORT_DIR, "index.html"),
+    log:
+        os.path.join(LOG_DIR, "reports", "index.log"),
+    shell:
+        """{RSCRIPT_EXEC} {input.script} \
+        {input.report} {output.report} {input.header}   \
+        '{{ \
+          "variants_csv": "{input.variants}", \
+          "mutations_csv": "{input.mutations}", \
+          "sample_sheet": "{SAMPLE_SHEET_CSV}", \
+          "mutation_sheet": "{MUTATION_SHEET_CSV}", \
+          "mutation_coverage_threshold": "{MUTATION_COVERAGE_THRESHOLD}", \
+          "mut_count_file": "{input.mut_count_file}", \
+          "unfiltered_mutation_sig_file": "{input.unfiltered_mutation_sig_file}", \
+          "logo": "{LOGO}", \
+          "fun_lm": "{params.fun_lm}", \
+          "fun_tbls": "{params.fun_tbls}", \
+          "fun_cvrg_scr": "{params.fun_cvrg_scr}", \
+          "fun_pool": "{params.fun_pool}", \
+          "fun_index": "{params.fun_index}", \
+          "overviewQC": "{input.overviewQC}", \
+          "coverage_dir": "{COVERAGE_DIR}", \
+          "output_dir": "{OUTPUT_DIR}" \
+        }}' > {log} 2>&1"""
