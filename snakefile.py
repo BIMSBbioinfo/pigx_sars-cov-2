@@ -121,10 +121,10 @@ def trim_reads_input(args):
     ]
 
 
-def map_input(args):
+def bwa_align_input(args):
     """
-    Function to return the trimmed read files belonging to a sample, independent
-    of their end mode (single vs paired).
+    Input function to return the trimmed read files belonging to a sample, 
+    independent of their end mode (single vs paired).
     """
     sample = args[0]
     reads_files = [
@@ -556,7 +556,7 @@ rule bwa_index:
 # alignment works with both single and paired-end files
 rule bwa_align:
     input:
-        fastq = map_input,
+        fastq = bwa_align_input,
         ref = os.path.join(INDEX_DIR, "{}".format(os.path.basename(REFERENCE_FASTA))),
         index = os.path.join(INDEX_DIR, "{}.bwt".format(os.path.basename(REFERENCE_FASTA)))
     output: os.path.join(MAPPED_READS_DIR, '{sample}_aligned_tmp.sam')
@@ -691,7 +691,7 @@ rule fastqc_raw:
                     mv {params.output_dir}/{tmp_R2_zip} {output.r2_zip}
                 fi """)
 
-# TODO: can probably be done by using map_input, no seperate functions neccessary?
+# TODO: can probably be done by using bwa_align_input, no seperate functions neccessary?
 rule fastqc_trimmed_se:
     input: os.path.join(TRIMMED_READS_DIR, "{sample}_trimmed.fastq.gz")
     output:
