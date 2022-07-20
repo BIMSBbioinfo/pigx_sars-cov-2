@@ -19,46 +19,6 @@ group_by_day <- function( df ){
   return(df_grouped)
 }
 
-read_files <- function ( sample_sheet.df ){
-  samples <- sample_sheet.df$name
-  do.call( bind_rows, lapply(samples, apply_fun_lookup, sample_sheet = sample_sheet.df))
-}
-
-apply_fun_lookup <- function ( sample, sample_sheet.df ){
-  sample_row <- which(sample_sheet.df$name == sample)
-  # works only for paired end for now - I don't know how to make num of returned read files conditional based on sample_sheet columns
-  # TODO make num of returend reads depended on paired or single end
-  data.frame( samplename = sample,
-              raw_reads1 = sample_sheet.df[sample_row,"reads"],
-              raw_reads2 = sample_sheet.df[sample_row, "reads2"])
-}
-
-read_num_raw <- function ( raw_reads_vector, reads_dir){
-  do.call( bind_rows, lapply(raw_reads_vector, apply_fun_get_read_num, reads_dir = reads_dir))
-}
-
-apply_fun_get_read_num <- function (read, reads_dir) {
-  read_num <- as.numeric(
-                      system2(command = "echo", 
-                      args = c ("$(zcat ", file.path(reads_dir, read), "|wc -l)/4|bc"),
-                      stdout = TRUE))
-  data.frame( read_num )
-}
-
-get_num_raw_reads <- function (reads_dir, sample_sheet){
-  
-  sample_sheet.df <- fread(sample_sheet)
-  # get read files matching samples
-  cat("get samples and reads from sample_sheet...\n")
-  read_counts <- read_files ( sample_sheet.df )
-  # fixme can do in one line with dplyr and across I think
-  read_counts$reads_r1 <- read_num_raw(read_counts$raw_reads1, reads_dir)$read_num
-  read_counts$reads_r2 <- read_num_raw(read_counts$raw_reads2, reads_dir)$read_num
-  read_counts <- read_counts %>% mutate( total_reads = reads_r1 + reads_r2 )
-  
-  return(read_counts)
-}
-
 pool_by_weighted_mean <- function(df, weights, group_fun = c("day_location", "day")) {
   #' docstring missing
   #' weigths is a dataframe with minimum samplenames and total_reads as column
