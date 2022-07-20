@@ -1,6 +1,6 @@
 locations:
   output-dir: output
-  reads-dir: reads
+  input-dir: reads
   reference-fasta: sample_data/NC_045512.2.fasta
   amplicons-bed: sample_data/nCoV-2019_NCref.bed
   kraken-db-dir: databases/kraken

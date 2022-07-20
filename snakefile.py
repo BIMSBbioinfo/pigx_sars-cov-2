@@ -99,7 +99,7 @@ def samtools_sort_preprimertrim_input(wildcards):
 
     if START_POINT == "bam":
         # take bam files directly from the reads dir
-        input_file = os.path.join(READS_DIR, f"{sample}.bam")
+        input_file = os.path.join(INPUT_DIR, f"{sample}.bam")
 
     else:
         input_file = os.path.join(MAPPED_READS_DIR, f"{sample}_aligned.bam")
@@ -115,7 +115,7 @@ def trim_reads_input(args):
     """
     sample = args[0]
     return [
-        os.path.join(READS_DIR, f)
+        os.path.join(INPUT_DIR, f)
         for f in lookup("name", sample, ["reads", "reads2"])
         if f
     ]
@@ -128,7 +128,7 @@ def map_input(args):
     """
     sample = args[0]
     reads_files = [
-        os.path.join(READS_DIR, f)
+        os.path.join(INPUT_DIR, f)
         for f in lookup("name", sample, ["reads", "reads2"])
         if f
     ]
@@ -179,7 +179,7 @@ def vcf2csv_input(wildcards):
 
     if START_POINT == "vcf":
         # take vcf files directly from the reads dir
-        input_file = os.path.join(READS_DIR, f"{sample}.vcf")
+        input_file = os.path.join(INPUT_DIR, f"{sample}.vcf")
 
     else:
         input_file = os.path.join(VARIANTS_DIR, f"{sample}_snv.vcf")
@@ -192,7 +192,7 @@ def vep_input(wildcards):
 
     if START_POINT == "vcf":
         # take vcf files directly from the reads dir
-        input_file = os.path.join(READS_DIR, f"{sample}.vcf")
+        input_file = os.path.join(INPUT_DIR, f"{sample}.vcf")
 
     else:
         input_file = os.path.join(VARIANTS_DIR, f"{sample}_snv.vcf")
@@ -209,7 +209,7 @@ def multiqc_input(args):
     """
     sample = args[0]
     reads_files = [
-        os.path.join(READS_DIR, f)
+        os.path.join(INPUT_DIR, f)
         for f in lookup("name", sample, ["reads", "reads2"])
         if f
     ]
@@ -310,7 +310,7 @@ def render_qc_report_params(wildcards, input, output = None, threads = None, res
 
 SAMPLE_SHEET_CSV    = config["locations"]["sample-sheet"]
 MUTATION_SHEET_CSV  = config["locations"]["mutation-sheet"]
-READS_DIR           = config["locations"]["reads-dir"]
+INPUT_DIR           = config["locations"]["input-dir"]
 REFERENCE_FASTA     = config["locations"]["reference-fasta"]
 AMPLICONS_BED       = config["locations"]["amplicons-bed"]
 MUTATIONS_BED       = config["locations"]["mutations-bed"]
@@ -1049,7 +1049,7 @@ rule create_overviewQC_table:
         {RSCRIPT_EXEC} {input.script} \
             {SAMPLE_SHEET_CSV} \
             {output} \
-            {READS_DIR} \
+            {INPUT_DIR} \
             {TRIMMED_READS_DIR} \
             {MAPPED_READS_DIR} \
             {input.quality_table_file} > {log} 2>&1
