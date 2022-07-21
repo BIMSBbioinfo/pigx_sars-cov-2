@@ -20,19 +20,22 @@ if (length(args) == 0) {
   )
 }
 
-params <- list(
-  mutations_csv = args[[1]],
-  coverage_dir = args[[2]],
-  mutation_sheet = args[[3]],
-  fun_cvrg_scr = args[[4]],
-  fun_lm = args[[5]],
-  fun_pool = args[[6]],
-  fun_tbls = args[[7]],
-  mutation_coverage_threshold = args[[8]],
-  overviewQC = args[[9]],
-  mut_count_outfile = args[[10]],
-  unfilt_mutation_sig_outfile = args[[11]]
-)
+# names must match order in snakefile and defaults
+arg_names <- c(
+  "mutations_csv",
+  "coverage_dir",
+  "mutation_sheet",
+  "fun_cvrg_scr",
+  "fun_lm",
+  "fun_tbls",
+  "mutation_coverage_threshold",
+  "overviewQC",
+  "mut_count_outfile",
+  "unfilt_mutation_sig_outfile"
+  )
+
+params <- lapply(args, function(x) x)
+names(params) <- arg_names
 
 # pretty print parameters for easier debugging
 cat("Script running with parameters:\n\n")

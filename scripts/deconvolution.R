@@ -32,20 +32,24 @@ if (length(args) == 0) {
   )
 }
 
-params <- list(
-    deconvolution_functions = args[[1]],
-    sample_name = args[[2]],
-    mutation_sheet = args[[3]],
-    sample_sheet = args[[4]],
-    vep_file = args[[5]],
-    snv_file = args[[6]],
-    mutation_depth_threshold = args[[7]],
-    sigmut_output_file = args[[8]],
-    non_sigmut_output_file = args[[9]],
-    variants_output_file = args[[10]],
-    variants_with_meta_output_file = args[[11]],
-    mutation_output_file = args[[12]]
+# names must match order in snakefile and defaults
+arg_names <- c(
+    "deconvolution_functions",
+    "sample_name",
+    "mutation_sheet",
+    "sample_sheet",
+    "vep_file",
+    "snv_file",
+    "mutation_depth_threshold",
+    "sigmut_output_file",
+    "non_sigmut_output_file",
+    "variants_output_file",
+    "variants_with_meta_output_file",
+    "mutation_output_file"
 )
+
+params <- lapply(args, function(x) x)
+names(params) <- arg_names
 
 # pretty print parameters for easier debugging
 cat("Script running with parameters:\n\n")
