@@ -903,6 +903,6 @@ Table 1: Discarded samples not matching the provided sample quality scoring.
 
 ```{r table_sample_quality_score}
 # TODO refine column names --> e.g "coverage in percent",
-bad_samples_df <- bad_samples_df %>% slice_head(n = 20)
+bad_samples_df <- bad_samples_df
 create_dt(bad_samples_df)
 ```
