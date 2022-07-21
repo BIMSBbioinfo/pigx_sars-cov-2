@@ -11,7 +11,6 @@ if (length(args) == 0) {
     mutation_sheet = "",
     fun_cvrg_scr = "",
     fun_lm = "",
-    fun_pool = "",
     fun_tbls = "",
     mutation_coverage_threshold = "",
     overviewQC = "",
@@ -55,7 +54,6 @@ library(data.table)
 df_mut <- fread(params$mutations_csv)
 
 ## ----filter_plot_frames_samplescore, warning=TRUE-----------------------------
-source(params$fun_pool)
 source(params$fun_cvrg_scr)
 
 mutation_coverage_threshold <- params$mutation_coverage_threshold %>%
