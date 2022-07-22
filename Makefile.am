@@ -21,7 +21,6 @@ dist_pkglibexec_scripts_SCRIPTS = \
   scripts/pooling.R \
   scripts/pred_mutation_increase.R \
   scripts/renderReport.R \
-  scripts/sample_coverage_score.R \
   scripts/table_extraction.R \
   scripts/vcfTocsv.py \
   scripts/vep_rule.py
