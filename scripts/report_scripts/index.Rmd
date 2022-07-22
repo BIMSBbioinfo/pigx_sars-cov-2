@@ -11,7 +11,6 @@ params:
   mutation_coverage_threshold: ""
   logo: ""
   fun_tbls: ""
-  coverage_dir: ""
   output_dir: ""
   overviewQC: ""
   fun_lm: ""
@@ -96,7 +95,6 @@ library(viridis)
 
 ```{r input}
 # TODO given as input? or only the scripts dir? similar variant_report
-source(params$fun_cvrg_scr)
 source(params$fun_pool)
 source(params$fun_index)
 source(params$fun_lm)
@@ -142,31 +140,20 @@ Institute of Medical System Biology (BIMSB).
 These plots provide an overview of the relative frequency dynamics of
 identified lineages at specific wastewater sampling locations over time. 
 
-```{r computs_sample_quality_score}
-coverages_df <- merge(get_genome_cov(params$coverage_dir),
-  get_mutation_cov(params$coverage_dir),
-  by = "samplename"
-) %>%
-  mutate(
-    proport_muts_covered = round(
-      (as.numeric(total_muts_cvrd) * 100) / as.numeric(total_num_muts), 1
-    )
-  )
+```{r sample_quality_score}
+quality_df <- fread(params$overviewQC)
 
-COVERAGES_FOUND <- length(coverages_df) > 0
-```
+good_samples_df <- quality_df %>%
+  filter(perc_muts_covered >= mutation_coverage_threshold)
 
-```{r display_sample_quality_score, eval=COVERAGES_FOUND}
-# take only the samples over the mutation coverage threshold
-good_samples_df <- coverages_df %>%
-  filter(as.numeric(proport_muts_covered) >= mutation_coverage_threshold)
+bad_samples_df <- quality_df %>%
+  filter(perc_muts_covered <  mutation_coverage_threshold)
 
-bad_samples_df <- coverages_df %>%
-  filter(!(samplename %in% good_samples_df$samplename))
-```
+approved_mut_plot <- df_mut %>%
+  filter(samplename %in% good_samples_df$samplename)
 
-```{r sample_quality_score_warning, results = "asis", warning=TRUE, eval=!COVERAGES_FOUND}
-warning("\n No coverage values found.")
+weights <- quality_df %>%
+  dplyr::select(c(samplename, total_reads))
 ```
 
 ```{r filter_plot_frames_samplescore, warning=TRUE}
@@ -176,10 +163,6 @@ approved_var_plot <- df_var %>%
   unique()
 approved_mut_plot <- df_mut %>%
   filter(samplename %in% good_samples_df$samplename)
-
-# pool the samples per day, discard locations
-weights <- fread(params$overviewQC) %>%
-  dplyr::select(c(samplename, total_reads))
 
 # check if filtered dataframe has actual values and get vars for conditional
 # execution
@@ -472,8 +455,7 @@ The associated plots are skipped.
 </div>
 ```
 
-
-```{r compute_linear_regression_tables, eval=RUN_MUTATION_REGRESSION}
+```{r linear_regression_tables, warning=TRUE, results='asis', eval=RUN_MUTATION_REGRESSION}
 mutation_sheet <- params$mutation_sheet
 sigmuts_df <- fread(mutation_sheet) %>%
   na_if("") %>%
@@ -483,6 +465,7 @@ sigmuts_df <- fread(mutation_sheet) %>%
       .x, str_glue("(?<={mut_str_sep})[[:alnum:]]+")
     )))
 
+# TODO Remove this restriction to 20 and the use of the lm script in here
 mutations_sig <- filter_lm_res_top20(mutations_sig_unfiltered, 0.05)
 
 SIGN_MUTS_FOUND <- nrow(mutations_sig) > 0
@@ -917,16 +900,9 @@ visualizations or the linear regression calculations.
 
 Table 1: Discarded samples not matching the provided sample quality scoring.
 ```
-```{r table_sample_quality_score, eval=COVERAGES_FOUND}
+
+```{r table_sample_quality_score}
 # TODO refine column names --> e.g "coverage in percent",
 bad_samples_df <- bad_samples_df %>% slice_head(n = 20)
 create_dt(bad_samples_df)
-```
-
-```{asis table_sample_quality_score_warning, echo=!COVERAGES_FOUND}
-<div class="alert alert-warning">
-**Warning**:
-
-No coverage values found.
-</div>
 ```
