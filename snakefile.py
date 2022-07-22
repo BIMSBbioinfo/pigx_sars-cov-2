@@ -532,17 +532,6 @@ rule samtools_coverage:
     shell: "{SAMTOOLS_EXEC} coverage {input.aligned_bam} > {output} 2>> {log} 3>&2"
 
 
-rule get_qc_table:
-    input:
-        coverage_csv = os.path.join(COVERAGE_DIR, '{sample}_genome_cov.csv'),
-        amplicon_csv = os.path.join(COVERAGE_DIR, '{sample}_mut_cov.csv')
-    output: os.path.join(COVERAGE_DIR, '{sample}_merged_covs.csv')
-    params:
-        script = os.path.join(SCRIPTS_DIR, 'get_qc_table.py')
-    log: os.path.join(LOG_DIR, 'get_qc_table_{sample}.log')
-    shell: "{PYTHON_EXEC} {params.script} {input.coverage_csv} {input.amplicon_csv} {output} >> {log} 2>&1"
-
-
 rule create_sample_quality_table:
     input:
         genome_cov_file=os.path.join(COVERAGE_DIR, "{sample}_genome_cov.csv"),
