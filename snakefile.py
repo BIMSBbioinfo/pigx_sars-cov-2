@@ -543,6 +543,43 @@ rule get_qc_table:
     shell: "{PYTHON_EXEC} {params.script} {input.coverage_csv} {input.amplicon_csv} {output} >> {log} 2>&1"
 
 
+rule create_sample_quality_table:
+    input:
+        genome_cov_file=os.path.join(COVERAGE_DIR, "{sample}_genome_cov.csv"),
+        mut_cov_file=os.path.join(COVERAGE_DIR, "{sample}_mut_cov.csv"),
+    output:
+        os.path.join(COVERAGE_DIR, "{sample}_quality.csv"),
+    params:
+        script=os.path.join(SCRIPTS_DIR, "create_sample_quality_table.R"),
+    log:
+        os.path.join(LOG_DIR, "create_sample_quality_table_{sample}.log"),
+    shell:
+        """
+        {RSCRIPT_EXEC} {params.script} \
+            {wildcards.sample} \
+            {input.genome_cov_file} \
+            {input.mut_cov_file} \
+            {output} > {log} 2>&1
+        """
+
+
+rule create_sample_quality_summary:
+    input:
+        script=os.path.join(SCRIPTS_DIR, "create_summary_table.R"),
+        files=expand(
+            os.path.join(COVERAGE_DIR, "{sample}_quality.csv"),
+            sample=SAMPLES,
+        ),
+    output:
+        os.path.join(COVERAGE_DIR, "sample_quality_summary.csv"),
+    log:
+        os.path.join(LOG_DIR, "create_sample_quality_summary.log"),
+    shell:
+        """
+        {RSCRIPT_EXEC} {input.script} {output} {input.files} > {log} 2>&1
+        """
+
+
 rule generate_navbar:
     input:
       script = os.path.join(SCRIPTS_DIR, "generateNavigation.R")
