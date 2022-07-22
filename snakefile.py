@@ -758,9 +758,9 @@ rule run_mutation_regression:
         script=os.path.join(SCRIPTS_DIR, "mutation_regression.R"),
         mutations_csv=os.path.join(MUTATIONS_DIR, "data_mutation_plot.csv"),
         overviewQC=os.path.join(OUTPUT_DIR, "overview_QC.csv"),
-        fun_cvrg_scr=os.path.join(SCRIPTS_DIR, "sample_coverage_score.R"),
         fun_lm=os.path.join(SCRIPTS_DIR, "pred_mutation_increase.R"),
-        fun_tbls=os.path.join(SCRIPTS_DIR, "table_extraction.R")
+        fun_tbls=os.path.join(SCRIPTS_DIR, "table_extraction.R"),
+        mutation_sheet=MUTATION_SHEET_CSV
     output:
         mut_count_outfile=os.path.join(OUTPUT_DIR, "mutations_counts.csv"),
         unfilt_mutation_sig_outfile=os.path.join(
@@ -772,9 +772,7 @@ rule run_mutation_regression:
         """
         {RSCRIPT_EXEC} {input.script} \
             {input.mutations_csv} \
-            {COVERAGE_DIR} \
-            {MUTATION_SHEET_CSV} \
-            {input.fun_cvrg_scr} \
+            {input.mutation_sheet} \
             {input.fun_lm} \
             {input.fun_tbls} \
             {MUTATION_COVERAGE_THRESHOLD} \
@@ -797,6 +795,15 @@ rule render_index:
         unfiltered_mutation_sig_file=os.path.join(
             OUTPUT_DIR, "unfiltered_mutations_sig.csv"
         ),
+        # TODO Remove this bit, it's only a crutch since the index script calls
+        # get_mutation_cov, which takes the COVERAGE_DIR and gets the files it
+        # wants, without them being explicitly declared. With overview_QC not
+        # requiring them any more they are not generated, and thus not available
+        # when get_mutation_cov tries to get them. But get_mutation_cov should
+        # disappear in a few commits.
+        mutation_cov_files=expand(
+            os.path.join(COVERAGE_DIR, '{sample}_merged_covs.csv'),
+            sample=SAMPLES)
     params:
         fun_cvrg_scr=os.path.join(SCRIPTS_DIR, "sample_coverage_score.R"),
         fun_lm=os.path.join(SCRIPTS_DIR, "pred_mutation_increase.R"),
