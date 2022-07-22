@@ -15,7 +15,6 @@ dist_pkglibexec_scripts_SCRIPTS = \
   scripts/download_databases.sh \
   scripts/fun_index.R \
   scripts/generateNavigation.R \
-  scripts/get_qc_table.py \
   scripts/mutation_regression.R \
   scripts/overview_QC_table.R \
   scripts/parse_vep.py \
