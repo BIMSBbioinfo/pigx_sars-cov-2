@@ -688,7 +688,7 @@ rule render_qc_report:
         script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
         report=os.path.join(SCRIPTS_DIR, "report_scripts", "qc_report_per_sample.Rmd"),
         header=os.path.join(REPORT_DIR, "_navbar.html"),
-        coverage=os.path.join(COVERAGE_DIR, "{sample}_merged_covs.csv"),
+        coverage=os.path.join(COVERAGE_DIR, "{sample}_quality.csv"),
         multiqc=os.path.join(MULTIQC_DIR, "{sample}", "multiqc_report.html"),
     output:
         html_report=os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.html"),

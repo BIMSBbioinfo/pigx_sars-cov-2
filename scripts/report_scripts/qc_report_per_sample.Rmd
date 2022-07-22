@@ -46,12 +46,7 @@ For detailed information about the methods please consult the
 
 ```{r reading_data, include = FALSE}
 # FIXME Rename these col names sensibly upstream
-coverage_df <- fread(params$coverage_file) %>%
-  mutate(across(everything(), ~ na_if(.x, "[]"))) %>%
-  mutate(across(everything(), ~ gsub("\\[|\\]", "", .x))) %>%
-  mutate(`Number of mutations not covered` = str_replace_all(
-    `Number of mutations not covered`, "\\'", ""
-  ))
+coverage_df <- fread(params$coverage_file)
 ```
 
 # Coverage reports
@@ -71,9 +66,9 @@ coverage at all.
  
 ```{r amplicon_coverage, echo = FALSE}
 mutation_coverage_cols <- c(
-  "Total number of tracked mutations",
-  "Total number of mutations covered",
-  "Number of mutations not covered"
+  "n_loc_total",
+  "n_loc_covered",
+  "n_loc_no_cov"
 )
 
 mut_cov_df <- coverage_df %>%
@@ -98,26 +93,24 @@ pre-processed reads.
 
 ```{r read_coverage, echo = FALSE}
 read_coverage_cols <- c(
-  "Total number aligned reads",
-  "Percentage ref.genome covered",
-  "Mean depth ref.genome coverage"
+  "numreads",
+  "coverage",
+  "meandepth"
 )
 
 read_cov_df <- coverage_df %>%
   select(all_of(read_coverage_cols)) %>%
-  mutate(
-    `Percentage ref.genome covered` = paste(round(as.integer(
-      `Percentage ref.genome covered`
-      ), 1), "%"),
-    `Mean depth ref.genome coverage` = round(as.integer(
-      `Mean depth ref.genome coverage`
-      ))
-    ) %>%
   rename(c(
     "Number of aligned reads" = read_coverage_cols[1],
     "Total ref. genome coverage" = read_coverage_cols[2],
-    "Mean read depth" = read_coverage_cols[3])
-  )
+    "Mean read depth" = read_coverage_cols[3])) %>%
+  mutate(
+    `Total ref. genome coverage` = paste(round(as.integer(
+      `Total ref. genome coverage`
+    ), 1), "%"),
+    `Mean read depth` = round(as.integer(
+      `Mean read depth`
+    )))
 
 datatable(t(read_cov_df) %>% set_colnames("Value"))
 ```
