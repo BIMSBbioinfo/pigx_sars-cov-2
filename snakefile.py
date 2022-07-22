@@ -512,13 +512,13 @@ rule krona_report:
     log: os.path.join(LOG_DIR, 'krona_report_{sample}.log')
     shell: "{IMPORT_TAXONOMY_EXEC} -m 3 -t 5 {input.kraken_output} -tax {input.database} -o {output} >> {log} 2>&1"
 
-# TODO: change amplicon naming to mutation site since it is misleading
+
 rule samtools_bedcov:
     input:
         mutations_bed = MUTATIONS_BED,
         aligned_bam = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted.bam'),
         aligned_bai = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted.bai')
-    output: os.path.join(COVERAGE_DIR, '{sample}_amplicons.csv')
+    output: os.path.join(COVERAGE_DIR, '{sample}_mut_cov.csv')
     log: os.path.join(LOG_DIR, 'samtools_bedcov_{sample}.log')
     shell: "{SAMTOOLS_EXEC} bedcov {input.mutations_bed} {input.aligned_bam} > {output} 2>> {log} 3>&2"
 
@@ -531,11 +531,11 @@ rule samtools_coverage:
     log: os.path.join(LOG_DIR, 'samtools_coverage_{sample}.log')
     shell: "{SAMTOOLS_EXEC} coverage {input.aligned_bam} > {output} 2>> {log} 3>&2"
 
-# TODO: change amplicon naming to mutation site because it is misleading
+
 rule get_qc_table:
     input:
         coverage_csv = os.path.join(COVERAGE_DIR, '{sample}_coverage.csv'),
-        amplicon_csv = os.path.join(COVERAGE_DIR, '{sample}_amplicons.csv')
+        amplicon_csv = os.path.join(COVERAGE_DIR, '{sample}_mut_cov.csv')
     output: os.path.join(COVERAGE_DIR, '{sample}_merged_covs.csv')
     params:
         script = os.path.join(SCRIPTS_DIR, 'get_qc_table.py')
