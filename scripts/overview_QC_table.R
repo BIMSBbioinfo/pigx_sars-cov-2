@@ -7,15 +7,16 @@ concat_overview_table <- function(sample_sheet,
                                   raw_reads_dir,
                                   trimmed_reads_dir,
                                   mapped_reads_dir,
-                                  coverage_dir) {
+                                  quality_table_file) {
+  # FIXME Move the computation of read numbers into sample quality script and
+  # make this entire script here obsolete.
   sample_sheet.df <- fread(sample_sheet)
   # get read files matching samples
   cat("get samples and reads from sample_sheet...\n")
   read_counts <- parse_sample_sheet(sample_sheet.df,
-                                    raw_reads_dir,
-                                    trimmed_reads_dir,
-                                    mapped_reads_dir,
-                                    coverage_dir)
+    raw_reads_dir,
+    trimmed_reads_dir,
+    mapped_reads_dir)
   # get read number of raw reads
   cat("get num of total raw reads...\n")
   read_counts <- read_counts %>%
@@ -45,17 +46,16 @@ concat_overview_table <- function(sample_sheet,
 
   cat("join counts together...\n")
   read_counts <- left_join(read_counts,
-                           parse_amplicon_coverage(sample_sheet.df$name,
-                                                   coverage_dir),
-                           by = "samplename")
-  # for double check, unaligend reads by calculation
-  read_counts <- read_counts %>%
-    mutate(unaligned_reads_by_calc = total_reads - as.numeric(aligned_reads))
-  # difference between unaligned reads from file and by calc must be reads filtered by QC
-  read_counts <- read_counts %>%
-    mutate(reads_removed_by_QC = unaligned_reads_by_calc - unaligned_reads_from_file)
-  # TODO check if removing file names is okay
-  read_counts <- read_counts %>%
+    fread(quality_table_file),
+    by = "samplename") %>%
+
+    # for double check, unaligend reads by calculation
+    mutate(unaligned_reads_by_calc = total_reads - as.numeric(numreads)) %>%
+
+    # difference between unaligned reads from file and by calc must be reads filtered by QC
+    mutate(reads_removed_by_QC = unaligned_reads_by_calc - unaligned_reads_from_file) %>%
+
+    # TODO check if removing file names is okay
     select(!starts_with("file"))
   return(read_counts)
 }
@@ -64,8 +64,7 @@ concat_overview_table <- function(sample_sheet,
 parse_sample_sheet <- function(sample_sheet.df,
                                raw_reads_dir,
                                trimmed_reads_dir,
-                               mapped_reads_dir,
-                               coverage_dir) {
+                               mapped_reads_dir) {
   # function to interpolate file paths for a given sample sheet
   # works for single and paired end samples
   sample_df <- sample_sheet.df %>%
@@ -113,26 +112,6 @@ read_num_fastq <- function(file_reads_vector) {
   )
 }
 
-parse_amplicon_coverage <- function(samples, coverage_dir) {
-  # vectorized function to query and aggregate coverage files
-  lapply(samples,
-         coverage_dir = coverage_dir,
-    FUN = function(sample, coverage_dir) {
-      coverage.df <- fread(
-        file.path(coverage_dir, paste0(sample, "_merged_covs.csv"))) %>%
-        dplyr::na_if("[]") %>%
-        mutate(across(everything(), str_replace, "(\\[|\\])", "")) %>%
-        transmute(
-          samplename = sample,
-          aligned_reads = as.numeric(`Total number aligned reads`),
-          num_sigmuts_covered = as.numeric(`Total number of mutations covered`),
-          percentage_refgenome_covered = as.numeric(`Percentage ref.genome covered`)
-        )
-    }
-  ) %>%
-    bind_rows()
-}
-
 args <- commandArgs(trailingOnly = TRUE)
 
 cat("\n\"")
@@ -144,11 +123,12 @@ output_file <- args[2]
 raw_reads_dir     <- args[3]
 trimmed_reads_dir <- args[4]
 mapped_reads_dir  <- args[5]
-coverage_dir      <- args[6]
+quality_table_file <- args[6]
 
 df <- concat_overview_table(sample_sheet,
-                            raw_reads_dir,
-                            trimmed_reads_dir,
-                            mapped_reads_dir,
-                            coverage_dir)
+  raw_reads_dir,
+  trimmed_reads_dir,
+  mapped_reads_dir,
+  quality_table_file)
+  
 fwrite(df, output_file)
