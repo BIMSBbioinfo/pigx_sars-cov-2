@@ -13,7 +13,6 @@ params:
   fun_tbls: ""
   output_dir: ""
   overviewQC: ""
-  fun_lm: ""
   fun_cvrg_scr: ""
   fun_pool: ""
   fun_index: ""
@@ -97,7 +96,6 @@ library(viridis)
 # TODO given as input? or only the scripts dir? similar variant_report
 source(params$fun_pool)
 source(params$fun_index)
-source(params$fun_lm)
 
 mutations_sig_unfiltered <- fread(params$unfiltered_mutation_sig_file)
 
@@ -456,8 +454,7 @@ The associated plots are skipped.
 ```
 
 ```{r linear_regression_tables, warning=TRUE, results='asis', eval=RUN_MUTATION_REGRESSION}
-mutation_sheet <- params$mutation_sheet
-sigmuts_df <- fread(mutation_sheet) %>%
+sigmuts_df <- fread(params$mutation_sheet) %>%
   na_if("") %>%
   # extract only the nucleotide mutation bit
   mutate(across(everything(),
@@ -465,15 +462,17 @@ sigmuts_df <- fread(mutation_sheet) %>%
       .x, str_glue("(?<={mut_str_sep})[[:alnum:]]+")
     )))
 
-# TODO Remove this restriction to 20 and the use of the lm script in here
-mutations_sig <- filter_lm_res_top20(mutations_sig_unfiltered, 0.05)
+mutations_sig <- mutations_sig <- mutations_sig_unfiltered %>%
+  filter(pvalues >= 0.05) %>%
+  arrange(desc(coefficients))
+
 
 SIGN_MUTS_FOUND <- nrow(mutations_sig) > 0
 ```
 
 ```{asis mut_reg_tables_caption, echo=SIGN_MUTS_FOUND}
 The following table shows the mutations showing the strongest increasing trend
-(p <= 0.05). The number of trending mutation is restricted to the top 20.
+(p <= 0.05).
 
 **Mutations with significant increase in frequency over time**
 ```
