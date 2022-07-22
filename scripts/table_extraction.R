@@ -25,7 +25,7 @@ count_muts <- function (x, mutation_sheet.df) { # x = sample row
   count_frame <- count_frame %>% mutate( non_sigmuts = total_muts - total_sigmuts)
   # get number of siganture mutation per variant
   for ( var in colnames(mutation_sheet.df)){
-    count_frame[,paste("sigmuts_",var)] <- as.numeric(rowSums(!is.na(mutations_ps %>% dplyr::select( dplyr::contains( na.omit(mutation_sheet.df[[var]]))))))
+    count_frame[,paste0("sigmuts_",var)] <- as.numeric(rowSums(!is.na(mutations_ps %>% dplyr::select( dplyr::contains( na.omit(mutation_sheet.df[[var]]))))))
   }
   return(count_frame)
 }
@@ -55,7 +55,7 @@ write_mutations_count <- function ( mutation_plot_data, mutation_sheet.df, mutat
     # get number of siganture mutation per variant
     for ( var in colnames(mutation_sheet.df)){
       sigmut_pv <- mutation_plot_data %>% dplyr::select( dplyr::contains( na.omit(mutation_sheet.df[[var]])))
-      count_frame[,paste("sigmuts_",var)] <- length(sigmut_pv)
+      count_frame[,paste0("sigmuts_",var)] <- length(sigmut_pv)
     }
     
     counts_per_sample <- do.call(bind_rows, apply(mutation_plot_data,1, count_muts, mutation_sheet.df))
