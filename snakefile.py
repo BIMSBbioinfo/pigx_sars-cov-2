@@ -527,14 +527,14 @@ rule samtools_coverage:
     input:
         aligned_bam = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted.bam'),
         aligned_bai = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted.bai')
-    output: os.path.join(COVERAGE_DIR, '{sample}_coverage.csv')
+    output: os.path.join(COVERAGE_DIR, '{sample}_genome_cov.csv')
     log: os.path.join(LOG_DIR, 'samtools_coverage_{sample}.log')
     shell: "{SAMTOOLS_EXEC} coverage {input.aligned_bam} > {output} 2>> {log} 3>&2"
 
 
 rule get_qc_table:
     input:
-        coverage_csv = os.path.join(COVERAGE_DIR, '{sample}_coverage.csv'),
+        coverage_csv = os.path.join(COVERAGE_DIR, '{sample}_genome_cov.csv'),
         amplicon_csv = os.path.join(COVERAGE_DIR, '{sample}_mut_cov.csv')
     output: os.path.join(COVERAGE_DIR, '{sample}_merged_covs.csv')
     params:
