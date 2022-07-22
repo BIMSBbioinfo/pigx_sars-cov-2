@@ -731,17 +731,28 @@ rule create_mutations_summary:
         {RSCRIPT_EXEC} {input.script} {output} {input.files} > {log} 2>&1
         """
 
+
 # TODO integrate the output of fastp.json to get the number of raw and trimmed reads
 rule create_overviewQC_table:
     input:
-        script = os.path.join(SCRIPTS_DIR, "overview_QC_table.R"),
-        cov_summary = expand(os.path.join(COVERAGE_DIR, '{sample}_merged_covs.csv'), sample=SAMPLES)
-    output:  os.path.join(OUTPUT_DIR, 'overview_QC.csv')
-    log: os.path.join(LOG_DIR, "create_overviewQC_table.log")
-    shell: """
-        {RSCRIPT_EXEC} {input.script} {SAMPLE_SHEET_CSV} {output} {READS_DIR} {TRIMMED_READS_DIR} {MAPPED_READS_DIR} {COVERAGE_DIR} > {log} 2>&1
-    """
-    
+        script=os.path.join(SCRIPTS_DIR, "overview_QC_table.R"),
+        quality_table_file=os.path.join(COVERAGE_DIR, "sample_quality_summary.csv"),
+    output:
+        os.path.join(OUTPUT_DIR, "overview_QC.csv"),
+    log:
+        os.path.join(LOG_DIR, "create_overviewQC_table.log"),
+    shell:
+        """
+        {RSCRIPT_EXEC} {input.script} \
+            {SAMPLE_SHEET_CSV} \
+            {output} \
+            {READS_DIR} \
+            {TRIMMED_READS_DIR} \
+            {MAPPED_READS_DIR} \
+            {input.quality_table_file} > {log} 2>&1
+        """
+
+
 rule run_mutation_regression:
     input:
         script=os.path.join(SCRIPTS_DIR, "mutation_regression.R"),
