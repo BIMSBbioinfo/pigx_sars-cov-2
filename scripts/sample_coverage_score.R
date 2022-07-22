@@ -3,7 +3,7 @@ library(data.table)
 get_genome_cov <- function ( coverage_dir, samples_names ) {
 
   files <- list.files(path = coverage_dir,
-                      pattern = "_coverage.csv",
+                      pattern = "_genome_cov.csv",
                       full.names = TRUE,
                       recursive = FALSE) # why false?
   # stop if no coverage files exists in dir or if the dir does not exist
@@ -32,7 +32,7 @@ get_genome_cov <- function ( coverage_dir, samples_names ) {
     rd_tbl <- data.table::fread(x)
     data <- if (all(names(rd_tbl) %in% samtools_coverage_header)) {
       data.frame(
-        samplename = strsplit(basename (x), "\\_coverage.csv")[[1]],
+        samplename = strsplit(basename(x), "\\_genome_cov.csv")[[1]],
         ref_genome_coverage = as.numeric(rd_tbl$coverage)
       )
     } else {
