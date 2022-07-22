@@ -795,17 +795,7 @@ rule render_index:
         unfiltered_mutation_sig_file=os.path.join(
             OUTPUT_DIR, "unfiltered_mutations_sig.csv"
         ),
-        # TODO Remove this bit, it's only a crutch since the index script calls
-        # get_mutation_cov, which takes the COVERAGE_DIR and gets the files it
-        # wants, without them being explicitly declared. With overview_QC not
-        # requiring them any more they are not generated, and thus not available
-        # when get_mutation_cov tries to get them. But get_mutation_cov should
-        # disappear in a few commits.
-        mutation_cov_files=expand(
-            os.path.join(COVERAGE_DIR, '{sample}_merged_covs.csv'),
-            sample=SAMPLES)
     params:
-        fun_cvrg_scr=os.path.join(SCRIPTS_DIR, "sample_coverage_score.R"),
         fun_lm=os.path.join(SCRIPTS_DIR, "pred_mutation_increase.R"),
         fun_tbls=os.path.join(SCRIPTS_DIR, "table_extraction.R"),
         fun_pool=os.path.join(SCRIPTS_DIR, "pooling.R"),
@@ -828,10 +818,8 @@ rule render_index:
           "logo": "{LOGO}", \
           "fun_lm": "{params.fun_lm}", \
           "fun_tbls": "{params.fun_tbls}", \
-          "fun_cvrg_scr": "{params.fun_cvrg_scr}", \
           "fun_pool": "{params.fun_pool}", \
           "fun_index": "{params.fun_index}", \
           "overviewQC": "{input.overviewQC}", \
-          "coverage_dir": "{COVERAGE_DIR}", \
           "output_dir": "{OUTPUT_DIR}" \
         }}' > {log} 2>&1"""
