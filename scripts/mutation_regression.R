@@ -108,7 +108,9 @@ if (nrow(approved_mut_plot) > 0 &&
 
 
   mutations_sig_unfiltered <- refined_lm_model(changing_muts)
-  mutations_sig <- filter_lm_res_top20(mutations_sig_unfiltered, 0.05)
+  mutations_sig <- mutations_sig_unfiltered %>%
+    filter(pvalues >= 0.05) %>%
+    arrange(desc(coefficients))
 
   ## ----mutation_counts--------------------------------------------------------
   # get functions for counting and writing
