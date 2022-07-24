@@ -899,7 +899,36 @@ Table 1: Quality description of samples not meeting the requirement of
 covering at least `r mutation_coverage_threshold`% of signature mutations.
 
 ```{r table_sample_quality_score}
-# TODO refine column names --> e.g "coverage in percent",
-bad_samples_df <- bad_samples_df
-create_dt(bad_samples_df)
+bad_samp_rename_vec <- c(
+  "Sample name" = "samplename",
+  "Collection date" = "date",
+  "n reads" = "total_reads",
+  "Trimmed reads in R1" = "read_num_trimmed_r1",
+  "Trimmed reads in R2" = "read_num_trimmed_r2",
+  "Unaligned reads" = "unaligned_reads_from_file",
+  "Aligned reads" = "numreads",
+  "Bases covered by reads" = "covbases",
+  "% of ref. genome covered" = "coverage",
+  "Mean depth" = "meandepth",
+  "Mean base qual." = "meanbaseq",
+  "Mean map qual." = "meanmapq",
+  "Total mutations" = "n_loc_total",
+  "Covered mutations" = "n_loc_covered",
+  "Uncovered mutations" = "n_loc_no_cov",
+  "Mean read depth at muts." = "avg_loc_cvrg",
+  "% of tot. muts. covered" = "perc_muts_covered",
+  "Reads removed during preprocessing" = "reads_removed_by_QC"
+)
+
+bad_samples_df %>%
+  select(-all_of(setdiff(names(.), bad_samp_rename_vec))) %>%
+    mutate(
+      date = format(date, "%d.%m.%Y, %H:%M"),
+      coverage = paste0(round(coverage, 1), "%"),
+      perc_muts_covered  = paste0(round(perc_muts_covered, 1), "%"),
+      meandepth = round(meandepth, 1),
+      avg_loc_cvrg = round(avg_loc_cvrg, 1)
+    ) %>%
+  rename(!!!bad_samp_rename_vec) %>%
+  create_dt()
 ```
