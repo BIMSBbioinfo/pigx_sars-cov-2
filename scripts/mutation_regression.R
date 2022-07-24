@@ -55,6 +55,14 @@ df_mut <- fread(params$mutations_csv)
 source(params$fun_pool)
 source(params$fun_cvrg_scr)
 
+mutation_coverage_threshold <- params$mutation_coverage_threshold %>%
+  # check if value is given as fraction [0,1] or percentage [0,100]
+  ifelse(. >= 0 & . <= 1,
+         . * 100,
+         .
+  ) %>%
+  as.numeric()
+
 # FIXME: Check if all this computation is necessary for the tasks below
 good_samples_df <- merge(get_genome_cov(params$coverage_dir),
   get_mutation_cov(params$coverage_dir),
@@ -63,7 +71,7 @@ good_samples_df <- merge(get_genome_cov(params$coverage_dir),
   mutate(proport_muts_covered = round(
     (as.numeric(total_muts_cvrd) * 100) / as.numeric(total_num_muts), 1
   )) %>%
-  filter(as.numeric(proport_muts_covered) >= params$mutation_coverage_threshold)
+  filter(as.numeric(proport_muts_covered) >= mutation_coverage_threshold)
 
 approved_mut_plot <- df_mut %>%
   filter(samplename %in% good_samples_df$samplename)
