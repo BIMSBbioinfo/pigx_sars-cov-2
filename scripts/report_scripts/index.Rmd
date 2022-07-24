@@ -895,10 +895,8 @@ signature mutation locations. Results from samples without sufficient coverage
 measures (< `r mutation_coverage_threshold`%) are not included in the
 visualizations or the linear regression calculations. 
 
-```{asis title_quality_score}
-
-Table 1: Discarded samples not matching the provided sample quality scoring.
-```
+Table 1: Quality description of samples not meeting the requirement of
+covering at least `r mutation_coverage_threshold`% of signature mutations.
 
 ```{r table_sample_quality_score}
 # TODO refine column names --> e.g "coverage in percent",
