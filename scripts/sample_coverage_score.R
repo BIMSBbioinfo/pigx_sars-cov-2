@@ -48,6 +48,7 @@ get_genome_cov <- function ( coverage_dir, samples_names ) {
 
 get_mutation_cov <- function ( coverage_dir ) {
 
+  # TODO: convert these files to proper csv and make names dynamic
   files <- list.files(path = coverage_dir,
                       pattern = "_merged_covs.csv",
                       full.names = TRUE,
