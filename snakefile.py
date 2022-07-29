@@ -579,7 +579,7 @@ rule render_variant_report:
     input:
       vep = os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2_parsed.txt"),
       snv = os.path.join(VARIANTS_DIR, "{sample}_snv.csv"),
-      deconvolution_functions = os.path.join( SCRIPTS_DIR, "deconvolution.R" ),
+      deconvolution_functions = os.path.join( SCRIPTS_DIR, "deconvolution_funs.R" ),
       script = os.path.join( SCRIPTS_DIR, "renderReport.R" ),
       report = os.path.join( SCRIPTS_DIR,"report_scripts", "variantreport_p_sample.Rmd" ),
       header = os.path.join( REPORT_DIR, "_navbar.html" )

@@ -10,7 +10,7 @@ pkglibexec_scriptsdir = $(pkglibexecdir)/scripts
 dist_pkglibexec_scripts_SCRIPTS = \
   scripts/creating_mutation_summary_table.R \
   scripts/creating_variants_summary_table.R \
-  scripts/deconvolution.R \
+  scripts/deconvolution_funs.R \
   scripts/download_databases.sh \
   scripts/generateNavigation.R \
   scripts/get_qc_table.py \
