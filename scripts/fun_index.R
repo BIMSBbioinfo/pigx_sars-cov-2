@@ -1,4 +1,6 @@
 library("DT")
+library("dplyr")
+library("stringr")
 
 ## ----functions--------------------------------------------------------------------
 # function for downloadable tables
@@ -50,4 +52,32 @@ create_html_note <- function(x, toggle = FALSE) {
     "</div>\n\n",
     sep = "\n"
   )
+}
+
+# function to order levels in a dataframe column such that strings matching
+# a pattern are always the first / last ones (controlled via leading)
+# default leading FALSE as this is needed for the plots
+give_priority_in_order <- function(vec, pattern, leading = FALSE,
+  decreasing = TRUE) {
+
+  # extract all variables that look like "Others". This should probably be only
+  # one, but currently there is also lowercase "others"
+  # FIXME This could probably be done more elegantly
+  others_str <- vec[str_detect(vec, pattern)] %>%
+    as.character()
+
+  rest_str <- vec[!str_detect(vec, pattern)] %>%
+    as.character() %>%
+    sort(decreasing = decreasing)
+
+  if (leading) {
+    ordering <- c(others_str, rest_str)
+  } else {
+    ordering <- c(rest_str, others_str)
+  }
+
+  # deduplicate ordering as factor levels need to be unique
+  ordering <- unique(ordering)
+
+  return(factor(vec, levels = ordering))
 }
