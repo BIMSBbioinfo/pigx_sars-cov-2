@@ -9,6 +9,7 @@ library(qpcR)
 library(stringr)
 library(magrittr)
 library(base64url)
+library(data.table)
 
 ## command line arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -87,13 +88,13 @@ coordinates_long    <- as.character(sample_entry$coordinates_long)
 
 ## ----process_signature_mutations, include = FALSE-----------------------------
 # Read signature data
-sigmut_df <- read.csv(mutation_sheet, header = TRUE) %>%
+sigmut_df <- fread(mutation_sheet, header = TRUE) %>%
   dplyr::select(-matches("source")) %>%
   dplyr::na_if("") %>%
   tidyr::pivot_longer(everything(), values_drop_na = TRUE) %>%
   dplyr::select(variant = name, mutation = value)
 
-vep_output_df <- read.table(params$vep_file, sep = ",", header = TRUE) %>%
+vep_output_df <- fread(params$vep_file) %>%
   dplyr::na_if("-")
 
 sigmuts_deduped <- sigmut_df %>%
@@ -144,7 +145,7 @@ cat(
   params$sigmut_output_file,
   "...\n")
 
-write.csv(
+fwrite(
   match_df,
   params$sigmut_output_file
 )
@@ -155,7 +156,7 @@ cat(
   params$non_sigmut_output_file,
   "...\n")
 
-write.csv(
+fwrite(
   nomatch_df,
   params$non_sigmut_output_file
 )
@@ -359,7 +360,7 @@ if (execute_deconvolution) {
     "...\n"
   )
 
-  write.csv(variant_abundance_df, params$variants_output_file)
+  fwrite(variant_abundance_df, params$variants_output_file)
 
   ## ----csv_output_variant_plot, include = F-----------------------------------
   # prepare processed variant values to output them as a csv which will be
@@ -388,10 +389,7 @@ if (execute_deconvolution) {
     )), everything())
 
 
-  write.table(output_variant_plot, params$variants_with_meta_output_file,
-    sep = "\t",
-    na = "NA", row.names = FALSE, quote = FALSE
-  )
+  fwrite(output_variant_plot, params$variants_with_meta_output_file)
 
 } else {
 
@@ -480,7 +478,4 @@ output_mutation_frame <- complete_df %>%
 
 # 3. write to output file
 cat("Writing mutation file to ", params$mutation_output_file, "...\n")
-write.table(output_mutation_frame, params$mutation_output_file,
-  sep = "\t",
-  row.names = FALSE, quote = FALSE
-)
+fwrite(output_mutation_frame, params$mutation_output_file)

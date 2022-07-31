@@ -17,9 +17,8 @@ create_dt <- function(x) {
 # function to dump data in csv formatted string
 dump_csv <- function(data, format = "csv", rownames = FALSE) {
   if (format != "csv") stop("Data can only be dumped in CSV format.")
-  capture.output(write.csv(data,
-    file = "",
-    quote = FALSE, row.names = rownames
+  capture.output(fwrite(data,
+    file = ""
   )) %>%
     paste0(collapse = "\n")
 }

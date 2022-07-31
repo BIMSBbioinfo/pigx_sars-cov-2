@@ -1,14 +1,12 @@
+library(data.table)
+
 create_summary <- function(files) {
   cat(paste("Summarizing", length(files), "files.\n"))
 
   # read files into list
   table_list <- lapply(
     X = files,
-    FUN = read.table,
-    sep = "\t",
-    header = TRUE,
-    colClasses = "character",
-    check.names = FALSE
+    FUN = fread
   )
 
   # remove empty files from list
@@ -43,4 +41,4 @@ files <- args[2:length(args)]
 output <- create_summary(files)
 
 # write to output file
-write.table(output, output_file, sep = "\t", row.names = FALSE, quote = FALSE)
+fwrite(output, output_file)
