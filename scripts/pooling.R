@@ -66,12 +66,19 @@ pool_by_weighted_mean <- function(df, weights, group_fun = c("day_location", "da
 
   weights <- weights %>%
     # only take weights from approved samples
-    semi_join(df, by = "samplename")
+    filter(samplename %in% df$samplename)
 
-  # get variants from data frame, being every column after the metadata
-  variants <- names(
-    df[(which(names(df) %in% "coordinates_long") + 1):length(names(df))]
+  # get variants from data frame, all cols not known to be predefined metadata
+  # columns
+  meta_cols <- c(
+    "samplename",
+    "dates",
+    "location_name",
+    "coordinates_lat",
+    "coordinates_long"
   )
+
+  variants <- names(df)[!grepl(paste(meta_cols, collapse = "|"), names(df))]
 
   if (group_fun == "day_location") {
     df_grouped <- group_by_day_location(df)
