@@ -4,19 +4,22 @@ nav: "Overview"
 author: "BIMSB Bioinformatics Platform"
 date: '`r format(as.POSIXct(if ("" != Sys.getenv("SOURCE_DATE_EPOCH")) { as.numeric(Sys.getenv("SOURCE_DATE_EPOCH")) } else { Sys.time() }, origin="1970-01-01"), "%Y-%m-%d %H:%M:%S")`'
 params:
-  variants_csv: ''
-  mutations_csv: ''
-  coverage_dir: ''
-  sample_sheet: ''
-  mutation_sheet: ''
-  mutation_coverage_threshold: '90'
-  logo: ''
-  fun_cvrg_scr: ''
-  fun_lm: ''
-  fun_tbls: ''
-  fun_pool: ''
-  overviewQC: ''
-  output_dir: ''
+  variants_csv: ""
+  mutations_csv: ""
+  sample_sheet: ""
+  mutation_sheet: ""
+  mutation_coverage_threshold: ""
+  logo: ""
+  fun_tbls: ""
+  coverage_dir: ""
+  output_dir: ""
+  overviewQC: ""
+  fun_lm: ""
+  fun_cvrg_scr: ""
+  fun_pool: ""
+  fun_index: ""
+  unfiltered_mutation_sig_file: ""
+  mut_count_file: ""
 ---
 
 <style>
@@ -89,6 +92,9 @@ library(viridis)
 
 
 ```{r input}
+
+mutations_sig_unfiltered <- fread(params$unfiltered_mutation_sig_file)
+
 df_var <- read.table(params$variants_csv, sep = "\t", header=TRUE, check.names = FALSE)
 df_mut <- read.table(params$mutations_csv, sep = "\t", header=TRUE, check.names = FALSE)
 
@@ -97,52 +103,6 @@ mutation_coverage_threshold <- as.numeric(params$mutation_coverage_threshold) %>
   ifelse(. >= 0 & . <= 1,
       . * 100,
       .)
-```
-
-
-```{r functions}
-# function for downloadable tables
-create_dt <- function(x){
-  DT::datatable(x, options = list(fixedColumns = TRUE, 
-                               scrollY = 180,
-                               scrollX = TRUE,
-                               scroller = TRUE, 
-                               dom = 'Slfrtip'))
-}
-
-# function to dump data in csv formatted string
-dump_csv <- function(data, format = "csv", rownames = FALSE) {
-  if (format != "csv") stop("Data can only be dumped in CSV format.")
-  capture.output(write.csv(data, file = "", quote = FALSE, row.names = rownames)) %>%
-    paste0(collapse = "\n")
-}
-
-# function to create html link with named downloadable files
-create_html_download_link <- function(base64enc, filename, text = NULL) {
-  if(is.null(text)) text <- sprintf("Download %s",filename)
-  sprintf(paste0(
-    '<a download="%s" href="%s">%s</a>'),
-    filename,
-    sprintf('data:text/csv;base64,%s', base64enc),
-    text
-  )
-}
-# function to create html formatted notes in panel box with optional toggling
-# see https://about.gitlab.com/handbook/markdown-guide/#additional-information
-create_html_note <- function(x, toggle = FALSE) {
-  paste(
-    '\n\n<div class="panel panel-info">',
-    ifelse(toggle,
-           '<details>\n<summary>**Note**</summary>',
-           '&nbsp;**Note**'),
-    '<div class="panel-body">',
-    gsub('##', '\n', x),
-    '</div>',
-    ifelse(toggle,'','</details>'),
-    '</div>\n\n',
-    sep = '\n'
-  )
-}
 ```
 
 This pipeline performs mutation analysis of SARS-CoV-2 and reports and quantifies the occurrence of
@@ -320,6 +280,7 @@ if (length(plot_list) >= 1) {
 
 
 ```{r text_maps_for_variants, results='asis', eval=VARIANTS_FOUND}
+source(params$fun_index)
 
 cat('## Lineage abundances geo-localized
 
@@ -451,11 +412,7 @@ sigmuts.df <- read.csv(mutation_sheet, header = TRUE) %>%
   # split gene name of for easier matching
   mutate_all(funs(str_replace(., '^[^:]*:', '')))
 
-
-changing_muts <- parsing_mutation_plot_data(approved_mut_plot)
-mutations_sig_unfiltered <- refined_lm_model(changing_muts)
-mutations_sig <-
-  filter_lm_res_top20(mutations_sig_unfiltered, 0.05)
+mutations_sig <- filter_lm_res_top20(mutations_sig_unfiltered, 0.05)
 
 # filter good samples for only mutations with sig pvalues for plotting
 filtered_approved_mut_plot <-
@@ -737,30 +694,12 @@ Frequencies per mutation per sample
 
 
 ```{r mutation_counts}
-# get functions for counting and writing
-source(params$fun_tbls)
-output_dir <- params$output_dir
-# make the mutation count frame
-if (exists("mutations_sig")){
-  count_frame <- write_mutations_count(df_mut, sigmuts.df, mutations_sig)
-} else {
-    # write empty files
-    count_frame <- data.frame()
-    mutations_sig_unfiltered <- data.frame()
-}
-# write to file
-write.csv(count_frame, file.path(output_dir, "mutations_counts.csv"),
-  na = "NA", row.names = FALSE, quote = FALSE
-)
-write.csv(mutations_sig_unfiltered,
-  file.path(output_dir, "linear_regression_results.csv"),
-  na = "NA", row.names = FALSE, quote = FALSE
-)
+count_frame <- read.csv(params$mut_count_file)
+
 # show and make downloadable
 count_frame_download <- count_frame %>%
   dump_csv() %>%
   base64url::base64_urlencode()
-
 ```
 
 Counts of mutations found across all sample and per sample
