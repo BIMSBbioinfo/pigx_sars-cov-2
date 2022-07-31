@@ -1,14 +1,15 @@
-
 create_summary <- function(files) {
   cat(paste("Summarizing", length(files), "variant files.\n"))
 
   # read files into list
-  variants_list <- lapply(X = files,
-                          FUN = read.table,
-                          sep = "\t",
-                          header = TRUE,
-                          colClasses = "character",
-                          check.names = FALSE )
+  variants_list <- lapply(
+    X = files,
+    FUN = read.table,
+    sep = "\t",
+    header = TRUE,
+    colClasses = "character",
+    check.names = FALSE
+  )
 
   # remove empty files from list
   variants_list_has_rows <- sapply(variants_list, nrow)
@@ -37,7 +38,7 @@ cat(paste(args, collapse = "\",\n\""))
 cat("\"\n\n")
 
 output_file <- args[1]
-files       <- args[2:length(args)]
+files <- args[2:length(args)]
 
 output <- create_summary(files)
 
