@@ -46,14 +46,7 @@ For detailed information about the methods please consult the
 
 ```{r reading_data, include = FALSE}
 # FIXME Rename these col names sensibly upstream
-coverage_df <- read.table(
-  params$coverage_file,
-  sep = "\t",
-  header = TRUE,
-  # this is necessary, else we have "." instead of spaces in colnames.
-  # not having them is preparation for switching to fread
-  check.names = FALSE
-  ) %>%
+coverage_df <- fread(params$coverage_file) %>%
   mutate(across(everything(), ~ na_if(.x, "[]"))) %>%
   mutate(across(everything(), ~ gsub("\\[|\\]", "", .x))) %>%
   mutate(`Number of mutations not covered` = str_replace_all(
@@ -156,7 +149,7 @@ fastqc-reports.
 # Download Stats csv
 
 ```{r data_download, include = FALSE}
-write.csv(coverage_df, params$coverage_table_outfile)
+fwrite(coverage_df, params$coverage_table_outfile)
 
 coverage <- readLines(params$coverage_file) %>%
   paste0(collapse = "\n") %>%

@@ -1,3 +1,5 @@
+library(data.table)
+
 get_genome_cov <- function ( coverage_dir, samples_names ) {
 
   files <- list.files(path = coverage_dir,
@@ -64,25 +66,25 @@ get_mutation_cov <- function ( coverage_dir ) {
                                 drop_out_muts = c())
 
   mutation_cov_header <- c(
-    "Total.number.of.tracked.mutations",
-    "Total.number.of.mutations.covered",
-    "Number.of.mutations.not.covered",
-    "Total.number.aligned.reads",
-    "Percentage.ref.genome.covered",
-    "Mean.depth.ref.genome.coverage"
+    "Total number of tracked mutations",
+    "Total number of mutations covered",
+    "Number of mutations not covered",
+    "Total number aligned reads",
+    "Percentage ref.genome covered",
+    "Mean depth ref.genome coverage"
   )
 
   mutation_cov.dfs <- lapply( files, function (x){
-    rd_tbl <- read.table(x, sep = '\t', header = TRUE)
+    rd_tbl <- fread(x)
     # check if file has the correct header format
     data <- if (all(names(rd_tbl) %in% mutation_cov_header)) {
       data.frame(
         samplename = strsplit(basename (x), "\\_merged_covs.csv")[[1]],
-        total_num_muts = rd_tbl$Total.number.of.tracked.mutations,
-        total_muts_cvrd = rd_tbl$Total.number.of.mutations.covered,
+        total_num_muts = rd_tbl$`Total number of tracked mutations`,
+        total_muts_cvrd = rd_tbl$`Total number of mutations covered`,
         drop_out_muts = gsub(pattern = "\\[|\\]|\\s",
                              replacement = "",
-                             x = rd_tbl$Number.of.mutations.not.covered)
+                             x = rd_tbl$`Number of mutations not covered`)
       )
     } else {
       NULL

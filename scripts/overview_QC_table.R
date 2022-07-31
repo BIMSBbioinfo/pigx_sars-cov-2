@@ -1,13 +1,14 @@
 library(dplyr)
 library(R.utils)
 library(stringr)
+library(data.table)
 
 concat_overview_table <- function(sample_sheet,
                                   raw_reads_dir,
                                   trimmed_reads_dir,
                                   mapped_reads_dir,
                                   coverage_dir) {
-  sample_sheet.df <- read.csv(sample_sheet, header = TRUE, stringsAsFactors = FALSE)
+  sample_sheet.df <- fread(sample_sheet)
   # get read files matching samples
   cat("get samples and reads from sample_sheet...\n")
   read_counts <- parse_sample_sheet(sample_sheet.df,
@@ -117,16 +118,15 @@ parse_amplicon_coverage <- function(samples, coverage_dir) {
   lapply(samples,
          coverage_dir = coverage_dir,
     FUN = function(sample, coverage_dir) {
-      coverage.df <- read.table(
-        file.path(coverage_dir, paste0(sample, "_merged_covs.csv")),
-        sep = "\t", header = TRUE) %>%
+      coverage.df <- fread(
+        file.path(coverage_dir, paste0(sample, "_merged_covs.csv"))) %>%
         dplyr::na_if("[]") %>%
         mutate(across(everything(), str_replace, "(\\[|\\])", "")) %>%
         transmute(
           samplename = sample,
-          aligned_reads = as.numeric(Total.number.aligned.reads),
-          num_sigmuts_covered = as.numeric(Total.number.of.mutations.covered),
-          percentage_refgenome_covered = as.numeric(Percentage.ref.genome.covered)
+          aligned_reads = as.numeric(`Total number aligned reads`),
+          num_sigmuts_covered = as.numeric(`Total number of mutations covered`),
+          percentage_refgenome_covered = as.numeric(`Percentage ref.genome covered`)
         )
     }
   ) %>%
@@ -151,4 +151,4 @@ df <- concat_overview_table(sample_sheet,
                             trimmed_reads_dir,
                             mapped_reads_dir,
                             coverage_dir)
-write.csv(df, output_file, row.names = FALSE)
+fwrite(df, output_file)
