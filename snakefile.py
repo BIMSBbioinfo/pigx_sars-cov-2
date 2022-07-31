@@ -673,7 +673,7 @@ rule create_mutations_summary:
     input:
         script = os.path.join(SCRIPTS_DIR, "creating_mutation_summary_table.R"),
         files = expand(os.path.join(MUTATIONS_DIR, "{sample}_mutations.csv"), sample = SAMPLES)
-    output: os.path.join(VARIANTS_DIR, 'data_mutation_plot.csv')
+    output: os.path.join(MUTATIONS_DIR, 'data_mutation_plot.csv')
     log: os.path.join(LOG_DIR, "create_mutations_summary.log")
     shell: """
         {RSCRIPT_EXEC} {input.script} "{MUTATIONS_DIR}" {output} > {log} 2>&1
@@ -693,7 +693,7 @@ rule create_overviewQC_table:
 rule run_mutation_regression:
     input:
         script=os.path.join(SCRIPTS_DIR, "mutation_regression.R"),
-        mutations_csv=os.path.join(VARIANTS_DIR, "data_mutation_plot.csv"),
+        mutations_csv=os.path.join(MUTATIONS_DIR, "data_mutation_plot.csv"),
         overviewQC=os.path.join(OUTPUT_DIR, "overview_QC.csv"),
         fun_cvrg_scr=os.path.join(SCRIPTS_DIR, "sample_coverage_score.R"),
         fun_lm=os.path.join(SCRIPTS_DIR, "pred_mutation_increase.R"),
@@ -730,7 +730,7 @@ rule render_index:
         report=os.path.join(SCRIPTS_DIR, "report_scripts", "index.Rmd"),
         header=os.path.join(REPORT_DIR, "_navbar.html"),
         variants=os.path.join(VARIANTS_DIR, "data_variant_plot.csv"),
-        mutations=os.path.join(VARIANTS_DIR, "data_mutation_plot.csv"),
+        mutations=os.path.join(MUTATIONS_DIR, "data_mutation_plot.csv"),
         overviewQC=os.path.join(OUTPUT_DIR, "overview_QC.csv"),
         mut_count_file=os.path.join(OUTPUT_DIR, "mutations_counts.csv"),
         unfiltered_mutation_sig_file=os.path.join(
