@@ -27,6 +27,7 @@ params:
 knitr::opts_chunk$set(echo = FALSE)
 
 suppressMessages(suppressWarnings(library(DT)))
+library(data.table)
 library(knitr)
 ```
 
@@ -83,7 +84,7 @@ species). In addition, it is shown which proportion of all fragments are
 classified by each taxon (**Propotion in %**).
   
 ```{r plot_table}
-table <- read.table(params$kraken_file, sep = "\t")
+table <- fread(params$kraken_file, sep = "\t")
 
 colnames(table) <-  c("Proportion in %",
     "Number of covered fragments",

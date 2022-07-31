@@ -1,4 +1,5 @@
 library(dplyr)
+library(data.table)
 
 concat_kraken_output <- function ( kraken_dir ){
     #' docstring missing
@@ -27,7 +28,7 @@ read_kraken <- function ( kraken_file ){
     #' docstring missing
     #' 
     
-    rd_tbl <- read.table( kraken_file, sep = "\t" )
+    rd_tbl <- fread( kraken_file, sep = "\t" )
     colnames (rd_tbl) <- c( "proportion", "num_cov_fragments", "num_assigned_fragments", "rank", "ncbi_taxID", "tax_class" )
 
     data.frame( sample = strsplit( basename( kraken_file ), "_classified_unaligned_reads.txt")[[1]], 
@@ -46,5 +47,5 @@ Kraken_summary <- concat_kraken_output( kraken_dir )
 summary_all <- Kraken_summary[[1]]
 summary_summed <- Kraken_summary[[2]]
 
-write.csv( summary_all, output, row.names = FALSE )
-write.csv( summary_summed, paste0( output, '_summed.csv' ), row.names = FALSE )
+fwrite( summary_all, output )
+fwrite( summary_summed, paste0( output, '_summed.csv' ) )

@@ -4,7 +4,7 @@ write_lm_results <- function ( df, output ){
   #' takes a dataframe with 3 col: samplename, p-values, sigmutflag
   #' writes them to a csv
   # this function is here because I don't know yet if we need to do smth else with it too
-  write.csv(df, output, na = "NA", row.names = FALSE, quote = FALSE)
+  fwrite(df, output)
 }
 
 count_muts <- function (x, mutation_sheet.df) { # x = sample row

@@ -81,6 +81,7 @@ knitr::knit_hooks$set(
 ```
 
 ```{r libraries}
+library(data.table)
 library(plotly)
 library(htmltools)
 library(reshape2)
@@ -102,10 +103,8 @@ source(params$fun_lm)
 
 mutations_sig_unfiltered <- fread(params$unfiltered_mutation_sig_file)
 
-df_var <- read.table(params$variants_csv, sep = "\t", header = TRUE,
-  check.names = FALSE)
-df_mut <- read.table(params$mutations_csv, sep = "\t", header = TRUE,
-  check.names = FALSE)
+df_var <- fread(params$variants_csv)
+df_mut <- fread(params$mutations_csv)
 
 mut_str_sep <- ":"
 ```
@@ -175,7 +174,7 @@ approved_mut_plot <- df_mut %>%
   filter(samplename %in% good_samples_df$samplename)
 
 # pool the samples per day, discard locations
-weights <- read.csv(params$overviewQC, header = TRUE, check.names = FALSE) %>%
+weights <- fread(params$overviewQC) %>%
   dplyr::select(c(samplename, total_reads))
 
 # check if filtered dataframe has actual values and get vars for conditional
@@ -467,7 +466,7 @@ if (!RUN_MUTATION_REGRESSION) {
 
 ```{r linear_regression_tables, warning=TRUE, results='asis', eval=RUN_MUTATION_REGRESSION}
 mutation_sheet <- params$mutation_sheet
-sigmuts_df <- read.csv(mutation_sheet, header = TRUE) %>%
+sigmuts_df <- fread(mutation_sheet) %>%
   na_if("") %>%
   # extract only the nucleotide mutation bit
   mutate(across(everything(),
@@ -830,7 +829,7 @@ Frequencies per mutation per sample
 `r create_html_download_link(df_mut_download, filename = "mutation_frequencies.csv")`
 
 ```{r mutation_counts}
-count_frame <- read.csv(params$mut_count_file)
+count_frame <- fread(params$mut_count_file)
 
 # show and make downloadable
 count_frame_download <- count_frame %>%
