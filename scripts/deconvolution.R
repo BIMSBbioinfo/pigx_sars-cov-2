@@ -63,7 +63,7 @@ source(params$deconvolution_functions)
 var_sep <- ","
 
 # separator for same mutations
-mut_sep <- ","
+mut_sep <- "+"
 
 # separator for the string containing mutation infos
 mut_str_sep  <- ":"
