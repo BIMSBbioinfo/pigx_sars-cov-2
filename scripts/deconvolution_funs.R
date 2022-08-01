@@ -2,35 +2,26 @@ library("MASS")
 library("stringr")
 library("dplyr")
 
-parse_snv_csv <- function(snvfile, ...) { # allele frequency from v-pipe vcf
+parse_snv_csv <- function(snvfile) { # allele frequency from v-pipe vcf
   #' input: csv file derived from vpipe vcf when using LoFreq,
   #' parsing snv-csv file for coverage, frequency and genomic mutation information
 
   snvtable <- read.table(snvfile, sep = ",", header = TRUE)
-  freq <- snvtable$AF
-  cov <- snvtable$DP
-  Ref <- snvtable$Ref
-  Pos <- snvtable$Pos
-  Var <- snvtable$Var
 
-  # concat position value and nucleotides to nucleotide-mutation-notation
-  snvinfo.df <- data.frame(
-    Ref = Ref,
-    Pos = Pos,
-    Var = Var,
-    gene_mut = paste0(Ref, Pos, Var),
-    stringsAsFactors = FALSE
+  ref <- snvtable$Ref
+  pos <- snvtable$Pos
+  var <- snvtable$Var
+
+  snv_info_df <- data.frame(
+    gene_pos = pos,
+    gene_mut = paste0(ref, pos, var),
+    freq     = snvtable$AF,
+    # FIXME This gives a read depth, not a coverage, the right name should be
+    # dep
+    cov      = snvtable$DP
   )
 
-  # concat nucleotide-mutation-notation with mutation frequencies and coverage
-  # seperate posistion column will be used for joining data frames
-  snv.info <- cbind(
-    gene_pos = snvinfo.df[, "Pos"],
-    gene_mut = snvinfo.df[, "gene_mut"],
-    freq, cov
-  )
-
-  return(snv.info)
+  return(snv_info_df)
 }
 
 detectable_deletions <- function(x, colnames) {
