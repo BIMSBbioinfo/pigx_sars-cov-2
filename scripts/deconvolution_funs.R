@@ -17,9 +17,7 @@ parse_snv_csv <- function(snvfile) { # allele frequency from v-pipe vcf
     gene_pos = pos,
     gene_mut = paste0(ref, pos, var),
     freq     = snvtable$AF,
-    # FIXME This gives a read depth, not a coverage, the right name should be
-    # dep
-    cov      = snvtable$DP
+    dep      = snvtable$DP
   )
 
   return(snv_info_df)
