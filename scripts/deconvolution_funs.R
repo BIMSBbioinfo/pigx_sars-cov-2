@@ -1,6 +1,7 @@
 library("MASS")
 library("stringr")
 library("dplyr")
+library("tidyr")
 
 parse_snv_csv <- function(snvfile) { # allele frequency from v-pipe vcf
   #' input: csv file derived from vpipe vcf when using LoFreq,
@@ -111,76 +112,111 @@ get_protein_mut <- function(vepfile) {
   # reading in whole vep txt output
   # you should include in the vep script to parse out the #
   # in the beginning of the line or include that step here.
-  vepfile.df <- read.table(vepfile, sep = ",", header = TRUE)
+  vepfile_df <- read.table(vepfile, sep = ",", header = TRUE)
   # parsing snv and protmut location
 
-  # parsing gene mutation
-  gene_mutation <- data.frame(
-    gene_mut_loc = str_split_fixed(vepfile.df$Location, "[:-]+", n = 3),
-    nucleotides = str_split_fixed(
-      str_split_fixed(vepfile.df$Uploaded_variation,
-        "[_-]+",
-        n = 4
-      )[, 4], "/",
-      n = 2
+
+  locations <- vepfile_df %>%
+
+    rename(
+      prot_pos  = Protein_position,
+      conseq    = Consequence,
+      gene_name = SYMBOL
+    ) %>%
+    # get general info on mutation and its position
+    mutate(
+      mut_nucs   = str_extract(Uploaded_variation, "[A-Z*]/[A-Z*]$"),
+      mut_chrom  = str_extract(Location, "^[^:]+"),
+      mut_start  = str_extract(Location, "(?<=:)[0-9]+[^-]"),
+      mut_end    = str_extract(Location, "(?<=-)[0-9]+")
+    ) %>%
+    # generate unique string describing mutation
+    mutate(
+      mut_ref = str_extract(mut_nucs, "^[A-Z*-]"),
+      mut_var = str_extract(mut_nucs,  "[A-Z*-]$"),
+
+      mut_str = paste0(mut_ref, mut_start, mut_var)
+    ) %>%
+
+    # get infos on mutation consequences for protein
+    mutate(
+      # Note: This may behave unexpectedly; in the case of no change aa_ref
+      # and aa_var are the same, aa_var will not be empty / NA
+      aa_ref = str_extract(Amino_acids, "^[A-Z*-]+"),
+      aa_var = str_extract(Amino_acids,  "[A-Z*-]+$"),
+
+      aa_str = paste0(aa_ref, prot_pos, aa_var)
+    ) %>%
+
+    # delete all rows with no protein position value
+    # TODO Why do we delete these mutations? This just means they do not
+    # affect the proteins, the mutations may still be informative...
+    filter(!str_detect(prot_pos, "^-")) %>%
+    # TODO What is the relevance of this information?
+    # specific B117 mutations: 21990-21993, 21764-21770, maybe also 3675-3677,
+    # 69-70 - all there
+
+    # remove unneeded cols
+    dplyr::select(-matches(names(vepfile_df), ignore.case = FALSE)) %>%
+
+    # This also removes variants that essentially look the same, but differ in
+    # their VEP determined Gene
+    # e.g. Gene:ENSSASG00005000002 <> Gene:ENSSASG00005000003
+    distinct()
+
+  if (any(!is.na(locations$mut_end))) {
+    # TODO: look into whether any other consequence might lead to more than one
+    # AA ref / var
+    # (https://grch37.ensembl.org/info/genome/variation/prediction/predicted_data.html#consequences)
+    indel_locations_idcs <- with(
+      locations,
+      str_detect(conseq, "(deletion)|(insertion)")
     )
-  )
 
-  gene_mutation$gene_mut <- paste0(
-    gene_mutation$nucleotides.1,
-    gene_mutation$gene_mut_loc.2,
-    gene_mutation$nucleotides.2
-  )
+    locations_indel_df <- apply(
+      locations[indel_locations_idcs, ],
+      1,
+      function(row) {
 
-  # parsing snv and protmut location
-  locations <- data.frame(
-    gene_mut_loc = str_split_fixed(vepfile.df$Location, "[:-]+", n = 3),
-    gene_mut = gene_mutation$gene_mut,
-    prot_mut_loc = vepfile.df$Protein_position,
-    AAs = str_split_fixed(vepfile.df$Amino_acids, "/", 2),
-    Conseq = vepfile.df$Consequence,
-    genes = vepfile.df$SYMBOL
-  )
+        # FIXME Probably more complicated than it needs to be. This just
+        # converts the named vector to a dataframe, but with one row instead of
+        # one col.
+        row <- row %>%
+          as.data.frame() %>%
+          transpose() %>%
+          set_names(names(row))
 
-  locations <- dplyr::na_if(locations, "")
+        if (str_detect(row["conseq"], "insertion")) {
+          sep_col <- "aa_var"
+          rpl_col <- "aa_ref"
+        } else {
+          sep_col <- "aa_ref"
+          rpl_col <- "aa_var"
+        }
 
-  # delete all rows with no protein position value
-  locations <- distinct(locations %>% filter(!grepl("^-", prot_mut_loc)))
-  # specific B117 mutations: 21990-21993, 21764-21770, maybe also 3675-3677,
-  # 69-70 - all there
+        row_sepd <- row %>%
+          separate_rows(all_of(sep_col), sep = "(?<=[[:alpha:]])(?!$)")
 
-  deletions.df <- locations %>%
-    filter(gene_mut_loc.2 != gene_mut_loc.3 &
-      Conseq == "inframe_deletion" &
-      str_detect(prot_mut_loc, "-"))
+        row_sepd[2:nrow(row_sepd), rpl_col] <- "-"
 
-  colnames <- colnames(deletions.df)
+        return(row_sepd)
+      }
+    ) %>%
+      bind_rows()
 
-  # if there is a deletion the snv would span a couple of positions, if there is
-  # not such a spanning region there are no deletions
-  # ! 06/05/2021 Vic - I think, I don't know how robust this is, but it will
-  # work for the sig mutations we have so far
-  if (nrow(locations) >= 1 && !(any(is.na(locations[, "gene_mut_loc.3"])))) {
-    deletions <- dplyr::bind_rows(apply(deletions.df, 1, detectable_deletions,
-      colnames = colnames
-    ))
-    locations <- dplyr::bind_rows(locations, deletions)
+    locations <- locations[- which(indel_locations_idcs), ]
+
+    locations <- locations %>%
+      bind_rows(locations_indel_df)
   }
 
-  # substitute "nothing" at alternative-aa-column (for deletions) with "-"
-  locations$AAs.2[is.na(locations$AAs.2)] <- "-"
-
-  # clean - characters
-  locations$AA_mut <- paste(locations$AAs.1,
-    locations$prot_mut_loc,
-    locations$AAs.2,
-    sep = ""
-  )
-
-  # adding gene information
-  locations$AA_mut <- paste(locations$genes,
-    locations$AA_mut,
-    sep = ":"
+  # FIXME for compatability the name should rather be changed in the scripts
+  # using the fun
+  locations <- dplyr::rename(
+    locations,
+    "gene_mut" = "mut_str",
+    "genes"    = "gene_name",
+    "AA_mut"   = "aa_str"
   )
 
   return(locations)
