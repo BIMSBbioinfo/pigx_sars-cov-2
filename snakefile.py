@@ -44,6 +44,7 @@ OUTPUT_DIR       = config['locations']['output-dir']
 READ_LENGTH      = config['trimming']['read-length']
 CUT_OFF          = config['trimming']['cut-off']
 
+MUTATION_DEPTH_THRESHOLD    = config["reporting"]["mutation-depth-threshold"]
 MUTATION_COVERAGE_THRESHOLD = config['reporting']['mutation-coverage-threshold']
 
 INDEX_DIR         = os.path.join(OUTPUT_DIR, 'index')
@@ -601,6 +602,7 @@ rule run_deconvolution:
         "{SAMPLE_SHEET_CSV}" \
         "{MUTATION_SHEET_CSV}" \
         "{input.deconvolution_functions}" \
+        "{MUTATION_DEPTH_THRESHOLD}" \
         > {log} 2>&1
         """
 
