@@ -67,9 +67,9 @@ match.df <- read.csv(params$sigmut_file)
 # Display the filtered signature mutations and the variants accordingly in
 #  scrollable tables
 SignatureTable <- data.frame(
-  "SNV" = match.df$gene_mut,
-  "gene" = match.df$genes,
-  "protein_mutation" = match.df$AA_mut,
+  "SNV" = match.df$mut_str,
+  "gene" = match.df$gene_name,
+  "protein_mutation" = match.df$aa_str,
   "variant" = match.df$variant, # TODO: more nice writing of it e.g B1.1.7
   "frequency" = match.df$freq, # TODO: more clear name stating which frequency
   "coverage" = match.df$cov
@@ -95,9 +95,9 @@ nomatch.df <- read.csv(params$non_sigmut_file)
 # Display the filtered signature mutations and the variants accordingly in
 # scrollable tables
 NoSignatureTable <- data.frame(
-  "SNV" = nomatch.df$gene_mut,
-  "gene" = nomatch.df$genes,
-  "protein_mutation" = nomatch.df$AA_mut,
+  "SNV" = nomatch.df$mut_str,
+  "gene" = nomatch.df$gene_name,
+  "protein_mutation" = nomatch.df$aa_str,
   "frequency" = nomatch.df$freq, # TODO more clear name stating which frequency
   "coverage" = nomatch.df$cov
 ) # TODO more clear title stating which coverage
@@ -118,7 +118,7 @@ Lineage proportion values are derived by deconvolution of the tracked signature 
 
 ```{r echo = FALSE}
 # get  NT mutations only, input for the signature matrix
-mutations.vector <- match.df$gene_mut_collapsed
+mutations.vector <- match.df$mut_str_collapsed
 
 # only execute the deconvolution when at least one signature mutation was found
 executeDeconvolution <- length(mutations.vector) > 0

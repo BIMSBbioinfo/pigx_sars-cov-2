@@ -134,20 +134,10 @@ get_protein_mut <- function(vepfile) {
       bind_rows(locations_indel_df)
   }
 
-  # FIXME for compatability the name should rather be changed in the scripts
-  # using the fun
-  locations <- dplyr::rename(
-    locations,
-    "gene_mut" = "mut_str",
-    "genes"    = "gene_name",
-    "AA_mut"   = "aa_str"
-  )
-
   return(locations)
 }
 
-
-createSigMatrix <- function(mutations_vector, mutation_sheet_file) {
+create_sig_matrix <- function(mutations_vector, mutation_sheet_file) {
   #' for making the signature matrix based on the signature mutations found in
   #' the sample (given as input as a vector)for it self
   #' returns simple signature matrix as data.frame without frequency values
@@ -181,7 +171,7 @@ createSigMatrix <- function(mutations_vector, mutation_sheet_file) {
   return(sig_mat)
 }
 
-simulateOthers <- function ( mutations.vector, bulk_freq.vector, simple_sigmat.dataframe, coverage.vector, Others_weight) {
+simulate_others <- function ( mutations.vector, bulk_freq.vector, simple_sigmat.dataframe, coverage.vector, Others_weight) {
   #' for the deconvolution to work we need the "wild type" frequencies too. The matrix from above got mirrored, 
   #' wild type mutations are simulated the following: e.g. T210I (mutation) -> T210T ("wild type")
   
@@ -226,7 +216,7 @@ simulateOthers <- function ( mutations.vector, bulk_freq.vector, simple_sigmat.d
 # between those columns. The workaround for now is to identify those equal columns and merge them into one, returning also
 # a vector with the information about which of the columns were merged. 
 # deduplicate dataframe
-dedupeDF <- function( msig_stable ){
+dedupe_df <- function( msig_stable ){
   # transpose and add mutations as first column
   msig_stable_transposed <- as.data.frame(cbind(
     variants = colnames(msig_stable),
@@ -245,7 +235,7 @@ dedupeDF <- function( msig_stable ){
   return(list(msig_stable_transposed, msig_dedupe_transposed))
 }
 
-dedupeVariants <- function (variant, variants.df, dedup_variants.df) {
+dedupe_variants <- function (variant, variants.df, dedup_variants.df) {
         # get variant group per mutation pattern
         # duped_variants <- grep (variant, variants.df$variants)
         duped_variants <- c()
