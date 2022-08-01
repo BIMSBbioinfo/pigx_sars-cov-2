@@ -52,7 +52,7 @@ report to be able to assess how trustworthy the results are.*
 # Mutation analysis
 
 The following tables combine the results from the variant calling which are 
-SNVs, their frequency and read coverage. They get translated to get the info 
+SNVs, their frequency and read depth. They get translated to get the info 
 about the resulting protein mutation and on which gene they are located. If the
 SNV matches a provided signature mutation it is marked which of the provided
 lineages they characterize. 
@@ -72,8 +72,8 @@ SignatureTable <- data.frame(
   "protein_mutation" = match.df$aa_str,
   "variant" = match.df$variant, # TODO: more nice writing of it e.g B1.1.7
   "frequency" = match.df$freq, # TODO: more clear name stating which frequency
-  "coverage" = match.df$cov
-) # TODO: more clear title stating which coverage
+  "depth" = match.df$dep
+) # TODO: more clear title stating which depth
 
 DT::datatable(SignatureTable,
               extensions = c('FixedColumns', 'Scroller'),
@@ -99,8 +99,8 @@ NoSignatureTable <- data.frame(
   "gene" = nomatch.df$gene_name,
   "protein_mutation" = nomatch.df$aa_str,
   "frequency" = nomatch.df$freq, # TODO more clear name stating which frequency
-  "coverage" = nomatch.df$cov
-) # TODO more clear title stating which coverage
+  "depth" = nomatch.df$dep
+) # TODO more clear title stating which depth
 
 DT::datatable(NoSignatureTable,
               extensions = c('FixedColumns', 'Scroller'),
