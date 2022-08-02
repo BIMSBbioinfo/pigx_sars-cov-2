@@ -264,28 +264,38 @@ if (execute_deconvolution) {
       # !! 17/02/2022 It's not yet tested how robust this behaves when one would
       # mindlessly clutter the mutationsheet
       # with lineages that are very unlikely to detect or not detected
+
+      # n all detected mutations / n all known mutations
+      # TODO Find out why
       value <- nrow(msig_deduped_df) / nrow(sigmuts_deduped)
     } else if (grepl(",", lineage)) {
+      # as we can not weight the variants separately by their n detected sig
+      # muts / n known sig muts (for this group), we use n detected sigmuts
+      # (that is still accurate) / group average n known signature mutations
+
+      # TODO Currently, if "Others" is within a group, it biases that groups
+      # weight upwards as no "Others" variant is present in the sigmut_df
+      # variant column.
       group <- unlist(str_split(lineage, ","))
       avrg <- sum(sigmut_df$variant %in% group) / length(group)
       value <- sum(msig_deduped_df[lineage]) / avrg
     } else {
+
+      # n lineage signature mutations detected in sample /
+      # n known lineage signature mutations (provided in the mutation
+      # sheet)
       value <- sum(msig_deduped_df[lineage]) /
         sum(sigmut_df$variant == lineage)
     }
     sigmut_proportion_weights[lineage] <- value
   }
 
-  sigmut_proportion_weights <- as_tibble(sigmut_proportion_weights)
-
-  # applying weights on signature matrix
-  # FIXME: there should be a way to do this vectorized
-  msig_simple_unique_weighted <- msig_deduped_df
-  for (lineage in deconv_lineages) {
-    weight <- msig_simple_unique_weighted[lineage] / as.numeric(sigmut_proportion_weights[lineage])
-    msig_simple_unique_weighted[lineage] <- as.numeric(ifelse(is.na(weight), 0, unlist(weight)))
-  }
-
+  # apply weights to signature matrix
+  msig_deduped_df_weighted <- msig_deduped_df %>%
+    mutate(across(
+      everything(), ~ .x / sigmut_proportion_weights[[cur_column()]]
+    )) %>%
+    replace(is.na(.), 0)
 
   ## ----simulating_WT_mutations, include = FALSE-------------------------------
   # construct additional WT mutations that are not weighted
