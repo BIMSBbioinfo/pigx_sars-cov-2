@@ -190,55 +190,72 @@ if (execute_deconvolution) {
   # for the deconvolution to work we need the "wild type" frequencies too.
   # The matrix from above got mirrored, wild type mutations are simulated the
   # following: e.g. T210I (mutation) -> T210T ("wild type")
-  msig_simple <- create_sig_matrix(mutations_vec, mutation_sheet) %>%
+  msig_simple <- create_sig_matrix(mutations_vec, mutation_sheet)
 
-    # When multiple columns look like the same, the deconvolution will not work,
-    # because the function can't distinguish between those columns. The
-    # workaround for now is to identify those equal columns and merge them into
-    # one, returning also a vector with the information about which of the
-    # columns were merged.
-    cbind(muts = mutations_vec, .)
+  # deduplicate matrix
 
-  msig_transposed <- dedupe_df(msig_simple)
-  msig_stable_transposed <- msig_transposed[[1]]
-  msig_dedupe_transposed <- msig_transposed[[2]]
+  variant_names <- colnames(msig_simple)
 
+  is_dupe <- duplicated(msig_simple, MARGIN = 2)
+  dupe_variants <- variant_names[is_dupe]
+
+  # coerce back to dataframe for easier processing
+  msig_simple_df <- as.data.frame(msig_simple)
+
+  # find out of which variant a dupe variant is a dupe of, generate groups
+  # of variants which are duplicates of each other
+  dupe_group_list <- list()      
+
+  # TODO dropped_variants only used for downstream compatability, will be renamed /
+  # removed later
   dropped_variants <- c()
 
-  # for every variant update the rownames with the group they are in
-  # FIXME: Shorten this and similar constructs
-  for (variant in rownames(
-    msig_stable_transposed[-(rownames(msig_stable_transposed) %in% "muts"), ]
-  )
-  ) {
-    grouping_res <- dedupe_variants(
-      variant,
-      msig_stable_transposed,
-      msig_dedupe_transposed
-    )
+  for (dupe_var in dupe_variants) {
+    if (!dupe_var %in% unique(unlist(dupe_group_list))) {
+      dupe_var_col <- msig_simple_df[[dupe_var]]
 
-    msig_dedupe_transposed <- grouping_res[[1]]
-    dropped_variants <- c(dropped_variants, grouping_res[[2]])
+      dupe_group_logi <- apply(
+        msig_simple,
+        2,
+        function(col, dupe_col) {
+          all(col == dupe_col)
+        }, dupe_var_col
+      )
+
+      dupe_group_vec <- variant_names[dupe_group_logi]
+
+      dupe_group_list[[dupe_group_vec[1]]] <- dupe_group_vec
+
+      # TODO remove when no longer needed
+      others_sel_vec <- str_detect(dupe_group_vec, "Others")
+      if (any(others_sel_vec)) {
+        dropped_variants <- c(
+          dropped_variants,
+          dupe_group_vec[! others_sel_vec]
+        )
+      }
+    }
   }
 
-  # transpose the data frame back to column format for additional processing
-  if (length(msig_dedupe_transposed) >= 1) {
-    # the 1 get's rid of the additional first row which is an transposing
-    # artifact
-    msig_simple_unique <- as.data.frame(t(msig_dedupe_transposed[, -1])) %>%
-      mutate(across(!c("muts"), as.numeric))
-  }
+  # concat dupe groups to form a new composite name for the now unique col
+  dupe_group_names <- lapply(dupe_group_list, paste, collapse = ",") %>%
+    unlist()
 
-  # clean the vector to know which variants has to be add with value 0 after
-  # deconvolution
-  dropped_variants <- unique(dropped_variants)
-  dropped_variants <- dropped_variants[!is.na(dropped_variants)]
+  # juggle names to get a named vector with names and values flipped
+  # needed by dplyr::rename()
+  old_names <- names(dupe_group_names)
+  new_names <- dupe_group_names
 
+  dupe_group_names <- old_names %>%
+    set_names(new_names)
+
+  # generate deduped signature matrix
+  # is a col was duplicated this contains only the first col of each dupe group
+  msig_deduped_df <- msig_simple_df[, !is_dupe] %>%
+    rename(!!dupe_group_names)
 
   ## ----calculate_sigmat_weigths, include = FALSE------------------------------
-  deconv_lineages <- colnames(
-    msig_simple_unique[, -which(names(msig_simple_unique) %in% c("muts", "WT"))]
-  )
+  deconv_lineages <- colnames(msig_deduped_df)
 
   # create list of proportion values that will be used as weigths
   sigmut_proportion_weights <- list()
@@ -247,13 +264,13 @@ if (execute_deconvolution) {
       # !! 17/02/2022 It's not yet tested how robust this behaves when one would
       # mindlessly clutter the mutationsheet
       # with lineages that are very unlikely to detect or not detected
-      value <- nrow(msig_simple_unique) / nrow(sigmuts_deduped)
+      value <- nrow(msig_deduped_df) / nrow(sigmuts_deduped)
     } else if (grepl(",", lineage)) {
       group <- unlist(str_split(lineage, ","))
       avrg <- sum(sigmut_df$variant %in% group) / length(group)
-      value <- sum(msig_simple_unique[lineage]) / avrg
+      value <- sum(msig_deduped_df[lineage]) / avrg
     } else {
-      value <- sum(msig_simple_unique[lineage]) /
+      value <- sum(msig_deduped_df[lineage]) /
         sum(sigmut_df$variant == lineage)
     }
     sigmut_proportion_weights[lineage] <- value
@@ -263,7 +280,7 @@ if (execute_deconvolution) {
 
   # applying weights on signature matrix
   # FIXME: there should be a way to do this vectorized
-  msig_simple_unique_weighted <- msig_simple_unique
+  msig_simple_unique_weighted <- msig_deduped_df
   for (lineage in deconv_lineages) {
     weight <- msig_simple_unique_weighted[lineage] / as.numeric(sigmut_proportion_weights[lineage])
     msig_simple_unique_weighted[lineage] <- as.numeric(ifelse(is.na(weight), 0, unlist(weight)))
@@ -280,7 +297,7 @@ if (execute_deconvolution) {
   others_weight <- as.numeric(sigmut_proportion_weights["Others"])
   msig_stable_all <- simulate_others(
     mutations_vec, bulk_freq_vec,
-    msig_simple_unique_weighted[, -which(names(msig_simple_unique_weighted) == "muts")],
+    msig_simple_unique_weighted,
     match_df$dep,
     others_weight
   )
@@ -390,7 +407,7 @@ if (!execute_deconvolution) {
   )
 } else {
   # get all possible variants
-  all_variants <- colnames(msig_simple[, -which(names(msig_simple) %in% "muts")])
+  all_variants <- colnames(msig_simple)
   # add columns for all possible variants to the dataframe
   for (variant in all_variants) {
     output_variant_plot[, variant] <- numeric()

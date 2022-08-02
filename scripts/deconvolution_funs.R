@@ -163,8 +163,9 @@ create_sig_matrix <- function(mutations_vector, mutation_sheet_file) {
     # TODO ensure this is how this column is supposed to work
     mutate(Others = rep(0, length(mutations_vector))) %>%
 
-    magrittr::set_rownames(mutations_vector)
+    as.matrix() %>%
 
+    magrittr::set_rownames(mutations_vector)
 
   return(sig_mat)
 }
