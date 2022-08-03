@@ -347,34 +347,9 @@ if (execute_deconvolution) {
   cat("Writing variant abundance file to ", variant_abundance_file, "...\n")
   write.csv(variant_abundance_df, variant_abundance_file)
 
-  # plot comes here in report
-} else {
-  # write dummy variants file
-  # TODO: do this as a proper emty table with the correct col names
-  file.create(variant_abundance_file)
-}
-
-# TODO: check if the else of the above if is handled correctly
-
-
-## ----csv_output_variant_plot, include = F-------------------------------------
-# prepare processed variant values to output them as a csv which will be
-# concatenated across samples and used for the plots in index.rmd.
-output_variant_plot <- data.frame(
-  samplename = character(),
-  dates = character(),
-  location_name = character(),
-  coordinates_lat = character(),
-  coordinates_long = character()
-)
-if (!execute_deconvolution) {
-  # if no signatur mutation found write empty output file
-  # TODO: sombody should check whether this empty file with header is enough, or a more sensible default is required
-  write.table(output_variant_plot, variants_with_meta_file,
-    sep = "\t",
-    na = "NA", row.names = FALSE, quote = FALSE
-  )
-} else {
+  ## ----csv_output_variant_plot, include = F-------------------------------------
+  # prepare processed variant values to output them as a csv which will be
+  # concatenated across samples and used for the plots in index.rmd.
 
   # NOTE: previously an additional column called lowercase "others" was
   # calculated as 1-sum(all other variants) due to the idea behind the uppercase
@@ -401,6 +376,27 @@ if (!execute_deconvolution) {
   write.table(output_variant_plot, variants_with_meta_file,
     sep = "\t",
     na = "NA", row.names = FALSE, quote = FALSE
+  )
+  
+} else {
+  cat("Writing dummy variants file to ", variant_abundance_file, "...\n")
+
+  # write dummy variants file
+  writeLines(
+    "Deconvolution not run, this is a dummy file.",
+    variant_abundance_file
+  )
+
+  cat(
+    "Writing dummy variants file with metadata to ",
+    variants_with_meta_file,
+    "...\n"
+  )
+
+  # write dummy variants file
+  writeLines(
+    "Deconvolution not run, this is a dummy file.",
+    variants_with_meta_file
   )
 }
 
