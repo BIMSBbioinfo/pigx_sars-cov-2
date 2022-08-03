@@ -10,4 +10,8 @@ locations:
   vep-db-dir: /local/Projects/AAkalin_pathogenomics/pigx_sars-cov-2_project/databases/vep_db
 
 reporting:
+  # This leads to enough samples being used that the mutation regression
+  # will run, meaning now most analysis code actually runs during
+  # testing. The results may be unrealistic, but we don't care about that
+  # during testing.
   mutation-coverage-threshold: 25
