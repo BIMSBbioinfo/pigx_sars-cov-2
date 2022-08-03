@@ -204,11 +204,7 @@ if (execute_deconvolution) {
 
   # find out of which variant a dupe variant is a dupe of, generate groups
   # of variants which are duplicates of each other
-  dupe_group_list <- list()      
-
-  # TODO dropped_variants only used for downstream compatability, will be renamed /
-  # removed later
-  dropped_variants <- c()
+  dupe_group_list <- list()
 
   for (dupe_var in dupe_variants) {
     if (!dupe_var %in% unique(unlist(dupe_group_list))) {
@@ -225,15 +221,6 @@ if (execute_deconvolution) {
       dupe_group_vec <- variant_names[dupe_group_logi]
 
       dupe_group_list[[dupe_group_vec[1]]] <- dupe_group_vec
-
-      # TODO remove when no longer needed
-      others_sel_vec <- str_detect(dupe_group_vec, "Others")
-      if (any(others_sel_vec)) {
-        dropped_variants <- c(
-          dropped_variants,
-          dupe_group_vec[! others_sel_vec]
-        )
-      }
     }
   }
 
@@ -336,65 +323,29 @@ if (execute_deconvolution) {
   msig_all <- rbind(msig_inverse, msig_deduped_df_weighted) %>%
     as.matrix()
 
-  
+
   ## central deconvolution step ------------------------------------------------
   variant_abundance <- deconv(bulk_all, msig_all)
 
 
   ## ----plot, echo = FALSE-----------------------------------------------------
-  # work in progress...only to show how it theoretically can look like in the
-  # report
-  variants <- colnames(msig_stable_unique[, -1])
-  df <- data.frame(rbind(variant_abundance))
+  variant_abundance_df <- data.frame(
+    variant = deconv_lineages,
+    abundance = variant_abundance
+  ) %>%
+    separate_rows(variant, sep = ",")
 
-  colnames(df) <- variants
-  df <- df %>%
-    tidyr::pivot_longer(everything()) %>%
-    dplyr::select(variant = name, abundance = value)
+  # go trough all groups and assign each group member the group abundance
+  # divided by the number of group members
+  for (group in dupe_group_list) {
+    group_ind <- variant_abundance_df$variant %in% group
+    group_abundance <- variant_abundance_df$abundance[group_ind][1]
 
-  # Handling of ambiguous cases and grouped variants
-
-  # case 1: add dropped variants again with value 0 in case all of the other
-  # variants add up to 1
-  if (round(sum(df$abundance), 1) == 1) {
-    for (variant in dropped_variants) {
-      df <- rbind(df, c(variant, 0))
-    }
+    variant_abundance_df$abundance[group_ind] <- group_abundance / length(group)
   }
-
-  # case 2: in case "others" == 0, both variants can be split up again and being
-  while (any(str_detect(df$variant, ","))) {
-    grouped_rows <- which(str_detect(df$variant, ","))
-    # fixme: this loop might be unneccessary, since only the first row should
-    # been picked, everything else will be handled by the while loop
-    for (row in grouped_rows) {
-      if (df[row, "abundance"] == 0) {
-        grouped_variants <- unlist(str_split(df[row, "variant"], ","))
-        for (variant in grouped_variants) {
-          # add new rows, one for each variant
-          df <- rbind(df, c(variant, 0))
-        }
-      } else if (df[row, "abundance"] != 0) {
-        grouped_variants <- unlist(str_split(df[row, "variant"], ","))
-        # normal distribution, devide deconv value by number of grouped variants
-        distributed_freq_value <-
-          as.numeric(as.numeric(df[row, "abundance"]) /
-            length(grouped_variants))
-        for (variant in grouped_variants) {
-          # add new rows, one for each variant
-          df <- rbind(df, c(variant, distributed_freq_value))
-        }
-      }
-      # drop grouped row
-      df <- df[-row, ]
-    }
-  }
-
-  df <- transform(df, abundance = as.numeric(abundance))
-
 
   cat("Writing variant abundance file to ", variant_abundance_file, "...\n")
-  write.csv(df, variant_abundance_file)
+  write.csv(variant_abundance_df, variant_abundance_file)
 
   # plot comes here in report
 } else {
@@ -407,9 +358,8 @@ if (execute_deconvolution) {
 
 
 ## ----csv_output_variant_plot, include = F-------------------------------------
-# prepare processed variant values to output them as a csv which will be used for the plots in index.rmd
-# those outputs are not offically declared as outputs which can lead to issues - that part should be handled by a seperate
-# file (and maybe rule)
+# prepare processed variant values to output them as a csv which will be
+# concatenated across samples and used for the plots in index.rmd.
 output_variant_plot <- data.frame(
   samplename = character(),
   dates = character(),
@@ -425,48 +375,29 @@ if (!execute_deconvolution) {
     na = "NA", row.names = FALSE, quote = FALSE
   )
 } else {
-  # get all possible variants
-  all_variants <- colnames(msig_simple)
-  # add columns for all possible variants to the dataframe
-  for (variant in all_variants) {
-    output_variant_plot[, variant] <- numeric()
-  }
-  meta_data <- c(
-    samplename = sample_name,
-    dates = date,
-    location_name = location_name,
-    coordinates_lat = coordinates_lat,
-    coordinates_long = coordinates_long
-  )
 
-  output_variant_plot <- bind_rows(output_variant_plot, meta_data)
+  # NOTE: previously an additional column called lowercase "others" was
+  # calculated as 1-sum(all other variants) due to the idea behind the uppercase
+  # "Others" col, this was always 0 and supposed to be already fixed.
+  output_variant_plot <- variant_abundance_df %>%
+    pivot_wider(names_from = variant, values_from = abundance) %>%
+    mutate(
+      samplename = sample_name,
+      dates = date,
+      location_name = location_name,
+      coordinates_lat = coordinates_lat,
+      coordinates_long = coordinates_long
+    ) %>%
 
-  # get rownumber for current sample
-  sample_row <- which(grepl(sample_name, output_variant_plot$samplename))
+    # ensure metadata cols are first
+    dplyr::select(all_of(c(
+      "samplename",
+      "dates",
+      "location_name",
+      "coordinates_lat",
+      "coordinates_long"
+    )), everything())
 
-  # write mutation frequency values to df
-  for (i in all_variants) {
-    if (i %in% df$variant) {
-      # check if variant already has a column
-      if (i %in% colnames(output_variant_plot)) {
-        output_variant_plot[sample_row, ][i] <- df$abundance[df$variant == i]
-        output_variant_plot <- output_variant_plot %>% mutate(others = 1 - rowSums(across(all_of(all_variants)), na.rm = TRUE))
-      }
-    }
-  }
-
-  ## # TODO: This chunk hast to go into a seperate rule
-  ## # 2. check if file exists already
-  ## if (file.exists (variants_with_meta_file)) {
-  ##   previous_df <- read.csv (variants_with_meta_file,
-  ##                              header = TRUE, colClasses = "character", check.names = FALSE)
-  ##   # convert numeric values to character
-  ##   output_variant_plot <- as.data.frame(lapply(output_variant_plot, as.character), check.names = FALSE)
-  ##   # merge with adding cols and rows
-  ##   output_variant_plot <- full_join(previous_df, output_variant_plot, by = colnames(previous_df), copy = TRUE)
-  ## }
-
-  # 3. write to output file
   write.table(output_variant_plot, variants_with_meta_file,
     sep = "\t",
     na = "NA", row.names = FALSE, quote = FALSE
