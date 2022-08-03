@@ -1,6 +1,6 @@
 locations:
   output-dir: output
-  reads-dir: sample_data/reads
+  reads-dir: reads
   reference-fasta: sample_data/NC_045512.2.fasta
   amplicons-bed: sample_data/nCoV-2019_NCref.bed
   mutations-bed: sample_data/Covid_CG_NTmutation_t07.bed
