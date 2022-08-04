@@ -142,7 +142,7 @@ Institute of Medical System Biology (BIMSB).
 These plots provide an overview of the relative frequency dynamics of
 identified lineages at specific wastewater sampling locations over time. 
 
-```{r sample_quality_score}
+```{r computs_sample_quality_score}
 coverages_df <- merge(get_genome_cov(params$coverage_dir),
   get_mutation_cov(params$coverage_dir),
   by = "samplename"
@@ -154,15 +154,15 @@ coverages_df <- merge(get_genome_cov(params$coverage_dir),
   )
 
 COVERAGES_FOUND <- length(coverages_df) > 0
+```
 
-if (COVERAGES_FOUND) {
-  # take only the samples over the mutation coverage threshold
-  good_samples_df <- coverages_df %>%
-    filter(as.numeric(proport_muts_covered) >= mutation_coverage_threshold)
+```{r display_sample_quality_score, eval=COVERAGES_FOUND}
+# take only the samples over the mutation coverage threshold
+good_samples_df <- coverages_df %>%
+  filter(as.numeric(proport_muts_covered) >= mutation_coverage_threshold)
 
-  bad_samples_df <- coverages_df %>%
-    filter(!(samplename %in% good_samples_df$samplename))
-}
+bad_samples_df <- coverages_df %>%
+  filter(!(samplename %in% good_samples_df$samplename))
 ```
 
 ```{r sample_quality_score_warning, results = "asis", warning=TRUE, eval=!COVERAGES_FOUND}
@@ -199,22 +199,22 @@ APPROVED_MUTATIONS_FOUND <- RUN_MUTATION_REGRESSION
 SIGN_MUTS_FOUND          <- RUN_MUTATION_REGRESSION
 ```
 
-```{r plotting_variants_text, results='asis', fig.width=4, fig.height=4, eval=VARIANTS_FOUND}
-cat("## Lineage abundances stacked {.tabset .tabset-fade}\n\n",
-  "The summary plot shows the results pooled by day and across locations by ",
-  "weighted average using the read number as weights. Please use the tabs ",
-  "to access the not-pooled plots for each location.",
-  sep = ""
-)
+```{asis plotting_variants_text, echo=VARIANTS_FOUND}
+## Lineage abundances stacked {.tabset .tabset-fade}
+
+The summary plot shows the results pooled by day and across locations by
+weighted average using the read number as weights. Please use the tabs
+to access the not-pooled plots for each location.
 ```
 
-```{r no_variants_warning}
-if (!VARIANTS_FOUND) {
-  warning(paste0(
-    "\nNot enough variants were found or passed the quality filters.",
-    "\nThe associated plots are skipped."
-  ))
-}
+
+```{asis no_variants_warning, echo=!VARIANTS_FOUND}
+<div class="alert alert-warning">
+**Warning**:
+
+Not enough variants were found or passed the quality filters.  
+The associated plots are skipped.
+</div>    
 ```
 
 ```{r variants_pooled_plot_gen, eval=VARIANTS_FOUND}
@@ -326,13 +326,14 @@ if (length(plot_list) >= 1) {
 }
 ```
 
-```{r maps_for_variants_text, results='asis', eval=VARIANTS_FOUND}
-cat("## Lineage abundances geo-localized\n\n",
-  "This plot visualizes proportions of identified lineage ",
-  "abundances at the provided sampling locations.",
-  sep = ""
-)
+```{asis, maps_for_variants_title, echo=VARIANTS_FOUND}
+## Lineage abundances geo-localized
 
+This plot visualizes proportions of identified lineage abundances at the
+provided sampling locations.
+```
+
+```{r maps_for_variants_text, results='asis', eval=VARIANTS_FOUND}
 cat(create_html_note(
   paste(
     "Locations of wastewater processing plants have been generated",
@@ -454,20 +455,21 @@ cat(create_html_note(str_glue(
 ```
 
 
-```{r title_lm_table, results = 'asis', eval=MUTATIONS_FOUND}
-cat(
-  "## Increasing mutations\n\n",
-  "To show the dynamic of significantly changing mutations over time a linear ",
-  "regression model was applied to the mutation results across all samples.",
-  sep = ""
-)
+```{asis lm_table_title, echo=MUTATIONS_FOUND}
+## Increasing mutations
+
+To show the dynamic of significantly changing mutations over time a linear
+regression model was applied to the mutation results across all samples.
 ```
 
-```{r lm_table_warning, results = 'asis', warning=TRUE, eval=MUTATIONS_FOUND && !RUN_MUTATION_REGRESSION}
-warning(paste(
-  "No mutations or not enough mutations were found to perform a",
-  "regression analysis.\nThe associated plots are skipped.\n"
-))
+```{asis lm_table_warning, echo=MUTATIONS_FOUND && !RUN_MUTATION_REGRESSION}
+<div class="alert alert-warning">
+**Warning**:
+
+No mutations or not enough mutations were found to perform a
+regression analysis.  
+The associated plots are skipped.
+</div>
 ```
 
 
@@ -486,20 +488,20 @@ mutations_sig <- filter_lm_res_top20(mutations_sig_unfiltered, 0.05)
 SIGN_MUTS_FOUND <- nrow(mutations_sig) > 0
 ```
 
-```{r mut_reg_tables_caption, results="asis", eval=SIGN_MUTS_FOUND}
-cat(
-  "The following table shows the mutations showing ",
-  "the strongest increasing trend (p <= 0.05).",
-  "The number of trending mutation is restricted to the top 20.",
-  "\n\n**Mutations with significant increase in frequency over time**\n"
-)
+```{asis mut_reg_tables_caption, echo=SIGN_MUTS_FOUND}
+The following table shows the mutations showing the strongest increasing trend
+(p <= 0.05). The number of trending mutation is restricted to the top 20.
+
+**Mutations with significant increase in frequency over time**
 ```
 
-```{r mut_reg_tables_warning, results="asis", warning=TRUE, eval=!SIGN_MUTS_FOUND}
-warning(
-  "No Mutation with significant increase in frequency over time found.",
-  "\nThe associated plots are skipped.\n"
-)
+```{asis mut_reg_tables_warning, echo=!SIGN_MUTS_FOUND}
+<div class="alert alert-warning">
+**Warning**:
+
+No Mutation with significant increase in frequency over time found.  
+The associated plots are skipped.
+</div>
 ```
 
 ```{r display_mut_reg_tables, results="asis", eval=SIGN_MUTS_FOUND}
@@ -585,17 +587,14 @@ approved_mut_plot_location_pooled <- pool_by_mean(filtered_approved_mut_plot,
 )
 ```
 
-```{r mutation_trends_pooled_text, results='asis', eval=APPROVED_MUTATIONS_FOUND}
-cat(
-  "## Trending mutations over time {.tabset .tabset-fade}\n\n",
-  "These plots show the relative frequency of detected mutations with strong ",
-  "increasing trends in samples at specific wastewater sampling locations and ",
-  "how the frequencies change over time. Please use the tabs to access the ",
-  "not-pooled plots for each location.",
-  sep = ""
-)
-```
+```{asis mutation_trends_pooled_text, echo=APPROVED_MUTATIONS_FOUND}
+## Trending mutations over time {.tabset .tabset-fade}
 
+These plots show the relative frequency of detected mutations with strong
+increasing trends in samples at specific wastewater sampling locations and
+how the frequencies change over time. Please use the tabs to access the
+not-pooled plots for each location.
+```
 
 ```{r mutation_trends_pooled_plot_gen, eval=APPROVED_MUTATIONS_FOUND}
 melted <- reshape2::melt(approved_mut_plot_location_pooled,
@@ -710,16 +709,14 @@ for (i in 1:length(locations)) {
 }
 ```
 
+```{asis muts_by_loc_and_date_title, echo=APPROVED_MUTATIONS_FOUND}
+## Trending mutations geo-localized
 
+This plot visualizes proportions of identified single mutation dynamics at the
+provided sampling locations.
+```
 
 ```{r muts_by_loc_and_date_text, results='asis', eval=APPROVED_MUTATIONS_FOUND}
-
-cat("## Trending mutations geo-localized\n\nThis plot visualizes proportions ",
-  "of identified single mutation dynamics at the provided sampling ",
-  "locations.",
-  sep = ""
-)
-
 cat(
   create_html_note(
     paste0(
@@ -916,13 +913,9 @@ signature mutation locations. Results from samples without sufficient coverage
 measures (< `r mutation_coverage_threshold`%) are not included in the
 visualizations or the linear regression calculations. 
 
-```{r title_quality_score, results = 'asis'}
-# table displaying bad samples which are not further inlcuded
-# TODO refine this text
-cat(
-  "\n Table 1: Discarded samples not matching the provided sample",
-  "quality scoring"
-)
+```{asis title_quality_score}
+
+Table 1: Discarded samples not matching the provided sample quality scoring.
 ```
 ```{r table_sample_quality_score, eval=COVERAGES_FOUND}
 # TODO refine column names --> e.g "coverage in percent",
@@ -930,6 +923,10 @@ bad_samples_df <- bad_samples_df %>% slice_head(n = 20)
 create_dt(bad_samples_df)
 ```
 
-```{r table_sample_quality_score_warning, warning=TRUE, eval=!COVERAGES_FOUND}
-warning("\n No coverage values found.")
+```{asis table_sample_quality_score_warning, echo=!COVERAGES_FOUND}
+<div class="alert alert-warning">
+**Warning**:
+
+No coverage values found.
+</div>
 ```
