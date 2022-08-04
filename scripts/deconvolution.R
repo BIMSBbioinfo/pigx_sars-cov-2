@@ -377,7 +377,7 @@ if (execute_deconvolution) {
     sep = "\t",
     na = "NA", row.names = FALSE, quote = FALSE
   )
-  
+
 } else {
   cat("Writing dummy variants file to ", variant_abundance_file, "...\n")
 
@@ -398,6 +398,7 @@ if (execute_deconvolution) {
     "Deconvolution not run, this is a dummy file.",
     variants_with_meta_file
   )
+
 }
 
 ## ----csv_output_mutation_plot, include = FALSE------------------------------
@@ -406,6 +407,7 @@ if (execute_deconvolution) {
 # outputs which can lead to issues - that part should be handled by a seperate
 # file (and maybe rule)
 # get all possible mutations
+
 # one aa mutation can have different codon mutations reported with
 # different freqs- for the summary table they have to be summed up
 # (process see line 1872 of documentation)
@@ -447,14 +449,14 @@ output_mutation_frame <- complete_df %>%
     coordinates_long = coordinates_long
   ) %>%
 
-    # ensure metadata cols are first
-    dplyr::select(all_of(c(
-      "samplename",
-      "dates",
-      "location_name",
-      "coordinates_lat",
-      "coordinates_long"
-    )), everything())
+  # ensure metadata cols are first
+  dplyr::select(all_of(c(
+    "samplename",
+    "dates",
+    "location_name",
+    "coordinates_lat",
+    "coordinates_long"
+  )), everything())
 
 # 3. write to output file
 cat("Writing mutation file to ", mutation_output_file, "...\n")
