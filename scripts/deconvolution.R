@@ -242,47 +242,69 @@ if (execute_deconvolution) {
     rename(!!dupe_group_names)
 
   ## ----calculate_sigmat_weigths, include = FALSE------------------------------
+  # FIXME Rename this to something like deconv_groups
   deconv_lineages <- colnames(msig_deduped_df)
 
-  # create list of proportion values that will be used as weigths
-  sigmut_proportion_weights <- list()
-  for (lineage in deconv_lineages) {
-    if (lineage == "Others") {
-      # !! 17/02/2022 It's not yet tested how robust this behaves when one would
-      # mindlessly clutter the mutationsheet
-      # with lineages that are very unlikely to detect or not detected
+  # calculate each variants weighting value
+  n_found_vec <- lapply(
+    variant_names,
+    function(variant) {
+      if (variant == "Others") {
+        n_mut_found <- nrow(msig_simple_df)
+      } else {
+        n_mut_found <- sum(msig_simple_df[variant])
+      }
+      names(n_mut_found) <- variant
 
-      # n all detected mutations / n all known mutations
-      # TODO Find out why
-      value <- nrow(msig_deduped_df) / nrow(sigmuts_deduped)
-    } else if (grepl(",", lineage)) {
-      # as we can not weight the variants separately by their n detected sig
-      # muts / n known sig muts (for this group), we use n detected sigmuts
-      # (that is still accurate) / group average n known signature mutations
-
-      # TODO Currently, if "Others" is within a group, it biases that groups
-      # weight upwards as no "Others" variant is present in the sigmut_df
-      # variant column.
-      group <- unlist(str_split(lineage, ","))
-      avrg <- sum(sigmut_df$variant %in% group) / length(group)
-      value <- sum(msig_deduped_df[lineage]) / avrg
-    } else {
-
-      # n lineage signature mutations detected in sample /
-      # n known lineage signature mutations (provided in the mutation
-      # sheet)
-      value <- sum(msig_deduped_df[lineage]) /
-        sum(sigmut_df$variant == lineage)
+      return(n_mut_found)
     }
-    sigmut_proportion_weights[lineage] <- value
-  }
+  ) %>%
+    unlist()
+
+  # average weights per group
+  # TODO Currently, if "Others" is within a group, it biases that groups
+  # weight upwards as no "Others" variant is present in the sigmut_df
+  # variant column.
+  group_weights_vec <- lapply(
+    deconv_lineages,
+    function(group) {
+      group_vec <- str_split(group, ",") %>%
+        unlist()
+
+      sel_vec <- names(n_found_vec) %in% group_vec
+      mean_n_found <- sum(n_found_vec[sel_vec]) / length(group_vec)
+
+      # Special case: Group consists only of "Others"
+      # TODO For now it stays like this to produce the original output,
+      # but it is actually not what it is supposed to do, as it ignores
+      # the case when a group of more than one variant includes "Others"
+      if (group == "Others") {
+        # Note: When the mutation sheet contains a large number of variants
+        # that are not being detected, that will strongly upweight the XXX
+
+        mean_n_total <- nrow(sigmuts_deduped)
+      } else {
+        mean_n_total <- sum(sigmut_df$variant %in% group_vec) /
+         length(group_vec)
+      }
+
+      weight <- mean_n_found / mean_n_total
+      names(weight) <- group
+
+      return(weight)
+    }
+  ) %>%
+    unlist()
 
   # apply weights to signature matrix
   msig_deduped_df_weighted <- msig_deduped_df %>%
     mutate(across(
-      everything(), ~ .x / sigmut_proportion_weights[[cur_column()]]
+      everything(), ~ .x / group_weights_vec[[cur_column()]]
     )) %>%
     replace(is.na(.), 0)
+
+  # TODO For downstream compatability only, remove once no longer needed
+  sigmut_proportion_weights <- group_weights_vec
 
   ## ----simulating_WT_mutations, include = FALSE-------------------------------
   # construct additional WT mutations that are not weighted
