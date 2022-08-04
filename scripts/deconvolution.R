@@ -409,68 +409,53 @@ if (execute_deconvolution) {
 # one aa mutation can have different codon mutations reported with
 # different freqs- for the summary table they have to be summed up
 # (process see line 1872 of documentation)
-complete_df <- complete_df %>%
-  group_by(across(c(-freq, -mut_str, -mut_str_collapsed, aa_str))) %>%
+
+# TODO These muations here are not filtered for coverage. Is this intended?
+# NOTE Previously NA aa mutations were not deduplicated, this may lead to
+# differences in the output for that case.
+output_mutation_frame <- complete_df %>%
+  group_by(aa_str) %>%
   summarise(
     freq = sum(as.numeric(freq)),
     mut_str = paste(mut_str, collapse = ",")
   ) %>%
-  rowwise() %>%
   mutate(aa_str = replace(aa_str, is.na(aa_str), "\\:\\")) %>%
   # 211006 this exclusion is necessary because this mutation has a wrong entry
   # in VEP which gives two AA_muts instead of probably 1 deletion
   filter(!(mut_str %in% "G13477A")) %>%
-  ungroup()
-# report the gene, translated_AA_mut and NT mut accordingly
-# easier to spot translation inconsitentcies that way
-all_mutations <- paste(complete_df$aa_str[!is.na(complete_df$aa_str)],
-  complete_df$mut_str,
-  sep = "::"
-)
-# 1. write dataframe with this information here
-output_mutation_frame <- data.frame(
-  samplename = character(),
-  dates = character(),
-  location_name = character(),
-  coordinates_lat = character(),
-  coordinates_long = character()
-)
-# add columns for all possible mutations to the dataframe
-for (mutation in all_mutations) {
-  output_mutation_frame[, mutation] <- numeric()
-}
-meta_data <- c(
-  samplename = sample_name,
-  dates = date,
-  location_name = location_name,
-  coordinates_lat = coordinates_lat,
-  coordinates_long = coordinates_long
-)
-output_mutation_frame <- bind_rows(output_mutation_frame, meta_data)
-# write mutation frequency values to df
-for (i in all_mutations) {
-  i_nt <- str_split(i, "::")[[1]][2]
-  if (i_nt %in% complete_df$mut_str) { # split gene name to match with AA mut
-    # check if variant already has a column
-    if (i %in% colnames(output_mutation_frame)) {
-      output_mutation_frame[, i] <- complete_df$freq[which(
-        complete_df$mut_str == i_nt
-      )]
-    }
-  }
-}
-colnames(output_mutation_frame) <- as.character(colnames(
-  output_mutation_frame
-))
-output_mutation_frame <- output_mutation_frame %>%
-  dplyr::select(-contains("NA", ignore.case = FALSE))
-# convert numeric values to character
-output_mutation_frame <- as.data.frame(lapply(
-  output_mutation_frame,
-  as.character
-),
-check.names = FALSE
-)
+  ungroup() %>%
+
+  # report the gene, translated_AA_mut and NT mut accordingly
+  # easier to spot translation inconsitentcies that way
+  mutate(nuc_aa_mut = paste(
+    aa_str, mut_str,
+    sep = "::"
+  )) %>%
+  dplyr::select(nuc_aa_mut, freq) %>%
+
+  # Filter aa muts that contain NA
+  # TODO Why do some contain NA? I suspect this is not necessary, as all NAs
+  # should be converted above.
+  filter(!str_detect(nuc_aa_mut, "NA")) %>%
+  pivot_wider(names_from = nuc_aa_mut, values_from = freq) %>%
+
+  mutate(
+    samplename = sample_name,
+    dates = date,
+    location_name = location_name,
+    coordinates_lat = coordinates_lat,
+    coordinates_long = coordinates_long
+  ) %>%
+
+    # ensure metadata cols are first
+    dplyr::select(all_of(c(
+      "samplename",
+      "dates",
+      "location_name",
+      "coordinates_lat",
+      "coordinates_long"
+    )), everything())
+
 # 3. write to output file
 cat("Writing mutation file to ", mutation_output_file, "...\n")
 write.table(output_mutation_frame, mutation_output_file,
