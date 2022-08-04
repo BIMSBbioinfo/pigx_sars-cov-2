@@ -153,16 +153,20 @@ coverages_df <- merge(get_genome_cov(params$coverage_dir),
     )
   )
 
-if (!(length(coverages_df) == 0)) {
+COVERAGES_FOUND <- length(coverages_df) > 0
+
+if (COVERAGES_FOUND) {
   # take only the samples over the mutation coverage threshold
   good_samples_df <- coverages_df %>%
     filter(as.numeric(proport_muts_covered) >= mutation_coverage_threshold)
 
   bad_samples_df <- coverages_df %>%
     filter(!(samplename %in% good_samples_df$samplename))
-} else {
-  warning("\n No coverage values found.")
 }
+```
+
+```{r sample_quality_score_warning, results = "asis", warning=TRUE, eval=!COVERAGES_FOUND}
+warning("\n No coverage values found.")
 ```
 
 ```{r filter_plot_frames_samplescore, warning=TRUE}
@@ -192,6 +196,7 @@ RUN_MUTATION_REGRESSION <- if (MUTATIONS_FOUND) {
 # define here in case mutation regression was not executed, as that would lead
 # to an error otherwise
 APPROVED_MUTATIONS_FOUND <- RUN_MUTATION_REGRESSION
+SIGN_MUTS_FOUND          <- RUN_MUTATION_REGRESSION
 ```
 
 ```{r plotting_variants_text, results='asis', fig.width=4, fig.height=4, eval=VARIANTS_FOUND}
@@ -449,24 +454,24 @@ cat(create_html_note(str_glue(
 ```
 
 
-```{r title_lm_table, results = 'asis', warning=TRUE, eval=MUTATIONS_FOUND}
+```{r title_lm_table, results = 'asis', eval=MUTATIONS_FOUND}
 cat(
   "## Increasing mutations\n\n",
   "To show the dynamic of significantly changing mutations over time a linear ",
   "regression model was applied to the mutation results across all samples.",
   sep = ""
 )
+```
 
-if (!RUN_MUTATION_REGRESSION) {
-  warning(paste(
-    "No mutations or not enough mutations were found to perform a",
-    "regression analysis.\nThe associated plots are skipped.\n"
-  ))
-}
+```{r lm_table_warning, results = 'asis', warning=TRUE, eval=MUTATIONS_FOUND && !RUN_MUTATION_REGRESSION}
+warning(paste(
+  "No mutations or not enough mutations were found to perform a",
+  "regression analysis.\nThe associated plots are skipped.\n"
+))
 ```
 
 
-```{r linear_regression_tables, warning=TRUE, results='asis', eval=RUN_MUTATION_REGRESSION}
+```{r compute_linear_regression_tables, eval=RUN_MUTATION_REGRESSION}
 mutation_sheet <- params$mutation_sheet
 sigmuts_df <- fread(mutation_sheet) %>%
   na_if("") %>%
@@ -478,46 +483,57 @@ sigmuts_df <- fread(mutation_sheet) %>%
 
 mutations_sig <- filter_lm_res_top20(mutations_sig_unfiltered, 0.05)
 
-if (nrow(mutations_sig) > 0) {
-  # flag if mutation is signature mutation
-  mutations_sig <- mutations_sig %>%
-    mutate(mut_str = str_extract(
-      mutation,
-      str_glue("(?<={mut_str_sep}{mut_str_sep})[[:alnum:]]+"))) %>%
-    mutate(
-      sigflag = ifelse(
-        mut_str %in%  unlist(sigmuts_df),
-        "SigMut",
-        "NoSigMut"
-    )) %>%
-    dplyr::select(-mut_str)
+SIGN_MUTS_FOUND <- nrow(mutations_sig) > 0
+```
 
-  cat(
-    "The following table shows the mutations showing ",
-    "the strongest increasing trend (p <= 0.05).",
-    "The number of trending mutation is restricted to the top 20.",
-    "\n\n**Mutations with significant increase in frequency over time**\n"
-  )
+```{r mut_reg_tables_caption, results="asis", eval=SIGN_MUTS_FOUND}
+cat(
+  "The following table shows the mutations showing ",
+  "the strongest increasing trend (p <= 0.05).",
+  "The number of trending mutation is restricted to the top 20.",
+  "\n\n**Mutations with significant increase in frequency over time**\n"
+)
+```
 
-  print(htmltools::tagList(create_dt(mutations_sig)))
+```{r mut_reg_tables_warning, results="asis", warning=TRUE, eval=!SIGN_MUTS_FOUND}
+warning(
+  "No Mutation with significant increase in frequency over time found.",
+  "\nThe associated plots are skipped.\n"
+)
+```
 
-  mutations_sig_download <- mutations_sig %>%
-    dump_csv() %>%
-    base64url::base64_urlencode()
-  cat(
-    create_html_download_link(
-      mutations_sig_download,
-      "significant_mutations.csv"
-    ),
-    "\n\n"
-  )
-} else {
-  warning(
-    "No Mutation with significant increase in frequency over time found.",
-    "\nThe associated plots are skipped.\n"
-  )
-}
+```{r display_mut_reg_tables, results="asis", eval=SIGN_MUTS_FOUND}
+# flag if mutation is signature mutation
+mutations_sig <- mutations_sig %>%
+  mutate(mut_str = str_extract(
+    mutation,
+    str_glue("(?<={mut_str_sep}{mut_str_sep})[[:alnum:]]+")
+  )) %>%
+  mutate(
+    sigflag = ifelse(
+      mut_str %in% unlist(sigmuts_df),
+      "SigMut",
+      "NoSigMut"
+    )
+  ) %>%
+  dplyr::select(-mut_str)
 
+print(htmltools::tagList(create_dt(mutations_sig)))
+
+mutations_sig_download <- mutations_sig %>%
+  dump_csv() %>%
+  base64url::base64_urlencode()
+
+cat(
+  create_html_download_link(
+    mutations_sig_download,
+    "significant_mutations.csv"
+  ),
+  "\n\n"
+)
+```
+
+```{r create_unfilt_mut_download, results="asis", eval=RUN_MUTATION_REGRESSION}
 if (nrow(mutations_sig_unfiltered) > 0) {
   mutations_sig_unfiltered <- mutations_sig_unfiltered %>%
     mutate(mut_str = str_extract(
@@ -908,13 +924,12 @@ cat(
   "quality scoring"
 )
 ```
+```{r table_sample_quality_score, eval=COVERAGES_FOUND}
+# TODO refine column names --> e.g "coverage in percent",
+bad_samples_df <- bad_samples_df %>% slice_head(n = 20)
+create_dt(bad_samples_df)
+```
 
-```{r table_sample_quality_score, warning=TRUE}
-if (!(length(coverages_df) == 0)) {
-  # TODO refine column names --> e.g "coverage in percent",
-  bad_samples_df <- bad_samples_df %>% slice_head(n = 20)
-  create_dt(bad_samples_df)
-} else {
-  warning("\n No coverage values found.")
-}
+```{r table_sample_quality_score_warning, warning=TRUE, eval=!COVERAGES_FOUND}
+warning("\n No coverage values found.")
 ```
