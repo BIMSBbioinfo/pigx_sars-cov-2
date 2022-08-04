@@ -882,12 +882,12 @@ cat(
 )
 ```
 
-```{r table_ample_quality_score}
+```{r table_ample_quality_score, warning=TRUE}
 if (!(length(coverages.df) == 0)) {
   # TODO refine column names --> e.g "coverage in percent",
   bad_samples_df <- bad_samples_df %>% slice_head(n = 20)
   create_dt(bad_samples_df)
 } else {
-  cat("\n No coverage values found.")
+  warning("\n No coverage values found.")
 }
 ```
