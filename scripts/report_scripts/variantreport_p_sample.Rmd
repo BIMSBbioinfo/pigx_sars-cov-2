@@ -58,9 +58,7 @@ about the resulting protein mutation and on which gene they are located. If the
 SNV matches a provided signature mutation it is marked which of the provided
 lineages they characterize. 
 
-```{r, results = 'asis'}
-cat("\n Table 1: SNVs from sample matching signature mutations")
-```
+Table 1: SNVs from sample matching signature mutations
 
 ```{r sig_table, results = 'asis'}
 match.df <- fread(params$sigmut_file)
@@ -89,9 +87,7 @@ DT::datatable(SignatureTable,
 )
 ```
 
-```{r nonsig_table, results = 'asis'}
-cat("\n Table 2: SNVs from sample not matching any signature mutations")
-```
+Table 2: SNVs from sample not matching any signature mutations
 
 ```{r non_sig_table, results = 'asis'}
 nomatch.df <- fread(params$non_sigmut_file)
