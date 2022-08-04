@@ -132,7 +132,13 @@ mutations.vector <- match.df$mut_str_collapsed
 executeDeconvolution <- length(mutations.vector) > 0
 ```
 
-`r if (executeDeconvolution) {"The following bar plot shows the proportion of each lineage in the sample as predicted by the deconvolution model. For the case of multiple lineages being indistinguishable because of shared signature mutations, the deconvolution result for this group is distributed equally across each grouped lineage and they all get the same value."}` 
+```{asis, echo=executeDeconvolution}
+The following bar plot shows the proportion of each lineage in the sample as
+predicted by the deconvolution model. For the case of multiple lineages being
+indistinguishable because of shared signature mutations, the deconvolution
+result for this group is distributed equally across each grouped lineage and
+they all get the same value.
+```
 
 ```{r plot, eval = executeDeconvolution}
 Variant_colors <- c(
