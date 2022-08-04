@@ -590,7 +590,7 @@ rule run_deconvolution:
          "{sample}_variants_with_meta.csv"),
         mutations=os.path.join(MUTATIONS_DIR, "{sample}_mutations.csv"),
     log:
-        os.path.join(LOG_DIR, "reports", "{sample}_deconvolution.log"),
+        os.path.join(LOG_DIR, "{sample}_deconvolution.log"),
     shell:
         """
         {RSCRIPT_EXEC} {input.script} \
@@ -705,7 +705,7 @@ rule run_mutation_regression:
             OUTPUT_DIR, "unfiltered_mutations_sig.csv"
         ),
     log:
-        os.path.join(LOG_DIR, "reports", "mutation_regression.log"),
+        os.path.join(LOG_DIR, "mutation_regression.log"),
     shell:
         """
         {RSCRIPT_EXEC} {input.script} \
