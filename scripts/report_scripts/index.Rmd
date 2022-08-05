@@ -268,7 +268,7 @@ melted <- reshape2::melt(approved_var_plot,
   id.vars = c(
     "dates", "samplename", "location_name",
     "coordinates_lat", "coordinates_long"
-  )) %>%
+)) %>%
   mutate(variable = give_priority_in_order(variable, "[Oo]thers"))
 
 location_plot <- function(melted, location) {
@@ -470,8 +470,11 @@ if (!RUN_MUTATION_REGRESSION) {
 mutation_sheet <- params$mutation_sheet
 sigmuts_df <- read.csv(mutation_sheet, header = TRUE) %>%
   na_if("") %>%
-  # split gene name of for easier matching
-  mutate(across(everything(), ~str_replace(.x, str_glue('^[^{mut_str_sep}]*{mut_str_sep}'), '')))
+  # extract only the nucleotide mutation bit
+  mutate(across(everything(),
+    ~ str_extract(
+      .x, str_glue("(?<={mut_str_sep})[[:alnum:]]+")
+    )))
 
 mutations_sig <- filter_lm_res_top20(mutations_sig_unfiltered, 0.05)
 
