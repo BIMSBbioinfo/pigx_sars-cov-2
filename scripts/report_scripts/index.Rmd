@@ -93,8 +93,12 @@ library(dplyr)
 library(viridis)
 ```
 
-
 ```{r input}
+# TODO given as input? or only the scripts dir? similar variant_report
+source(params$fun_cvrg_scr)
+source(params$fun_pool)
+source(params$fun_index)
+source(params$fun_lm)
 
 mutations_sig_unfiltered <- fread(params$unfiltered_mutation_sig_file)
 
@@ -138,9 +142,6 @@ These plots provide an overview of the relative frequency dynamics of
 identified lineages at specific wastewater sampling locations over time. 
 
 ```{r sample_quality_score}
-# TODO given as input? or only the scripts dir? similar variant_report
-source(params$fun_cvrg_scr)
-
 coverages.df <- merge(get_genome_cov(params$coverage_dir),
   get_mutation_cov(params$coverage_dir),
   by = "samplename"
@@ -202,8 +203,6 @@ cat("## Lineage abundances stacked {.tabset .tabset-fade}\n\n",
 ```
 
 ```{r variants_pooled_plot_gen, eval=VARIANTS_FOUND}
-source(params$fun_pool)
-
 if (VARIANTS_FOUND) {
   approved_var_plot_location_pooled <- pool_by_weighted_mean(
     approved_var_plot,
@@ -321,7 +320,6 @@ if (length(plot_list) >= 1) {
 ```
 
 ```{r maps_for_variants_text, results='asis', eval=VARIANTS_FOUND}
-source(params$fun_index)
 cat("## Lineage abundances geo-localized\n\n",
   "This plot visualizes proportions of identified lineage ",
   "abundances at the provided sampling locations.",
@@ -466,8 +464,6 @@ if (!RUN_MUTATION_REGRESSION) {
 
 
 ```{r linear_regression_tables, warning=TRUE, results='asis', eval=RUN_MUTATION_REGRESSION}
-source(params$fun_lm)
-
 mutation_sheet <- params$mutation_sheet
 sigmuts.df <- read.csv(mutation_sheet, header = TRUE) %>%
   na_if("") %>%
