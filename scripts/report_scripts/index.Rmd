@@ -203,18 +203,20 @@ cat("## Lineage abundances stacked {.tabset .tabset-fade}\n\n",
 )
 ```
 
-```{r variants_pooled_plot_gen, eval=VARIANTS_FOUND}
-if (VARIANTS_FOUND) {
-  approved_var_plot_location_pooled <- pool_by_weighted_mean(
-    approved_var_plot,
-    weights, "day_location"
-  )
-} else {
+```{r no_variants_warning}
+if (!VARIANTS_FOUND) {
   warning(paste0(
     "\nNot enough variants were found or passed the quality filters.",
     "\nThe associated plots are skipped."
   ))
 }
+```
+
+```{r variants_pooled_plot_gen, eval=VARIANTS_FOUND}
+approved_var_plot_location_pooled <- pool_by_weighted_mean(
+  approved_var_plot,
+  weights, "day_location"
+)
 
 melted <- reshape2::melt(approved_var_plot_location_pooled,
   id.vars = c("dates", "samplename")
