@@ -45,7 +45,6 @@ dist_doc_DATA = 									\
 EXTRA_DIST = \
   VERSION \
   META.in \
-  $(wildcard databases/sigmut_db/*) \
   tests/sample_data/Test_vep_sarscov2_parsed.txt \
   tests/sample_data/test_vep_parsing_input.txt \
   tests/sample_sheet.csv \
