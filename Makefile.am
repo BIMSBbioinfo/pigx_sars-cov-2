@@ -50,14 +50,9 @@ EXTRA_DIST = \
   tests/sample_data/test_vep_parsing_input.txt \
   tests/sample_sheet.csv \
   tests/settings.yaml \
+  $(wildcard tests/reads/*) \
   tests/sample_data/test_match.df \
   tests/sample_data/test_sig_mutations.df \
-  tests/sample_data/reads/Test0_R1.fastq.gz \
-  tests/sample_data/reads/Test0_R2.fastq.gz \
-  tests/sample_data/reads/Test2_R1.fastq.gz \
-  tests/sample_data/reads/Test2_R2.fastq.gz \
-  tests/sample_data/reads/Test5_R1.fastq.gz \
-  tests/sample_data/reads/Test5_R2.fastq.gz \
   tests/sample_data/NC_045512.2.fasta \
   tests/sample_data/nCoV-2019_NCref.bed \
   tests/sample_data/Covid_CG_NTmutation_t07.bed \
