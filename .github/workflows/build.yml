@@ -30,4 +30,6 @@ jobs:
       - name: Build
         run: guix shell -m manifest.scm -- make -j
       - name: Distcheck
+        env:
+          VERBOSE: "true"
         run: guix shell -m manifest.scm -- make distcheck
