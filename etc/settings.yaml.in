@@ -3,10 +3,10 @@ locations:
   input-dir: reads
   reference-fasta: sample_data/NC_045512.2.fasta
   amplicons-bed: sample_data/nCoV-2019_NCref.bed
-  kraken-db-dir: databases/kraken
-  krona-db-dir: databases/krona
-  vep-db-dir: databases/vep
-  mutation-sheet: databases/mutation_sheet.csv
+  kraken-db-dir: @PIGX_DB_DIR@/kraken_db
+  krona-db-dir: @PIGX_DB_DIR@/krona_db
+  vep-db-dir: @PIGX_DB_DIR@/vep_db
+  mutation-sheet: sample_data/mutation_sheet.csv
 
 parameters:
   # Parameters for rule vep. See documentation about arguments
