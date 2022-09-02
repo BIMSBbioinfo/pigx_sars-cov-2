@@ -26,6 +26,9 @@ function install_kraken_db {
     # Download archive and install
     @WGET@ -qO- $db_url | tar -C $DBNAME -xzv
 
+    # Create missing library subdir
+    mkdir -p "$DBNAME/library"
+
     @KRAKEN2_BUILD@ --use-ftp --download-taxonomy --db $DBNAME
     @KRAKEN2_BUILD@ --build --db $DBNAME
 }
