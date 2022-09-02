@@ -13,10 +13,15 @@ function install_kraken_db {
     # NOTE: This command will download a very large file, after unpacking this will
     # require about 100GB of disc space. If this is not feasible use another
     # database instead. For this please see link above or commented lines below.
-    # @WGET@ -qO- https://genome-idx.s3.amazonaws.com/kraken/k2_pluspfp_20210127.tar.gz | tar -C $DBNAME -xzv
+    # Database choice impacts mainly classification of unaligned reads.
+    # Very large database ~100GB.
+    db_url="https://genome-idx.s3.amazonaws.com/kraken/k2_pluspfp_20210127.tar.gz"
 
-    # Use the following two lines to use smaller 8GB version instead.
-    @WGET@ -qO- https://genome-idx.s3.amazonaws.com/kraken/k2_pluspfp_8gb_20210127.tar.gz | tar -C $DBNAME -xzv
+    # Smaller db
+    # db_url="https://genome-idx.s3.amazonaws.com/kraken/k2_pluspfp_8gb_20210127.tar.gz"
+
+    # Download archive and install
+    @WGET@ -qO- $db_url | tar -C $DBNAME -xzv
 
     @KRAKEN2_BUILD@ --use-ftp --download-taxonomy --db $DBNAME
     @KRAKEN2_BUILD@ --build --db $DBNAME
