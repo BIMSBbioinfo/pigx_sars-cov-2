@@ -45,7 +45,7 @@ function install_vep_db {
 
 
 # Each of the procedures expect to be operating in $DBDIR.
-DBDIR=$PWD/databases
+DBDIR=@PIGX_DB_DIR@
 mkdir -p $DBDIR
 
 cd $DBDIR
