@@ -2,6 +2,8 @@
 
 set -o nounset -o pipefail -o errexit
 
+echo "Starting DB downloads..."
+
 function install_kraken_db {
     echo "Downloading Kraken database."
 
