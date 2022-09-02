@@ -15,13 +15,13 @@ function install_kraken_db {
     # database instead. For this please see link above or commented lines below.
     # Database choice impacts mainly classification of unaligned reads.
     # Very large database ~100GB.
-    db_url="https://genome-idx.s3.amazonaws.com/kraken/k2_pluspfp_20210127.tar.gz"
+    # db_url="https://genome-idx.s3.amazonaws.com/kraken/k2_pluspfp_20210127.tar.gz"
 
     # Smaller db
     # db_url="https://genome-idx.s3.amazonaws.com/kraken/k2_pluspfp_8gb_20210127.tar.gz"
 
     # Very small db, later db version
-    # db_url="https://genome-idx.s3.amazonaws.com/kraken/k2_viral_20220607.tar.gz"
+    db_url="https://genome-idx.s3.amazonaws.com/kraken/k2_viral_20220607.tar.gz"
 
     # Download archive and install
     @WGET@ -qO- $db_url | tar -C $DBNAME -xzv
