@@ -23,6 +23,12 @@ function install_kraken_db {
     # Very small db, later db version
     db_url="https://genome-idx.s3.amazonaws.com/kraken/k2_viral_20220607.tar.gz"
 
+    # If size is an issue, downsample the database, causes loss of sensitivity,
+    # see kraken2-build documentation.
+    # The default size (250MB) for example is used to fit the database onto a
+    # github runner.
+    # local SIZELIM="--max-db-size 250000000"
+
     # Download archive and install
     @WGET@ -qO- $db_url | tar -C $DBNAME -xzv
 
@@ -30,7 +36,7 @@ function install_kraken_db {
     mkdir -p "$DBNAME/library"
 
     @KRAKEN2_BUILD@ --use-ftp --download-taxonomy --db $DBNAME
-    @KRAKEN2_BUILD@ --build --db $DBNAME
+    @KRAKEN2_BUILD@ --build --db $DBNAME $SIZELIM
 }
 
 
