@@ -66,9 +66,11 @@ function install_vep_db {
 DBDIR=@PIGX_DB_DIR@
 mkdir -p $DBDIR
 
-cd $DBDIR
+pushd $DBDIR
 install_kraken_db
 install_krona_db
 install_vep_db
+
+popd
 
 echo "Done."
