@@ -42,7 +42,6 @@ function install_krona_db {
 
     KRONA="$(dirname @IMPORT_TAXONOMY@)/../share/krona-tools/"
     $KRONA/updateTaxonomy.sh "$DBNAME"
-    $KRONA/updateAccessions.sh "$DBNAME"
 }
 
 
