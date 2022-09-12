@@ -37,6 +37,11 @@ function install_kraken_db {
 
     @KRAKEN2_BUILD@ --use-ftp --download-taxonomy --db $DBNAME
     @KRAKEN2_BUILD@ --build --db $DBNAME $SIZELIM
+
+    # the taxonomy dir is only used for building the database, afterwards it
+    # only takes up space.
+    # See https://github.com/DerrickWood/kraken2/wiki/Manual#standard-kraken-2-database
+    rm -r $DBNAME/taxonomy
 }
 
 
