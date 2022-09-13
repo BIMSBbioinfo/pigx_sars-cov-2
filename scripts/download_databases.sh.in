@@ -35,7 +35,7 @@ function install_kraken_db {
     # Create missing library subdir
     mkdir -p "$DBNAME/library"
 
-    @KRAKEN2_BUILD@ --use-ftp --download-taxonomy --db $DBNAME
+    @KRAKEN2_BUILD@ --use-ftp --download-taxonomy --db $DBNAME --skip-map
     @KRAKEN2_BUILD@ --build --db $DBNAME $SIZELIM
 
     # the taxonomy dir is only used for building the database, afterwards it
