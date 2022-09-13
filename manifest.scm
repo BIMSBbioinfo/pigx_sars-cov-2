@@ -21,15 +21,15 @@
 
 (define channels
   (list (channel
-         (name 'guix)
-         (url "https://git.savannah.gnu.org/git/guix.git")
-         (commit
-          "b540e5e6bba6e0047864abcc3a6dfec46ff6cd32")
-         (introduction
-          (make-channel-introduction
-           "9edb3f66fd807b096b48283debdcddccfea34bad"
-           (openpgp-fingerprint
-            "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))))
+          (name 'guix)
+          (url "https://git.savannah.gnu.org/git/guix.git")
+          (commit
+            "b540e5e6bba6e0047864abcc3a6dfec46ff6cd32")
+          (introduction
+            (make-channel-introduction
+              "9edb3f66fd807b096b48283debdcddccfea34bad"
+              (openpgp-fingerprint
+                "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))))
 
 (define (lookup name)
   (specification->package name))
