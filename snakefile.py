@@ -337,7 +337,7 @@ IVAR_WINDOW_WIDTH   = parameters["ivar_trimming"]["window-width"]
 MUTATION_DEPTH_THRESHOLD    = parameters["reporting"]["mutation-depth-threshold"]
 MUTATION_COVERAGE_THRESHOLD = parameters['reporting']['mutation-coverage-threshold']
 
-START_POINT = config["control"]["start"]
+START_POINT = config["control"]["start"].lower()
 TARGETS     = config["control"]["targets"]
 
 RUN_IVAR_PRIMER_TRIMING = config["control"]["run-ivar-primer-trimming"]
