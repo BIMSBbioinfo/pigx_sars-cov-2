@@ -48,7 +48,12 @@ def tool(name):
     Helper function to bundle a tool with its preset arguments.
     """
     cmd = config["tools"][name]["executable"]
-    return cmd + " " + toolArgs(name)
+    args = toolArgs(name)
+
+    if args:
+        return cmd + " " + args
+    else:
+        return cmd
 
 
 # Convenience function to access fields of sample sheet columns that
