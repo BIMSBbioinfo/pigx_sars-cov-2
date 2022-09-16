@@ -120,6 +120,9 @@ tools:
   kraken2:
     executable: @KRAKEN2@
     args: ""
+  kraken2_build:
+    executable: @KRAKEN2_BUILD@
+    args: ""
   import_krona:
     executable: @IMPORT_KRONA@
     args: ""
