@@ -30,7 +30,7 @@ function install_kraken_db {
     # local SIZELIM="--max-db-size 250000000"
 
     # Download archive and install
-    @WGET@ -qO- $db_url | tar -C $DBNAME -xzv
+    @WGET@ -qO- $db_url | tar -C $DBNAME -xzv --exclude hash.k2d
 
     # Create missing library subdir
     mkdir -p "$DBNAME/library"
