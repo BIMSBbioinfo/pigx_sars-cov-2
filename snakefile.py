@@ -195,6 +195,8 @@ def vcf2csv_input(wildcards):
 def vep_input(wildcards):
     sample = wildcards[0]
 
+    input={"db_dir": VEP_DB}
+
     if START_POINT == "vcf":
         # take vcf files directly from the reads dir
         input_file = os.path.join(INPUT_DIR, f"{sample}.vcf")
@@ -202,7 +204,9 @@ def vep_input(wildcards):
     else:
         input_file = os.path.join(VARIANTS_DIR, f"{sample}_snv.vcf")
 
-    return input_file
+    input["input_file"] = input_file
+
+    return input
 
 
 # dynamically define the multiqc input files created by FastQC and fastp
@@ -795,7 +799,7 @@ rule vcf2csv:
 
 rule vep:
     input:
-        vep_input,
+        unpack(vep_input),
     output:
         os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2.txt"),
     params:
@@ -808,7 +812,7 @@ rule vep:
     shell:
         """
         {VEP_EXEC} --verbose --offline \
-        --dir_cache {VEP_DB} \
+        --dir_cache {input.db_dir} \
         --DB_VERSION {params.db_version} \
         --buffer_size {params.buffer_size} \
         --species {params.species} \
@@ -818,7 +822,7 @@ rule vep:
         --protein \
         --symbol \
         --transcript_version \
-        --input_file {input} \
+        --input_file {input.input_file} \
         --output_file {output} \
         >> {log} 2>&1
         """
