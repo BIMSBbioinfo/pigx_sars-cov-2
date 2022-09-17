@@ -68,7 +68,10 @@ with open(snakemake.log[0], "w") as log_file:
                 stderr = log_file
             )
 
-            # @KRAKEN2_BUILD@ --build --db $DBNAME
+            # Manually create library dummy dir. Somehow kraken2-build still
+            # expects that.
+            os.makedirs(os.path.join(kraken_dir, "library"))
+
             db_build_call = [
                 *snakemake.params["kraken2_build"].split(" "),
                 "--build",
