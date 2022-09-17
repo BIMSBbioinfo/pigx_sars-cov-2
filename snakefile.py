@@ -324,6 +324,19 @@ KRONA_DB            = config["locations"]["krona-db-dir"]
 VEP_DB              = config["locations"]["vep-db-dir"]
 OUTPUT_DIR          = config["locations"]["output-dir"]
 
+kraken_dl_params = config["databases"]["kraken2"]
+krona_dl_params  = config["databases"]["krona"]
+vep_dl_params    = config["databases"]["vep"]
+
+KRAKEN_DB_URL        = kraken_dl_params["archive-url"]
+KRAKEN_DB_DOWNSAMPLE = kraken_dl_params["downsample-db"]
+KRAKEN_DB_MAX_SIZE   = kraken_dl_params["max-db-size-bytes"]
+
+KRONA_DB_USE_PREBUILT = krona_dl_params["use-prebuilt"]
+KRONA_DB_URL          = krona_dl_params["archive-url"]
+
+VEP_DB_URL = vep_dl_params["archive-url"]
+
 # TODO: get default read length from multiqc
 parameters = config["parameters"]
 
