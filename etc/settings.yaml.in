@@ -8,6 +8,19 @@ locations:
   vep-db-dir: @PIGX_DB_DIR@/vep_db
   mutation-sheet: sample_data/mutation_sheet.csv
 
+databases:
+  kraken2:
+    archive-url: https://genome-idx.s3.amazonaws.com/kraken/k2_pluspfp_20210127.tar.gz
+    downsample-db: false
+    # If downsampling should occurr, what is the maximum allowable size?
+    max-db-size-bytes: 250000000
+  krona:
+    use-prebuilt: false
+    # If a prebuilt archive should be downloaded, where is it located?
+    archive-url: ""
+  vep:
+    archive-url: ftp://ftp.ensemblgenomes.org/pub/viruses/variation/indexed_vep_cache/sars_cov_2_vep_101_ASM985889v3.tar.gz
+
 parameters:
   # Parameters for rule vep. See documentation about arguments
   # --species
