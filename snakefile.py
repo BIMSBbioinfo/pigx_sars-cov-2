@@ -549,6 +549,38 @@ onsuccess:
             for name in generated:
                 logger.info("  - {}".format(name))
 
+
+# ANNOT: If the any of the databases is not present, download it to the location
+# specified in the settings file.
+rule download_kraken_db:
+    output: directory(KRAKEN_DB)
+    params:
+        kraken2_build=KRAKEN2_BUILD_EXEC,
+        dl_url=KRAKEN_DB_URL,
+        downsample_db=KRAKEN_DB_DOWNSAMPLE,
+        max_db_size=KRAKEN_DB_MAX_SIZE
+    log:
+       os.path.join(LOG_DIR, "database_downloads", "download_kraken_db.log")
+    script: "snakefile_scripts/rule_download_kraken_db.py"
+    
+rule download_krona_db:
+    output: directory(KRONA_DB)
+    params:
+        krona_update_tax_script=KRONA_TAXUPDATE,
+        dl_url=KRONA_DB_URL,
+        use_prebuilt=KRONA_DB_USE_PREBUILT
+    log:
+       os.path.join(LOG_DIR, "database_downloads", "download_krona_db.log")
+    script: "snakefile_scripts/rule_download_krona_db.py"
+    
+rule download_vep_db:
+    output: directory(VEP_DB)
+    params:
+        dl_url=VEP_DB_URL
+    log:
+       os.path.join(LOG_DIR, "database_downloads", "download_vep_db.log")
+    script: "snakefile_scripts/rule_download_vep_db.py"
+
 # Trimming in three steps: general by qual and cutoff, get remaining adapters out, get remaining primers out
 
 # TODO the output suffix should be dynamic depending on the input
