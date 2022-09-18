@@ -157,7 +157,7 @@ def bwa_align_input(args):
 def lofreq_input(wildcards):
     sample = wildcards[0]
 
-    if RUN_IVAR_PRIMER_TRIMING and not START_POINT == "bam":
+    if RUN_IVAR_PRIMER_TRIMMING and not START_POINT == "bam":
         file_descript = "_aligned_sorted_primer-trimmed_sorted"
 
     else:
@@ -365,7 +365,7 @@ DECONVOLUTION_METHOD = config["deconvolution"]["method"]
 START_POINT = config["control"]["start"].lower()
 TARGETS     = config["control"]["targets"]
 
-RUN_IVAR_PRIMER_TRIMING = config["control"]["run-ivar-primer-trimming"]
+RUN_IVAR_PRIMER_TRIMMING = config["control"]["run-ivar-primer-trimming"]
 
 INDEX_DIR         = os.path.join(OUTPUT_DIR, 'index')
 TRIMMED_READS_DIR = os.path.join(OUTPUT_DIR, 'trimmed_reads')
