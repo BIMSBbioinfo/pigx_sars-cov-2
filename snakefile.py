@@ -860,6 +860,7 @@ rule vep:
         --transcript_version \
         --input_file {input.input_file} \
         --output_file {output} \
+        --force_overwrite \
         >> {log} 2>&1
         """
 
