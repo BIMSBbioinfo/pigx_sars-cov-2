@@ -17,10 +17,7 @@ with open(snakemake.log[0], "w") as log_file:
         kraken_dir = snakemake.output[0]
         os.makedirs(kraken_dir)
 
-        # large db, smaller version is at
-        # db_url = "https://genome-idx.s3.amazonaws.com/kraken/k2_pluspfp_8gb_20210127.tar.gz"
-        # db_url = "https://genome-idx.s3.amazonaws.com/kraken/k2_pluspfp_20210127.tar.gz"
-        db_url = "https://genome-idx.s3.amazonaws.com/kraken/k2_viral_20220607.tar.gz"
+        db_url = snakemake.params["dl_url"]
         
         logger.info(
             f"Downloading database archive from {db_url}...")
@@ -37,8 +34,8 @@ with open(snakemake.log[0], "w") as log_file:
 
         tar_out = tarfile.open(fileobj = dl_resp.raw, mode = "r:gz")
 
-        downsample_db = False
-        max_db_size = 250000000
+        downsample_db = snakemake.params["downsample_db"]
+        max_db_size = snakemake.params["max_db_size"]
 
         if downsample_db:
             logger.info(
