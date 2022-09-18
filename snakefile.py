@@ -402,6 +402,10 @@ SAMTOOLS_EXEC        = tool("samtools")
 VEP_EXEC             = tool("vep")
 IVAR_EXEC            = tool("ivar")
 
+KRONA_TAXUPDATE = os.path.join(
+    os.path.dirname(IMPORT_TAXONOMY_EXEC),
+    "../share/krona-tools/updateTaxonomy.sh")
+
 # start file types and the rules that will be skipped:
 #   fastq.gz: 
 #     None
