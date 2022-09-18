@@ -21,10 +21,7 @@ with open(snakemake.log[0], "w") as log_file:
         
         logger.info(
             f"Downloading database archive from {db_url}...")
-        # NOTE: This command will download a very large file, after unpacking this will
-        # require about 100GB of disc space. If this is not feasible use another
-        # database instead. For this please see link above.
-        #@WGET@ -qO-  | tar -C $DBNAME -xzv
+            
         dl_resp = requests.get(db_url, stream = True)
 
         if not dl_resp.status_code == 200:
