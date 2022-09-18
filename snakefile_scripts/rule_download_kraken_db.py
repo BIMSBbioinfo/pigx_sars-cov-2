@@ -49,6 +49,8 @@ with open(snakemake.log[0], "w") as log_file:
                 if member.name != "hash.k2d":
                     tar_out.extract(member, path = kraken_dir)
 
+            tar_out.close()
+
             taxonomy_dl_call = [
                 snakemake.params["kraken2_build"],
                 "--use-ftp",
@@ -101,6 +103,8 @@ with open(snakemake.log[0], "w") as log_file:
             logger.info(
                 f"Download successfull, downloaded kraken2 files to "
                 f"{kraken_dir}.")
+
+        tar_out.close()
 
         logger.info("Done with kraken_db.")
 
