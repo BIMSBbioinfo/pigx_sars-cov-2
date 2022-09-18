@@ -18,18 +18,18 @@ with open(snakemake.log[0], "w") as log_file:
         os.makedirs(kraken_dir)
 
         db_url = snakemake.params["dl_url"]
-        
+
         logger.info(
             f"Downloading database archive from {db_url}...")
-            
-        dl_resp = requests.get(db_url, stream = True)
+
+        dl_resp = requests.get(db_url, stream=True)
 
         if not dl_resp.status_code == 200:
             logger.error(
                 f"Download not successfull, status code {dl_resp.status_code}")
             sys.exit(1)
 
-        tar_out = tarfile.open(fileobj = dl_resp.raw, mode = "r:gz")
+        tar_out = tarfile.open(fileobj=dl_resp.raw, mode="r:gz")
 
         downsample_db = snakemake.params["downsample_db"]
         max_db_size = snakemake.params["max_db_size"]
@@ -41,7 +41,7 @@ with open(snakemake.log[0], "w") as log_file:
 
             for member in tar_out:
                 if member.name != "hash.k2d":
-                    tar_out.extract(member, path = kraken_dir)
+                    tar_out.extract(member, path=kraken_dir)
 
             tar_out.close()
 
@@ -57,11 +57,11 @@ with open(snakemake.log[0], "w") as log_file:
             )
 
             logger.info(taxonomy_dl_call)
-        
+
             subprocess.run(
                 taxonomy_dl_call,
-                stdout = log_file,
-                stderr = log_file
+                stdout=log_file,
+                stderr=log_file
             )
 
             # Manually create library dummy dir. Somehow kraken2-build still
@@ -76,13 +76,13 @@ with open(snakemake.log[0], "w") as log_file:
 
             logger.info(
                 "Building database with size-limit...")
-                
+
             logger.info(db_build_call)
-            
+
             subprocess.run(
                 db_build_call,
-                stdout = log_file,
-                stderr = log_file
+                stdout=log_file,
+                stderr=log_file
             )
 
             # After building, the taxonomy subdir only takes up space.
@@ -92,7 +92,7 @@ with open(snakemake.log[0], "w") as log_file:
             logger.info(
                 "No downsampling requested, taking downloaded dir as is.")
 
-            tar_out.extractall(path = kraken_dir)
+            tar_out.extractall(path=kraken_dir)
 
             logger.info(
                 f"Download successfull, downloaded kraken2 files to "
@@ -102,8 +102,6 @@ with open(snakemake.log[0], "w") as log_file:
 
         logger.info("Done with kraken_db.")
 
-
     except Exception as e:
         logger.error(e)
         sys.exit(1)
-        
