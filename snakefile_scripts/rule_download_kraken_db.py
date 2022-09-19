@@ -1,10 +1,9 @@
 import os
 import sys
 import shutil
-import requests
-import tarfile
 import subprocess
 from snakemake.logging import logger
+import download_tarball as dltar
 
 with open(snakemake.log[0], "w") as log_file:
     sys.stdout = log_file
@@ -17,21 +16,9 @@ with open(snakemake.log[0], "w") as log_file:
         kraken_dir = snakemake.output[0]
         os.makedirs(kraken_dir)
 
-        # FIXME Unify all the download and unpack sequences across db_dl rule
-        #   scripts into one function.
         db_url = snakemake.params["dl_url"]
 
-        logger.info(
-            f"Downloading database archive from {db_url}...")
-
-        dl_resp = requests.get(db_url, stream=True)
-
-        if not dl_resp.status_code == 200:
-            logger.error(
-                f"Download not successfull, status code {dl_resp.status_code}")
-            sys.exit(1)
-
-        tar_out = tarfile.open(fileobj=dl_resp.raw, mode="r:gz")
+        tar_out = dltar.download_tarball(db_url)
 
         downsample_db = snakemake.params["downsample_db"]
         max_db_size = snakemake.params["max_db_size"]
