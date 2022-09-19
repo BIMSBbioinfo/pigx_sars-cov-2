@@ -10,7 +10,9 @@ def download_tarball(dl_url):
     Download .tar.gz archive from url and return a tarfile object to it.
     """
 
-    # TODO Ensure download url points to an actual archive.
+    if not re.search(".tar.gz$", dl_url):
+        Exception(f"dl_url ({dl_url}) does not point to a '.tar.gz' file.")
+    
     if re.match("ftp://*", dl_url):
         print(
             f"Downloading database archive from ftp server at "
