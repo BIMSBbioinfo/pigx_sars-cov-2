@@ -42,6 +42,9 @@ function install_kraken_db {
     # only takes up space.
     # See https://github.com/DerrickWood/kraken2/wiki/Manual#standard-kraken-2-database
     rm -r $DBNAME/taxonomy
+
+    # libary is only a dummy dir and should be empty, so we remove it.
+    rm $DBNAME/library
 }
 
 
