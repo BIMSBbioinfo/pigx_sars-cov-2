@@ -17,6 +17,8 @@ with open(snakemake.log[0], "w") as log_file:
         kraken_dir = snakemake.output[0]
         os.makedirs(kraken_dir)
 
+        # FIXME Unify all the download and unpack sequences across db_dl rule
+        #   scripts into one function.
         db_url = snakemake.params["dl_url"]
 
         logger.info(
