@@ -22,6 +22,10 @@ with open(snakemake.log[0], "w") as log_file:
         temp_dl_file = os.path.join(vep_dir, "archive.temp")
 
         if re.match("ftp://*", dl_url):
+            logger.info(
+                f"Downloading database archive from ftp server at "
+                f"{dl_url} to temp file...")
+
             urlrequest.urlretrieve(
                 dl_url, temp_dl_file)
 
