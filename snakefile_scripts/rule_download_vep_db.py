@@ -44,6 +44,11 @@ with open(snakemake.log[0], "w") as log_file:
 
             tar_out = tarfile.open(fileobj=dl_resp.raw, mode="r:gz")
 
+        else:
+            logger.error(
+                f"Cannot resolve url protocol in {dl_url}")
+            sys.exit(1)
+
         tar_out.extractall(vep_dir)
 
         tar_out.close()
