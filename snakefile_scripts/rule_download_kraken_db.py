@@ -85,8 +85,10 @@ with open(snakemake.log[0], "w") as log_file:
                 stderr=log_file
             )
 
-            # After building, the taxonomy subdir only takes up space.
+            # After building, the taxonomy and library subdirs only take up
+            # space.
             shutil.rmtree(os.path.join(kraken_dir, "taxonomy"))
+            shutil.rmtree(os.path.join(kraken_dir, "library"))
 
         else:
             logger.info(
