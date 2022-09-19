@@ -1,9 +1,8 @@
 import os
 import sys
 import subprocess
-import requests
-import tarfile
 from snakemake.logging import logger
+import download_tarball as dltar
 
 with open(snakemake.log[0], "w") as log_file:
     sys.stdout = log_file
@@ -20,17 +19,7 @@ with open(snakemake.log[0], "w") as log_file:
 
             dl_url = snakemake.params["dl_url"]
 
-            logger.info(
-                f"Downloading prebuilt database archive from {dl_url}...")
-
-            dl_resp = requests.get(dl_url, stream=True)
-
-            if not dl_resp.status_code == 200:
-                logger.error(
-                    f"Download not successfull, status code {dl_resp.status_code}")
-                sys.exit(1)
-
-            tar_out = tarfile.open(fileobj=dl_resp.raw, mode="r:gz")
+            tar_out = dltar.download_tarball(dl_url)
 
             tar_out.extractall(krona_dir)
 
