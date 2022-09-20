@@ -3,6 +3,7 @@ import requests
 import tempfile
 import tarfile
 import urllib.request as urlrequest
+from snakemake.logging import logger
 
 
 def download_tarball(dl_url):
@@ -14,7 +15,7 @@ def download_tarball(dl_url):
         raise Exception(f"dl_url ({dl_url}) does not point to a '.tar.gz' file.")
     
     if re.match("ftp://*", dl_url):
-        print(
+        logger.info(
             f"Downloading database archive from ftp server at "
             f"{dl_url} to temp file...")
 
@@ -27,11 +28,11 @@ def download_tarball(dl_url):
 
     elif re.match("http[s]?://*", dl_url) or not re.match("[a-z]*://", dl_url):
         if not re.match("[a-z]*://", dl_url):
-            print(
+            logger.info(
                 f"No protocol identifier in {dl_url}, assuming http/https...")
             dl_url = "http://" + dl_url
 
-        print(
+        logger.info(
             f"Downloading database archive from {dl_url}...")
 
         dl_resp = requests.get(dl_url, stream=True)
