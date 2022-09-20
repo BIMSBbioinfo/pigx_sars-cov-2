@@ -25,7 +25,12 @@ def download_tarball(dl_url):
 
         tar_out = tarfile.open(temp_dl_file)
 
-    elif re.match("http[s]?://*", dl_url):
+    elif re.match("http[s]?://*", dl_url) or not re.match("[a-z]*://", dl_url):
+        if not re.match("[a-z]*://", dl_url):
+            print(
+                f"No protocol identifier in {dl_url}, assuming http/https...")
+            dl_url = "http://" + dl_url
+
         print(
             f"Downloading database archive from {dl_url}...")
 
