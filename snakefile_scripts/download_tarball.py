@@ -11,7 +11,7 @@ def download_tarball(dl_url):
     """
 
     if not re.search(".tar.gz$", dl_url):
-        Exception(f"dl_url ({dl_url}) does not point to a '.tar.gz' file.")
+        raise Exception(f"dl_url ({dl_url}) does not point to a '.tar.gz' file.")
     
     if re.match("ftp://*", dl_url):
         print(
@@ -32,13 +32,13 @@ def download_tarball(dl_url):
         dl_resp = requests.get(dl_url, stream=True)
 
         if not dl_resp.status_code == 200:
-            Exception(
+            raise Exception(
                 f"Download not successfull, status code {dl_resp.status_code}")
 
         tar_out = tarfile.open(fileobj=dl_resp.raw, mode="r:gz")
 
     else:
-        Exception(
+        raise Exception(
             f"Cannot resolve url protocol in {dl_url}")
 
     return(tar_out)
