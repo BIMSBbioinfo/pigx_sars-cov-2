@@ -467,7 +467,7 @@ SAMPLES = [line['name'] for line in SAMPLE_SHEET]
 
 # predefine files for targets
 final_report_files = (
-    expand(os.path.join(REPORT_DIR, '{sample}.variantreport_p_sample.html'), sample=SAMPLES)
+    expand(os.path.join(REPORT_DIR, '{sample}.variantreport_per_sample.html'), sample=SAMPLES)
 )
 
 if START_POINT != "vcf":
@@ -1028,7 +1028,7 @@ rule run_deconvolution:
 rule render_variant_report:
     input:
         script=os.path.join(SCRIPTS_DIR, "renderReport.R"),
-        report=os.path.join(SCRIPTS_DIR, "report_scripts", "variantreport_p_sample.Rmd"),
+        report=os.path.join(SCRIPTS_DIR, "report_scripts", "variantreport_per_sample.Rmd"),
         header=os.path.join(REPORT_DIR, "_navbar.html"),
         sigmut_file=os.path.join(MUTATIONS_DIR, "{sample}_sigmuts.csv"),
         non_sigmut_file=os.path.join(MUTATIONS_DIR, "{sample}_non_sigmuts.csv"),
@@ -1040,7 +1040,7 @@ rule render_variant_report:
         vep=os.path.join(VARIANTS_DIR, "{sample}_vep_sarscov2_parsed.txt"),
         snv=os.path.join(VARIANTS_DIR, "{sample}_snv.csv"),
     output:
-        varreport=os.path.join(REPORT_DIR, "{sample}.variantreport_p_sample.html"),
+        varreport=os.path.join(REPORT_DIR, "{sample}.variantreport_per_sample.html"),
     params:
         vep_transcript_distance=VEP_TRANSCRIPT_DISTANCE,
         vep_species=SPECIES
