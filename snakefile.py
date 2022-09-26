@@ -1132,7 +1132,7 @@ rule run_mutation_regression:
         fun_tbls=os.path.join(SCRIPTS_DIR, "table_extraction.R"),
         mutation_sheet=MUTATION_SHEET_CSV
     output:
-        mut_count_outfile=os.path.join(OUTPUT_DIR, "mutations_counts.csv"),
+        mut_count_outfile=os.path.join(OUTPUT_DIR, "mutation_counts.csv"),
         unfilt_mutation_sig_outfile=os.path.join(
             OUTPUT_DIR, "unfiltered_mutations_sig.csv"
         ),
@@ -1161,7 +1161,7 @@ rule render_index:
         variants=os.path.join(VARIANTS_DIR, "data_variant_plot.csv"),
         mutations=os.path.join(MUTATIONS_DIR, "data_mutation_plot.csv"),
         overviewQC=os.path.join(OUTPUT_DIR, "overview_QC.csv"),
-        mut_count_file=os.path.join(OUTPUT_DIR, "mutations_counts.csv"),
+        mut_count_file=os.path.join(OUTPUT_DIR, "mutation_counts.csv"),
         unfiltered_mutation_sig_file=os.path.join(
             OUTPUT_DIR, "unfiltered_mutations_sig.csv"
         ),
