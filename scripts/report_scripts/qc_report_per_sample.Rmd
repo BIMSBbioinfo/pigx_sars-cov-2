@@ -52,9 +52,9 @@ library(data.table)
 multiqc_ran <- as.logical(params$multiqc_ran)
 ```
 
-This report provides an overview over general quality control measures of the 
-sample and provides the summarized data as downloadable tables. 
-For detailed information about the methods please consult the
+This report provides an overview over general quality control measures of the
+sample and provides the summarized data as downloadable tables. For detailed
+information about the methods please consult the
 [documentation](http://bioinformatics.mdc-berlin.de/pigx_docs/pigx-sars-cov-2.html#output-description).
 
 ```{r reading_data, include = FALSE}
@@ -63,11 +63,11 @@ coverage_df <- fread(params$coverage_file)
 ```
 
 # Coverage reports
-Here, the information about read coverage of the reference genome as well as 
-coverage of the mutation locations that were provided are listed. From those 
+Here, the information about read coverage of the reference genome as well as
+coverage of the mutation locations that were provided are listed. From those
 values, the overall quality of the sample can be assessed and whether or not its
-analysis results should and will be used for further trend-analysis and 
-visualization. 
+analysis results should and will be used for further trend-analysis and
+visualization.
 
 ## Mutation locations
 
@@ -75,7 +75,7 @@ In order to assess variant calling based on mutations of interest it is crucial
 that its genome locations are covered by read alignment. The table below shows
 the proportion of covered mutation locations, how many mutations are tracked in
 total, how many of their locations are covered and which locations have no read
-coverage at all. 
+coverage at all.
  
 ```{r amplicon_coverage, echo = FALSE}
 mutation_coverage_cols <- c(
@@ -100,8 +100,8 @@ datatable(
 
 ## Reference Genome
 
-This table shows the total number of raw reads, number of aligned reads, the 
-mean coverage depth and percentage of the reference genome covered by 
+This table shows the total number of raw reads, number of aligned reads, the
+mean coverage depth and percentage of the reference genome covered by
 pre-processed reads.
 
 ```{r read_coverage, echo = FALSE}
@@ -167,8 +167,7 @@ if (multiqc_ran) {
 ## Trimming
 
 To improve alignment rates and mutation calling, proper trimming of reads should
-be considered e.g. based on the provided
-fastqc-reports.
+be considered e.g. based on the provided fastqc-reports.
 
 # Download Stats csv
 
