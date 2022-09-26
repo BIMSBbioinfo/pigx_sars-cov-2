@@ -28,3 +28,6 @@ tests/tests/*trs
 tests/tests/*log
 tests/tests/*sh
 .Rproj.user
+
+# misc dirs
+*/__*__
