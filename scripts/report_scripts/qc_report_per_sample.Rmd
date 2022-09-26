@@ -172,8 +172,6 @@ be considered e.g. based on the provided fastqc-reports.
 # Download Stats csv
 
 ```{r data_download, include = FALSE}
-fwrite(coverage_df, params$coverage_table_outfile)
-
 coverage <- readLines(params$coverage_file) %>%
   paste0(collapse = "\n") %>%
   base64_urlencode()
