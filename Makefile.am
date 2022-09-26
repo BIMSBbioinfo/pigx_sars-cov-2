@@ -38,7 +38,7 @@ dist_pkglibexec_reports_SCRIPTS = \
   scripts/report_scripts/index.Rmd \
   scripts/report_scripts/qc_report_per_sample.Rmd \
   scripts/report_scripts/taxonomic_classification.Rmd \
-  scripts/report_scripts/variantreport_p_sample.Rmd
+  scripts/report_scripts/variantreport_per_sample.Rmd
 
 dist_pkgdata_DATA =            \
   etc/pretty.txt \

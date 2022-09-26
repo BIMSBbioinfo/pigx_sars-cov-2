@@ -856,7 +856,7 @@ sample_sheet <- fread(params$sample_sheet)
 sample_names <- sample_sheet$name
 reports <- list(
   list(
-    "suffix" = ".variantreport_p_sample.html",
+    "suffix" = ".variantreport_per_sample.html",
     "name" = "variant report"
   ),
   list(
