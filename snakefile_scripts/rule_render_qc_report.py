@@ -11,7 +11,6 @@ with open(snakemake.log[0], "w") as log_file:
         "sample_name": snakemake.wildcards.sample,
         "coverage_file": snakemake.input.coverage,
         "logo": snakemake.input.logo,
-        "coverage_table_outfile": snakemake.output.table_outfile,
         "multiqc_ran": snakemake.params[0]["multiqc_ran"]
     }
 

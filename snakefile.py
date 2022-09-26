@@ -1073,9 +1073,6 @@ rule render_qc_report:
         unpack(render_qc_report_input)
     output:
         html_report=os.path.join(REPORT_DIR, "{sample}.qc_report_per_sample.html"),
-        table_outfile=os.path.join(
-            COVERAGE_DIR, "{sample}_report_download_coverage.csv"
-        ),
     params:
         render_qc_report_params,
     log:
