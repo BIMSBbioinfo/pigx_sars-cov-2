@@ -19,7 +19,7 @@ count_muts <- function (x, mutation_sheet.df) { # x = sample row
       # count all mutations that are signature mutations
       total_sigmuts = as.numeric(rowSums(!is.na(mutations_ps %>% dplyr::select( dplyr::contains(mutation_sheet.v))))),
       # get num of muts with significant increase over time
-      tracked_muts_after_lm = as.numeric(rowSums(!is.na( mutations_ps %>% dplyr::select( dplyr::contains(mutations_sig$mutation)))))
+      sig_incr_muts = as.numeric(rowSums(!is.na( mutations_ps %>% dplyr::select( dplyr::contains(mutations_sig$mutation)))))
   )
   # get number of mutations which aren't signature mutations
   count_frame <- count_frame %>% mutate( non_sigmuts = total_muts - total_sigmuts)
@@ -48,7 +48,7 @@ write_mutations_count <- function ( mutation_plot_data, mutation_sheet.df, mutat
                                total_muts = length(mutations),
                                total_sigmuts = length(sigmuts_found.df),
                                # get how many of all found mutations will be tracked because of significant increase over time
-                               tracked_muts_after_lm = length(mutation_plot_data %>% dplyr::select( dplyr::contains(mutations_sig$mutation)))
+                               sig_incr_muts = length(mutation_plot_data %>% dplyr::select( dplyr::contains(mutations_sig$mutation)))
     )
     # get number of mutations which aren't signature mutations
     count_frame <- count_frame %>% mutate( non_sigmuts = total_muts - total_sigmuts)
