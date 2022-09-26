@@ -912,14 +912,14 @@ rule samtools_coverage:
     input:
         aligned_bam = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted.bam'),
         aligned_bai = os.path.join(MAPPED_READS_DIR, '{sample}_aligned_sorted.bai')
-    output: os.path.join(COVERAGE_DIR, '{sample}_genome_cov.csv')
+    output: os.path.join(COVERAGE_DIR, '{sample}_genome_cov.tsv')
     log: os.path.join(LOG_DIR, 'samtools_coverage_{sample}.log')
     shell: "{SAMTOOLS_EXEC} coverage {input.aligned_bam} > {output} 2>> {log} 3>&2"
 
 
 rule create_sample_quality_table:
     input:
-        genome_cov_file=os.path.join(COVERAGE_DIR, "{sample}_genome_cov.csv"),
+        genome_cov_file=os.path.join(COVERAGE_DIR, "{sample}_genome_cov.tsv"),
         mut_cov_file=os.path.join(COVERAGE_DIR, "{sample}_mut_cov.csv"),
     output:
         os.path.join(COVERAGE_DIR, "{sample}_quality.csv"),
