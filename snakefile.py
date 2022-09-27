@@ -321,7 +321,7 @@ SAMPLE_SHEET_CSV    = config["locations"]["sample-sheet"]
 MUTATION_SHEET_CSV  = config["locations"]["mutation-sheet"]
 INPUT_DIR           = config["locations"]["input-dir"]
 REFERENCE_FASTA     = config["locations"]["reference-fasta"]
-AMPLICONS_BED       = config["locations"]["amplicons-bed"]
+PRIMERS_BED       = config["locations"]["primers-bed"]
 MUTATIONS_BED       = config["locations"]["mutations-bed"]
 KRAKEN_DB           = config["locations"]["kraken-db-dir"]
 KRONA_DB            = config["locations"]["krona-db-dir"]
@@ -671,7 +671,7 @@ rule ivar_primer_trim:
     # the rule leaves everything as is. But that might be more trouble than it
     # is worth.
     input:
-        primers=AMPLICONS_BED,
+        primers=PRIMERS_BED,
         aligned_bam=os.path.join(MAPPED_READS_DIR, "{sample}_aligned_sorted.bam"),
         aligned_bai=os.path.join(MAPPED_READS_DIR, "{sample}_aligned_sorted.bai"),
     output:
