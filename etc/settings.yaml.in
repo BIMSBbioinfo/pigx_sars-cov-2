@@ -52,28 +52,28 @@ parameters:
   reporting:
     mutation-coverage-threshold: 90
     mutation-depth-threshold: 100
-    
 
-# Control the deconvolution method used.
-# Possible options are:
-#   weighted_rlm(default): 
-#     Robust linear regression with bulk mutation abundances weighted per
-#     variant by the inverse of the proportion of detected mutations to known
-#     mutations. This biases the abundance of variants with high proportions
-#     towards higher values, and coversely biases the abundence of variants with
-#     low proportions towards lower values. Robust linear regression is
-#     implemented in the `MASS` package.
-#   rlm:
-#     Robust linear regression as implemented in the `MASS` package, executed
-#     via the `deconvR` package.
-#   nnls:
-#     Non-negative least squares (`deconvR`).
-#   qp:
-#     Quadratic programming (`deconvR`).
-#   svr:
-#     Support vector regression (`deconvR`).
-deconvolution:
-  method: weighted_rlm
+
+  # Control the deconvolution method used.
+  # Possible options are:
+  #   weighted_rlm(default):
+  #     Robust linear regression with bulk mutation abundances weighted per
+  #     variant by the inverse of the proportion of detected mutations to known
+  #     mutations. This biases the abundance of variants with high proportions
+  #     towards higher values, and coversely biases the abundence of variants
+  #     with low proportions towards lower values. Robust linear regression is
+  #     implemented in the `MASS` package.
+  #   rlm:
+  #     Robust linear regression as implemented in the `MASS` package, executed
+  #     via the `deconvR` package.
+  #   nnls:
+  #     Non-negative least squares (`deconvR`).
+  #   qp:
+  #     Quadratic programming (`deconvR`).
+  #   svr:
+  #     Support vector regression (`deconvR`).
+  deconvolution:
+    method: weighted_rlm
 
 # The following settings control from which point the pipeline starts, which
 # path it follows (i.e. which rules are executed on the way) and where it stops.

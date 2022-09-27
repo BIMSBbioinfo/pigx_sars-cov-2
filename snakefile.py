@@ -360,7 +360,7 @@ MUTATION_COVERAGE_THRESHOLD = parameters['reporting']['mutation-coverage-thresho
 
 # deconvolution parameters
 MUTATION_DEPTH_THRESHOLD    = parameters["reporting"]["mutation-depth-threshold"]
-DECONVOLUTION_METHOD = config["deconvolution"]["method"]
+DECONVOLUTION_METHOD     = parameters["deconvolution"]["method"]
 
 START_POINT = config["control"]["start"].lower()
 TARGETS     = config["control"]["targets"]
