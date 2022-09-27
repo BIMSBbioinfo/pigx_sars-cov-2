@@ -2,7 +2,7 @@ locations:
   output-dir: output
   input-dir: reads
   reference-fasta: sample_data/NC_045512.2.fasta
-  amplicons-bed: sample_data/nCoV-2019_NCref.bed
+  primers-bed: sample_data/nCoV-2019_NCref.bed
   mutations-bed: sample_data/Covid_CG_NTmutation_t07.bed
   mutation-sheet: sample_data/mutation_sheet_211006_covidCG_NT_location.csv
   kraken-db-dir: @PIGX_DB_DIR@/kraken_db
