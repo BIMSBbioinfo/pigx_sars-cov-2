@@ -56,6 +56,7 @@ EXTRA_DIST = \
   tests/sample_data/test_vep_parsing_input.txt \
   tests/sample_sheet.csv \
   tests/settings.yaml \
+  tests/setup_test_settings.yaml \
   $(wildcard tests/reads/*) \
   tests/sample_data/NC_045512.2.fasta \
   tests/sample_data/nCoV-2019_NCref.bed \
