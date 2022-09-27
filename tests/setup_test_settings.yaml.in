@@ -1,0 +1,18 @@
+locations:
+  output-dir: output_setup_test  
+  input-dir: reads
+  reference-fasta: sample_data/NC_045512.2.fasta
+  amplicons-bed: sample_data/nCoV-2019_NCref.bed
+  mutations-bed: sample_data/Covid_CG_NTmutation_t07.bed
+  mutation-sheet: sample_data/mutation_sheet_211006_covidCG_NT_location.csv
+  kraken-db-dir: @PIGX_DB_DIR@/kraken_db
+  krona-db-dir: @PIGX_DB_DIR@/krona_db
+  vep-db-dir: @PIGX_DB_DIR@/vep_db
+  
+parameters:
+  reporting:
+    # This leads to enough samples being used that the mutation regression
+    # will run, meaning now most analysis code actually runs during
+    # testing. The results may be unrealistic, but we don't care about that
+    # during testing.
+    mutation-coverage-threshold: 25
