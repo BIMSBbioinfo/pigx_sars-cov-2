@@ -16,7 +16,7 @@ config.json
 build-aux/*
 aclocal.m4
 scripts/download_databases.sh
-pigx_sars-cov-2*.tar.gz
+pigx_sars-cov-2*
 
 # test files
 tests/output*
