@@ -51,7 +51,6 @@ parameters:
   # the visualizations or the linear regression calculations.
   reporting:
     mutation-coverage-threshold: 90
-    mutation-depth-threshold: 100
 
 
   deconvolution:
@@ -74,6 +73,7 @@ parameters:
     #   svr:
     #     Support vector regression (`deconvR`).
     method: weighted_rlm
+    mutation-depth-threshold: 100
 
 # The following settings control from which point the pipeline starts, which
 # path it follows (i.e. which rules are executed on the way) and where it stops.
