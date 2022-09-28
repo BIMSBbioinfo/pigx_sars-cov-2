@@ -187,7 +187,7 @@ def vcf2csv_input(wildcards):
         input_file = os.path.join(INPUT_DIR, f"{sample}.vcf")
 
     else:
-        input_file = os.path.join(VARIANTS_DIR, f"{sample}_snv.vcf")
+        input_file = os.path.join(VARIANTS_DIR, f"{sample}.vcf")
 
     return input_file
 
@@ -202,7 +202,7 @@ def vep_input(wildcards):
         input_file = os.path.join(INPUT_DIR, f"{sample}.vcf")
 
     else:
-        input_file = os.path.join(VARIANTS_DIR, f"{sample}_snv.vcf")
+        input_file = os.path.join(VARIANTS_DIR, f"{sample}.vcf")
 
     input["input_file"] = input_file
 
@@ -808,7 +808,7 @@ rule multiqc:
 rule lofreq:
     input:
         unpack(lofreq_input)
-    output: vcf = os.path.join(VARIANTS_DIR, '{sample}_snv.vcf')
+    output: vcf = os.path.join(VARIANTS_DIR, '{sample}.vcf')
     log: os.path.join(LOG_DIR, 'lofreq_{sample}.log')
     run:
         call = (f"{LOFREQ_EXEC} call "
