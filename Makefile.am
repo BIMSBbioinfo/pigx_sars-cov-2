@@ -22,8 +22,7 @@ dist_pkglibexec_scripts_SCRIPTS = \
   scripts/pred_mutation_increase.R \
   scripts/renderReport.R \
   scripts/table_extraction.R \
-  scripts/vcfTocsv.py \
-  scripts/vep_rule.py
+  scripts/vcfTocsv.py
 
 pkglibexec_snakefilescriptsdir = $(pkglibexecdir)/snakefile_scripts
 dist_pkglibexec_snakefilescripts_SCRIPTS = \
