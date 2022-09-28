@@ -182,14 +182,13 @@ def lofreq_input(wildcards):
 def vcf2csv_input(wildcards):
     sample = wildcards[0]
 
+    vcf_dir = VARIANTS_DIR
+
     if START_POINT == "vcf":
         # take vcf files directly from the reads dir
-        input_file = os.path.join(INPUT_DIR, f"{sample}.vcf")
+        vcf_dir = INPUT_DIR
 
-    else:
-        input_file = os.path.join(VARIANTS_DIR, f"{sample}.vcf")
-
-    return input_file
+    return os.path.join(vcf_dir, f"{sample}.vcf")
 
 
 def vep_input(wildcards):
