@@ -196,14 +196,13 @@ def vep_input(wildcards):
 
     input={"db_dir": VEP_DB}
 
+    vcf_dir = VARIANTS_DIR
+
     if START_POINT == "vcf":
         # take vcf files directly from the reads dir
-        input_file = os.path.join(INPUT_DIR, f"{sample}.vcf")
+        vcf_dir = INPUT_DIR
 
-    else:
-        input_file = os.path.join(VARIANTS_DIR, f"{sample}.vcf")
-
-    input["input_file"] = input_file
+    input["input_file"] = os.path.join(vcf_dir, f"{sample}.vcf")
 
     return input
 
