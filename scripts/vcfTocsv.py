@@ -55,7 +55,7 @@ def vcfTocsv(vcffile, csvfile):
                         if re.search(r'DP4=', element):
                             DP4 = element.split("=")[1]
 
-                    if any([DP, AF, SB, DP4]):
+                    if not all([DP, AF, SB, DP4]):
                         warn(
                             "At least one of \"DP\", \"AF\", \"SB\", \"DP4\" "
                             "could not be found in the current line, writing "
