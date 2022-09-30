@@ -98,7 +98,6 @@ control:
 
 execution:
   jobs: 6
-  nice: 19
   submit-to-cluster: no
   cluster:
     missing-file-timeout: 120
