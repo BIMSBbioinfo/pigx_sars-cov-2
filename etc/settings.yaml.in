@@ -97,9 +97,9 @@ control:
   run-ivar-primer-trimming: yes
 
 execution:
-  submit-to-cluster: no
   jobs: 6
   nice: 19
+  submit-to-cluster: no
   cluster:
     missing-file-timeout: 120
     stack: 128M
