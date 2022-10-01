@@ -1,3 +1,7 @@
+# For information on individual settings, please consult the pipeline
+# documentation:
+# http://bioinformatics.mdc-berlin.de/pigx_docs/pigx-sars-cov-2.html#settings-file
+
 locations:
   output-dir: output
   input-dir: reads
@@ -13,83 +17,33 @@ databases:
   kraken2:
     archive-url: https://genome-idx.s3.amazonaws.com/kraken/k2_pluspfp_20210127.tar.gz
     downsample-db: false
-    # If downsampling should occurr, what is the maximum allowable size?
     max-db-size-bytes: 250000000
   krona:
     use-prebuilt: false
-    # If a prebuilt archive should be downloaded, where is it located?
     archive-url: ""
   vep:
     archive-url: ftp://ftp.ensemblgenomes.org/pub/viruses/variation/indexed_vep_cache/sars_cov_2_vep_101_ASM985889v3.tar.gz
 
 parameters:
-  # Parameters for rule vep. See documentation about arguments
-  # --species
-  # --buffer_size
-  # --distance
-  # respectively in the vep documentation at
-  # https://grch37.ensembl.org/info/docs/tools/vep/script/vep_options.html
   vep:
     species: sars_cov_2
     buffer-size: 5000
     transcript-distance: 5000
     db-version: 101
 
-  # Parameters for rule ivar_primer_trim. See documentation about arguments
-  # -q
-  # -m
-  # -s
-  # respectively in the iVar documentation at
-  # https://andersen-lab.github.io/ivar/html/manualpage.html
   ivar_trimming:
     quality-cutoff: 15
     length-cutoff: 30
     window-width: 4    
 
-  # These paramerters are used to set quality control filters for the reports.
-  # Results from samples without sufficient coverage measures are not included in
-  # the visualizations or the linear regression calculations.
   reporting:
     mutation-coverage-threshold: 90
 
 
   deconvolution:
-    # Control the deconvolution method used.
-    # Possible options are:
-    #   weighted_rlm(default):
-    #     Robust linear regression with bulk mutation abundances weighted per
-    #     variant by the inverse of the proportion of detected mutations to
-    #     known mutations. This biases the abundance of variants with high
-    #     proportions towards higher values, and coversely biases the abundence
-    #     regression is of variants with low proportions towards lower values.
-    #     Robust linear implemented in the `MASS` package.
-    #   rlm:
-    #     Robust linear regression as implemented in the `MASS` package, executed
-    #     via the `deconvR` package.
-    #   nnls:
-    #     Non-negative least squares (`deconvR`).
-    #   qp:
-    #     Quadratic programming (`deconvR`).
-    #   svr:
-    #     Support vector regression (`deconvR`).
     method: weighted_rlm
     mutation-depth-threshold: 100
 
-# The following settings control from which point the pipeline starts, which
-# path it follows (i.e. which rules are executed on the way) and where it stops.
-# TODO Update this once it is finished in the snakefile
-# TODO Add all the implications for the later control flow
-# start: Start points for the analysis
-#   * fastq.gz:     Raw reads in gzipped FASTQ format
-#   * bam:          Unfiltered alignments
-#   * bam_aligned:  Alignments filtered for aligned reads
-#   * ...
-# targets: Desired results of the analysis
-#   * (help:          Print all rules and their descriptions.)
-#   * final_reports:  Produce a comprehensive report. This is the default target.
-#   * lofreq:         Call variants and produce .vcf file and overview .csv file.
-#   * multiqc:        Create MultiQC reports for including raw and trimmed reads.
-#
 control:
   start: fastq.gz
   targets: 
