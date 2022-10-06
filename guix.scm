@@ -54,7 +54,10 @@
                              (mkdir-p where)
                              (invoke "tar" "-C" where
                                      "-xf" (assoc-ref inputs db))))
-                         '("kraken-db" "krona-db" "vep-db"))))))))
+                         '("kraken-db" "krona-db" "vep-db")))))
+         (add-before 'configure 'set-PYTHONPATH
+           (lambda _
+             (setenv "PYTHONPATH" (getenv "GUIX_PYTHONPATH")))))))
     (inputs
      (map p %packages))
     (native-inputs
