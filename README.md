@@ -30,11 +30,17 @@ Tracker for this.
 
 # Publication
 The pre-print that describes and uses this pipeline is as follows:
-_SARS-CoV-2 infection dynamics revealed by wastewater sequencing analysis and deconvolution_
-Vic-Fabienne Schumann, Rafael Ricardo de Castro Cuadrat, Emanuel Wyler, Ricardo Wurmus, Aylina Deter, Claudia Quedenau, Jan Dohmen, Miriam Faxel, Tatiana Borodina, Alexander Blume, Martin Meixner, José Horacio Grau, Karsten Liere, Thomas Hackenbeck, Frederik Zietzschmann, Regina Gnirss, Uta Böckelmann, Bora Uyar, Vedran Franke, Niclas Barke, Janine Altmüller, Nikolaus Rajewsky, Markus Landthaler, Altuna Akalin
+
+_SARS-CoV-2 infection dynamics revealed by wastewater sequencing analysis and deconvolution__
+
+Vic-Fabienne Schumann, Rafael Ricardo de Castro Cuadrat, Emanuel Wyler, Ricardo Wurmus, Aylina Deter, Claudia Quedenau, 
+Jan Dohmen, Miriam Faxel, Tatiana Borodina, Alexander Blume, Martin Meixner, José Horacio Grau, Karsten Liere, Thomas Hackenbeck, 
+Frederik Zietzschmann, Regina Gnirss, Uta Böckelmann, Bora Uyar, Vedran Franke, Niclas Barke, Janine Altmüller, Nikolaus Rajewsky, Markus Landthaler, 
+Altuna Akalin
+
 medRxiv 2021.11.30.21266952; doi: https://doi.org/10.1101/2021.11.30.21266952
 
-## Reproducibility of the analysis in the paper
+## Reproducing the analysis
 
 The presented analysisa results in the publication were produced using PiGx SARS-CoV-2 version 0.0.5.
 
