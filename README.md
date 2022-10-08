@@ -28,6 +28,25 @@ Features to enable e.g. single-end input are currently under development. We are
 happy to hear about any other feature request! Please consider using the Issue
 Tracker for this.
 
+# Publication
+The pre-print that describes and uses this pipeline is as follows:
+_SARS-CoV-2 infection dynamics revealed by wastewater sequencing analysis and deconvolution_
+Vic-Fabienne Schumann, Rafael Ricardo de Castro Cuadrat, Emanuel Wyler, Ricardo Wurmus, Aylina Deter, Claudia Quedenau, Jan Dohmen, Miriam Faxel, Tatiana Borodina, Alexander Blume, Martin Meixner, José Horacio Grau, Karsten Liere, Thomas Hackenbeck, Frederik Zietzschmann, Regina Gnirss, Uta Böckelmann, Bora Uyar, Vedran Franke, Niclas Barke, Janine Altmüller, Nikolaus Rajewsky, Markus Landthaler, Altuna Akalin
+medRxiv 2021.11.30.21266952; doi: https://doi.org/10.1101/2021.11.30.21266952
+
+## Reproducibility of the analysis in the paper
+
+The presented analysisa results in the publication were produced using PiGx SARS-CoV-2 version 0.0.5.
+
+dataset-Berlin250, dataset-NYC(RBD) (MiSeq data and all samples merged) - commit 524ed4832a6972fd695c0eeec25264188710a143
+
+dataset-Berlin35, dataset-NYC(RBD) (iSeq data), insilico-simulation - commit 0a150c4bec58a5a8296c870586e225e49ee2b6f8
+
+UCSD-spike in - commit bd87e7f2d83317e9d83f6fd81abb631af95476f6
+
+The repository also contains the Guix manifest for this analysis (commit 4ded8c5bdc755391360e5695003d6d4085110d08). The channels file to reproduce the environment that was used for the analysis can be found in this link []
+
+
 # Installation
 
 ## Databases
