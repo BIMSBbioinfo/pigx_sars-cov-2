@@ -6,8 +6,11 @@
 
 # PiGx SARS-CoV-2 Wastewater Sequencing Pipeline
 
-**Copyright 2021-2022: Vic-Fabienne Schumann, Ricardo Wurmus, Miriam Faxel, Jan Dohmen, Rafael Cuadrat, Bora Uyar, Vedran Franke, Alexander Blume, and Altuna Akalin.**
-**This work is distributed under the terms of the GNU General Public License, version 3 or later.  It is free to use for all purposes.**
+**Copyright 2021-2022: Vic-Fabienne Schumann, Ricardo Wurmus, Miriam Faxel, Jan
+Dohmen, Rafael Cuadrat, Bora Uyar, Vedran Franke, Alexander Blume, and Altuna
+Akalin.**  
+**This work is distributed under the terms of the GNU General Public
+License, version 3 or later. It is free to use for all purposes.**
 
 -----------
 
@@ -29,29 +32,37 @@ happy to hear about any other feature request! Please consider using the Issue
 Tracker for this.
 
 # Publication
+
 The pre-print that describes and uses this pipeline is as follows:
 
-_SARS-CoV-2 infection dynamics revealed by wastewater sequencing analysis and deconvolution__
+_SARS-CoV-2 infection dynamics revealed by wastewater sequencing analysis and
+deconvolution_
 
-Vic-Fabienne Schumann, Rafael Ricardo de Castro Cuadrat, Emanuel Wyler, Ricardo Wurmus, Aylina Deter, Claudia Quedenau, 
-Jan Dohmen, Miriam Faxel, Tatiana Borodina, Alexander Blume, Martin Meixner, José Horacio Grau, Karsten Liere, Thomas Hackenbeck, 
-Frederik Zietzschmann, Regina Gnirss, Uta Böckelmann, Bora Uyar, Vedran Franke, Niclas Barke, Janine Altmüller, Nikolaus Rajewsky, Markus Landthaler, 
-Altuna Akalin
+Vic-Fabienne Schumann, Rafael Ricardo de Castro Cuadrat, Emanuel Wyler, Ricardo
+Wurmus, Aylina Deter, Claudia Quedenau, Jan Dohmen, Miriam Faxel, Tatiana
+Borodina, Alexander Blume, Martin Meixner, José Horacio Grau, Karsten Liere,
+Thomas Hackenbeck, Frederik Zietzschmann, Regina Gnirss, Uta Böckelmann, Bora
+Uyar, Vedran Franke, Niclas Barke, Janine Altmüller, Nikolaus Rajewsky, Markus
+Landthaler, Altuna Akalin
 
-medRxiv 2021.11.30.21266952; doi: https://doi.org/10.1101/2021.11.30.21266952
+medRxiv 2021.11.30.21266952; doi: <https://doi.org/10.1101/2021.11.30.21266952>
 
 ## Reproducing the analysis
 
-The presented analysisa results in the publication were produced using PiGx SARS-CoV-2 version 0.0.5.
+The presented analysisa results in the publication were produced using PiGx
+SARS-CoV-2 version 0.0.5.
 
-dataset-Berlin250, dataset-NYC(RBD) (MiSeq data and all samples merged) - commit 524ed4832a6972fd695c0eeec25264188710a143
+dataset-Berlin250, dataset-NYC(RBD) (MiSeq data and all samples merged) - commit
+524ed4832a6972fd695c0eeec25264188710a143
 
-dataset-Berlin35, dataset-NYC(RBD) (iSeq data), insilico-simulation - commit 0a150c4bec58a5a8296c870586e225e49ee2b6f8
+dataset-Berlin35, dataset-NYC(RBD) (iSeq data), insilico-simulation - commit
+0a150c4bec58a5a8296c870586e225e49ee2b6f8
 
 UCSD-spike in - commit bd87e7f2d83317e9d83f6fd81abb631af95476f6
 
-The repository also contains the Guix manifest for this analysis (commit 4ded8c5bdc755391360e5695003d6d4085110d08). The channels file to reproduce the environment that was used for the analysis can be found in this link []
-
+The repository also contains the Guix manifest for this analysis (commit
+4ded8c5bdc755391360e5695003d6d4085110d08). The channels file to reproduce the
+environment that was used for the analysis can be found in this link []
 
 # Installation
 
@@ -87,38 +98,38 @@ Conda. We recommend using Guix to install the complete pipeline (see above).
 <details>
     <summary> The following tools must be available (latest version): </summary>
 
-    - snakemake  
-    - samtools  
-    - bwa  
-    - bedtools  
-    - fastp  
-    - fastqc  
-    - R  
-    - Rscript  
-    - kraken2  
-    - kraken2-build  
-    - ktImportKrona  
-    - ktImportTaxonomy  
-    - ivar  
-    - lofreq  
-    - vep  
-    - multiqc  
-    - pandoc  
+- snakemake
+- samtools
+- bwa
+- bedtools
+- fastp
+- fastqc
+- R
+- Rscript
+- kraken2
+- kraken2-build
+- ktImportKrona
+- ktImportTaxonomy
+- ivar
+- lofreq
+- vep
+- multiqc
+- pandoc
 
 And the R-packages:  
 
-    - DT  
-    - base64url    
-    - dplyr    
-    - ggplot2    
-    - magrittr  
-    - plotly  
-    - qpcR  
-    - rmarkdown  
-    - stringr  
-    - tidyr  
-    - reshape2  
-    - R.utils  
+- DT
+- base64url
+- dplyr
+- ggplot2
+- magrittr
+- plotly
+- qpcR
+- rmarkdown
+- stringr
+- tidyr
+- reshape2
+- R.utils
 
 All of these dependencies must be present in the environment at
 configuration time.
