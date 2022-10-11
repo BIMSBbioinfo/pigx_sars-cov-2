@@ -49,7 +49,7 @@ medRxiv 2021.11.30.21266952; doi: <https://doi.org/10.1101/2021.11.30.21266952>
 
 ## Reproducing the analysis
 
-The presented analysisa results in the publication were produced using PiGx
+The presented analysis results in the publication were produced using PiGx
 SARS-CoV-2 version 0.0.5.
 
 dataset-Berlin250, dataset-NYC(RBD) (MiSeq data and all samples merged) - commit
