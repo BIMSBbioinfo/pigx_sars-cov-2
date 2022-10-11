@@ -50,20 +50,51 @@ Science of The Total Environment, 2022; doi:
 
 ## Reproducing the analysis
 
-The presented analysis results in the publication were produced using PiGx
-SARS-CoV-2 version 0.0.5.
+The presented analysis results in the publication were produced using
+three different development versions of PiGx SARS-CoV-2.  The commits
+are as follows:
 
-dataset-Berlin250, dataset-NYC(RBD) (MiSeq data and all samples merged) - commit
-524ed4832a6972fd695c0eeec25264188710a143
+- dataset-Berlin250, dataset-NYC(RBD) (MiSeq data and all samples merged)
+  commit: 524ed4832a6972fd695c0eeec25264188710a143
 
-dataset-Berlin35, dataset-NYC(RBD) (iSeq data), insilico-simulation - commit
-0a150c4bec58a5a8296c870586e225e49ee2b6f8
+- dataset-Berlin35, dataset-NYC(RBD) (iSeq data), insilico-simulation
+  commit: 0a150c4bec58a5a8296c870586e225e49ee2b6f8
 
-UCSD-spike in - commit bd87e7f2d83317e9d83f6fd81abb631af95476f6
+- UCSD-spike in
+  commit: bd87e7f2d83317e9d83f6fd81abb631af95476f6
 
-The repository also contains the Guix manifest for this analysis (commit
-4ded8c5bdc755391360e5695003d6d4085110d08). The channels file to reproduce the
-environment that was used for the analysis can be found in this link []
+To enter a faithful reproduction of the development environment used
+for the analysis at these three commits execute this command:
+
+```sh
+guix time-machine -C reproducibility/channels.scm -- shell --pure -m reproducibility/manifest.scm
+```
+
+This will build the exact version of Guix described in
+`reproducibility/channels.scm` and then use that version of Guix to
+launch a shell session where the environment specified in
+`reproducibility/manifest.scm` is activated.  All other environment
+variables are cleared, so consider augmenting this environment with
+`git` and other tools as needed.
+
+Proceed to check out the repository commit in question (see above) and
+build the pipeline in the usual way:
+
+```sh
+/bin/git checkout $commit
+git submodule update --init
+./bootstrap.sh
+./configure --prefix=$HOME/pigx-sars-cov-2--reproduce
+make
+make install
+```
+
+You can then launch the pipeline with
+
+```sh
+$HOME/pigx-sars-cov-2--reproduce/bin/pigx-sars-cov-2 ...
+```
+
 
 # Installation
 
