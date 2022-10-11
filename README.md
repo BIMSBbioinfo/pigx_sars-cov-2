@@ -33,19 +33,20 @@ Tracker for this.
 
 # Publication
 
-The pre-print that describes and uses this pipeline is as follows:
+The publication that describes and uses this pipeline is as follows:
 
 _SARS-CoV-2 infection dynamics revealed by wastewater sequencing analysis and
 deconvolution_
 
 Vic-Fabienne Schumann, Rafael Ricardo de Castro Cuadrat, Emanuel Wyler, Ricardo
 Wurmus, Aylina Deter, Claudia Quedenau, Jan Dohmen, Miriam Faxel, Tatiana
-Borodina, Alexander Blume, Martin Meixner, José Horacio Grau, Karsten Liere,
-Thomas Hackenbeck, Frederik Zietzschmann, Regina Gnirss, Uta Böckelmann, Bora
-Uyar, Vedran Franke, Niclas Barke, Janine Altmüller, Nikolaus Rajewsky, Markus
-Landthaler, Altuna Akalin
+Borodina, Alexander Blume, Jonas Freimuth, Martin Meixner, José Horacio Grau,
+Karsten Liere, Thomas Hackenbeck, Frederik Zietzschmann, Regina Gnirss, Uta
+Böckelmann, Bora Uyar, Vedran Franke, Niclas Barke, Janine Altmüller, Nikolaus
+Rajewsky, Markus Landthaler, Altuna Akalin
 
-medRxiv 2021.11.30.21266952; doi: <https://doi.org/10.1101/2021.11.30.21266952>
+Science of The Total Environment, 2022; doi:
+<https://doi.org/10.1016/j.scitotenv.2022.158931>
 
 ## Reproducing the analysis
 
@@ -164,7 +165,7 @@ the required structure of the input files:
 # Sample Reports
 
 See as example the HTML report produced by PiGx SARS-CoV-2 used for
-["COVID-19 infection dynamics revealed by SARS-CoV-2 wastewater sequencing analysis and deconvolution"](https://www.medrxiv.org/content/10.1101/2021.11.30.21266952v3)
+["SARS-CoV-2 infection dynamics revealed by wastewater sequencing analysis and deconvolution"](https://doi.org/10.1016/j.scitotenv.2022.158931):
 <https://bimsbstatic.mdc-berlin.de/akalin/AAkalin_pathogenomics/sars-cov-2_reports/211104_pub_version/index.html>
 
 # Getting help
