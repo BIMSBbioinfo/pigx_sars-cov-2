@@ -121,16 +121,21 @@ And the R-packages:
 
 - DT
 - base64url
+- deconvr
 - dplyr
 - ggplot2
+- htmltools
+- jsonlite
 - magrittr
+- mass
 - plotly
 - qpcR
+- reshape2
+- R.utils
 - rmarkdown
 - stringr
 - tidyr
-- reshape2
-- R.utils
+- viridis
 
 All of these dependencies must be present in the environment at
 configuration time.
