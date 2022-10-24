@@ -202,7 +202,7 @@ the required structure of the input files:
 
 See as example the HTML report produced by PiGx SARS-CoV-2 used for
 ["SARS-CoV-2 infection dynamics revealed by wastewater sequencing analysis and deconvolution"](https://doi.org/10.1016/j.scitotenv.2022.158931):
-<https://bimsbstatic.mdc-berlin.de/akalin/AAkalin_pathogenomics/sars-cov-2_reports/211104_pub_version/index.html>
+<https://bimsbstatic.mdc-berlin.de/akalin/AAkalin_pathogenomics/sarscov2_ww_reports/211104_pub_version/index.html>
 
 # Getting help
 
