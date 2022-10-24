@@ -29,7 +29,7 @@ params:
 <sample>`r params$sample_name`</sample>
 
 ```{r setup, include = FALSE, warning = FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 library(MASS)
 library(knitr)
