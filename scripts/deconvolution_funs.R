@@ -229,7 +229,7 @@ dedupe_sigmut_mat <- function(sigmut_mat, var_sep = "_") {
 
   # generate deduped signature matrix
   # is a col was duplicated this contains only the first col of each dupe group
-  msig_deduped_df <- sigmut_mat_df[, !is_dupe] %>%
+  msig_deduped_df <- sigmut_mat_df[, !is_dupe, drop = FALSE] %>%
     rename(!!dupe_group_names) %>%
 
     # Simple replace may complain about too long variable names.
