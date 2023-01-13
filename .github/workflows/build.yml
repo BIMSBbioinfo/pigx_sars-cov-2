@@ -15,7 +15,7 @@ jobs:
         with:
           pullAfterInstall: false
       - name: Describe Guix
-        run: echo "::set-output name=guix-commit::$(guix describe | grep commit | join -a1 -o1.2 - /dev/null)"
+        run: echo "guix-commit=$(guix describe | grep commit | join -a1 -o1.2 - /dev/null)" >> $GITHUB_OUTPUT
         id: guix-commit
       - name: Guix cache
         id: guix-cache
