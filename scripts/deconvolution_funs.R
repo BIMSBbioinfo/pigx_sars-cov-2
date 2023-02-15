@@ -155,9 +155,9 @@ create_sig_matrix <- function(mutations_vector, mutation_sheet_file) {
     return(as.numeric(mutations_vector %in% mutations_df[[variant]]))
   }) %>%
 
-    dplyr::bind_cols() %>%
-
     magrittr::set_names(names(mutations_df)) %>%
+
+    dplyr::bind_cols() %>%
 
     # add "Others" col of all "0"s to indicate possible other variants not
     # possessing any of the mutations
