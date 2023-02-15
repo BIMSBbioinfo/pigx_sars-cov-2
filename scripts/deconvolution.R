@@ -266,9 +266,14 @@ if (run_pre_deconv) {
 
     # apply weights to signature matrix
     msig_deduped_df_weighted <- msig_deduped_df %>%
-      mutate(across(
-        everything(), ~ .x / group_weights_vec[[cur_column()]]
-      ))
+
+      # Simple mutate(across()) may complain in case of too long variable names
+      purrr::map2(
+        group_weights_vec,
+        divide_by
+      ) %>%
+      bind_cols() %>%
+      as.data.frame()
 
     # TODO For downstream compatability only, remove once no longer needed
     sigmut_proportion_weights <- group_weights_vec
@@ -306,16 +311,28 @@ if (run_pre_deconv) {
   # make matrix with Others mutations and inverse the values and wild type
   # freqs
   msig_inverse <- msig_deduped_df %>%
-    mutate(across(everything(), ~ as.numeric(!as.logical(.x))))
+    # dplyr doesn't work because col names may take more space than 1000Bytes.
+    apply(
+      2,
+      function(col) {
+        as.numeric(!as.logical(col))
+      },
+      simplify = FALSE
+    ) %>%
+    bind_cols() %>%
+    as.data.frame()
 
   if (do_weighting) {
     msig_inverse <- msig_inverse %>%
-
-      # apply weights
-      mutate(across(
-        everything(),
-        ~ .x / as.numeric(others_prop_wt)
-      ))
+      # dplyr doesn't work because col names may take more space than 1000Bytes.
+      apply(
+        2,
+        divide_by,
+        simplify = FALSE,
+        e2 = others_prop_wt
+      ) %>%
+      bind_cols() %>%
+      as.data.frame()
 
     # generate combined signature matrix for variants, dummy and real
     msig_all_df <- rbind(msig_inverse, msig_deduped_df_weighted)
@@ -328,8 +345,10 @@ if (run_pre_deconv) {
 
     # Add IDs col and put it at position 1. Both name and posistion are
     # required by the deconvolute function.
-    mutate(IDs = seq_len(nrow(.))) %>%
-    dplyr::select(IDs, everything())
+    # dplyr doesn't work because col names may take more space than 1000Bytes.
+    {
+      bind_cols(IDs = seq_len(nrow(.)), .)
+    }
 }
 
 if (run_pre_deconv) {
