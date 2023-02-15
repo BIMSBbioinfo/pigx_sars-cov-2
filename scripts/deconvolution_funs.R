@@ -231,7 +231,17 @@ dedupe_sigmut_mat <- function(sigmut_mat, var_sep = "_") {
   # is a col was duplicated this contains only the first col of each dupe group
   msig_deduped_df <- sigmut_mat_df[, !is_dupe] %>%
     rename(!!dupe_group_names) %>%
-    replace(is.na(.), 0)
+
+    # Simple replace may complain about too long variable names.
+    apply(
+      2,
+      function(col) {
+        replace(col, is.na(col), 0)
+      },
+      simplify = FALSE
+    ) %>%
+    bind_cols() %>%
+    as.data.frame()
 
   return(msig_deduped_df)
 }
