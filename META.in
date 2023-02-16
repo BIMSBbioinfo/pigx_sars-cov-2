@@ -2,7 +2,7 @@ version = """
 PiGx SARS-CoV-2 wastewater sequencing Pipeline.
 Version: @PACKAGE_VERSION@
 
-Copyright © 2021, 2022 Akalin Lab
+Copyright © 2021-2023 Akalin Lab
 """ + license_blurb
 
 description = """
