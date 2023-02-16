@@ -1,6 +1,6 @@
 # PiGx SARS-CoV-2 wastewater sequencing pipeline
 #
-# Copyright © 2021 Akalin lab.
+# Copyright © 2021 - 2023 Akalin lab.
 #
 # This file is part of the PiGx SARS-CoV-2 wastewater sequencing pipeline.
 #
