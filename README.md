@@ -6,7 +6,7 @@
 
 # PiGx SARS-CoV-2 Wastewater Sequencing Pipeline
 
-**Copyright 2021-2022: Vic-Fabienne Schumann, Ricardo Wurmus, Miriam Faxel, Jan
+**Copyright 2021-2023: Vic-Fabienne Schumann, Ricardo Wurmus, Miriam Faxel, Jan
 Dohmen, Rafael Cuadrat, Bora Uyar, Vedran Franke, Alexander Blume, Jonas
 Freimuth, and Altuna Akalin.**  
 **This work is distributed under the terms of the GNU General Public
