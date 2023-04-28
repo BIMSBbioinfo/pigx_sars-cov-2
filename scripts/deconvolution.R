@@ -112,12 +112,12 @@ coordinates_long    <- as.character(sample_entry$coordinates_long)
 # Read signature data
 sigmut_df <- fread(mutation_sheet, header = TRUE) %>%
   dplyr::select(-matches("source")) %>%
-  dplyr::na_if("") %>%
+  mutate(across(everything(), ~dplyr::na_if(.x, ""))) %>%
   tidyr::pivot_longer(everything(), values_drop_na = TRUE) %>%
   dplyr::select(variant = name, mutation = value)
 
 vep_output_df <- fread(params$vep_file) %>%
-  dplyr::na_if("-")
+  mutate(across(everything(), ~dplyr::na_if(.x, "-")))
 
 sigmuts_deduped <- sigmut_df %>%
   group_by(mutation) %>%
