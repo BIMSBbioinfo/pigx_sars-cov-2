@@ -455,7 +455,7 @@ The associated plots are skipped.
 
 ```{r linear_regression_tables, warning=TRUE, results='asis', eval=RUN_MUTATION_REGRESSION}
 sigmuts_df <- fread(params$mutation_sheet) %>%
-  na_if("") %>%
+  mutate(across(everything(), ~dplyr::na_if(.x, ""))) %>%
   # extract only the nucleotide mutation bit
   mutate(across(everything(),
     ~ str_extract(

@@ -84,7 +84,7 @@ if (nrow(approved_mut_plot) > 0 &&
   mutation_sheet <- params$mutation_sheet
 
   sigmuts_df <- fread(mutation_sheet) %>%
-    na_if("") %>%
+    mutate(across(everything(), ~dplyr::na_if(.x, ""))) %>%
     # split gene name of for easier matching
     mutate_all(funs(str_replace(., "^[^:]*:", "")))
 
