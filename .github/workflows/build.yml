@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install GNU Guix
-        uses: PromyLOPh/guix-install-action@v1.3
+        uses: PromyLOPh/guix-install-action@v1.4
         with:
           pullAfterInstall: false
       - name: Describe Guix
