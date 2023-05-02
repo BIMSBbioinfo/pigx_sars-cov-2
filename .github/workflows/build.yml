@@ -14,6 +14,8 @@ jobs:
         uses: PromyLOPh/guix-install-action@v1.4
         with:
           pullAfterInstall: false
+      - name: Set PATH
+        run: export PATH="~/.config/guix/current/bin${PATH:+:}$PATH"
       - name: Describe Guix
         run: echo "guix-commit=$(guix describe | grep commit | join -a1 -o1.2 - /dev/null)" >> $GITHUB_OUTPUT
         id: guix-commit
