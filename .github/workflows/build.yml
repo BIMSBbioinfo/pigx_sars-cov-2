@@ -15,7 +15,7 @@ jobs:
         with:
           pullAfterInstall: false
       - name: Describe Guix
-        run: echo "guix-commit=$(~/.config/guix/current/bin/guix describe | grep commit | join -a1 -o1.2 - /dev/null)" >> $GITHUB_OUTPUT
+        run: echo "guix-commit=$(/var/guix/profiles/per-user/root/current-guix/bin/guix describe | grep commit | join -a1 -o1.2 - /dev/null)" >> $GITHUB_OUTPUT
         id: guix-commit
       - name: Guix cache
         id: guix-cache
@@ -31,25 +31,25 @@ jobs:
         if: steps.guix-cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p ~/.cache/guix
-          ~/.config/guix/current/bin/guix environment -l guix.scm --root=env -- echo done
-          ~/.config/guix/current/bin/guix archive --export --recursive $(readlink -f env) > ~/.cache/guix/env
+          /var/guix/profiles/per-user/root/current-guix/bin/guix environment -l guix.scm --root=env -- echo done
+          /var/guix/profiles/per-user/root/current-guix/bin/guix archive --export --recursive $(readlink -f env) > ~/.cache/guix/env
           cp /etc/guix/signing-key.pub ~/.cache/guix/
       - name: Authorize cached signing key
         if: steps.guix-cache.outputs.cache-hit == 'true'
         run: |
-          cat ~/.cache/guix/signing-key.pub | sudo ~/.config/guix/current/bin/guix archive --authorize
+          cat ~/.cache/guix/signing-key.pub | sudo /var/guix/profiles/per-user/root/current-guix/bin/guix archive --authorize
       - name: Import Guix environment
         if: steps.guix-cache.outputs.cache-hit == 'true'
         run: |
           du -sh ~/.cache/guix/env
-          cat ~/.cache/guix/env | sudo ~/.config/guix/current/bin/guix archive --import
+          cat ~/.cache/guix/env | sudo /var/guix/profiles/per-user/root/current-guix/bin/guix archive --import
       - name: Bootstrap
-        run: ~/.config/guix/current/bin/guix shell -m manifest.scm -- ./bootstrap.sh
+        run: /var/guix/profiles/per-user/root/current-guix/bin/guix shell -m manifest.scm -- ./bootstrap.sh
       - name: Configure
-        run: ~/.config/guix/current/bin/guix shell -m manifest.scm -- ./configure
+        run: /var/guix/profiles/per-user/root/current-guix/bin/guix shell -m manifest.scm -- ./configure
       - name: Build
-        run: ~/.config/guix/current/bin/guix shell -m manifest.scm -- make -j
+        run: /var/guix/profiles/per-user/root/current-guix/bin/guix shell -m manifest.scm -- make -j
       - name: Distcheck
         env:
           VERBOSE: "true"
-        run: ~/.config/guix/current/bin/guix shell -m manifest.scm -- make distcheck
+        run: /var/guix/profiles/per-user/root/current-guix/bin/guix shell -m manifest.scm -- make distcheck
