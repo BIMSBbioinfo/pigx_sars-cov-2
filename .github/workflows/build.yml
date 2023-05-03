@@ -13,7 +13,7 @@ jobs:
       - name: Install GNU Guix
         uses: PromyLOPh/guix-install-action@v1.4
         with:
-          pullAfterInstall: false
+          pullAfterInstall: true
       - name: Describe Guix
         run: echo "guix-commit=$(guix describe | grep commit | join -a1 -o1.2 - /dev/null)" >> $GITHUB_OUTPUT
         id: guix-commit
